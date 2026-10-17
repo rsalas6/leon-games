@@ -49,7 +49,7 @@ def build_page(src, out, up):
 {head}
 </head>
 <body>
-{INTRO}{body}<script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('{up}sw.js',{{scope:'{up or './'}'}});</script>
+{INTRO.replace('__UP__', up)}{body}<script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('{up}sw.js',{{scope:'{up or './'}'}});</script>
 </body>
 </html>
 '''
@@ -62,6 +62,7 @@ def main():
     shutil.rmtree(SITE, ignore_errors=True)
     shutil.copytree(os.path.join(ROOT, 'vendor'), os.path.join(SITE, 'vendor'))
     shutil.copytree(os.path.join(ROOT, 'icons'), os.path.join(SITE, 'icons'))
+    shutil.copytree(os.path.join(ROOT, 'img'), os.path.join(SITE, 'img'))
     for src, out, up in PAGES:
         build_page(src, out, up)
     write(os.path.join(SITE, 'manifest.webmanifest'), json.dumps({

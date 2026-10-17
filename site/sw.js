@@ -1,6 +1,6 @@
 // Caches every game on the device so the whole app works 100% offline after the first visit
-const CACHE = 'leon-games-20261017120830';
-const FILES = ['./', 'dino-race/', 'dino-race/index.html', 'icons/apple-touch-icon.png', 'icons/dino-race.png', 'icons/icon-192.png', 'icons/icon-512.png', 'index.html', 'manifest.webmanifest', 'vendor/fonts.css', 'vendor/fonts/XRXV3I6Li01BKofINeaBTMnFcQ.woff2', 'vendor/fonts/XRXV3I6Li01BKofIO-aBTMnFcQIG.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2', 'vendor/three.min.js'];
+const CACHE = 'leon-games-20261017121745';
+const FILES = ['./', 'dino-race/', 'dino-race/index.html', 'icons/apple-touch-icon.png', 'icons/dino-race.png', 'icons/icon-192.png', 'icons/icon-512.png', 'img/leon-loading.webp', 'index.html', 'manifest.webmanifest', 'vendor/fonts.css', 'vendor/fonts/XRXV3I6Li01BKofINeaBTMnFcQ.woff2', 'vendor/fonts/XRXV3I6Li01BKofIO-aBTMnFcQIG.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2', 'vendor/fonts/press-start-2p-latin.woff2', 'vendor/three.min.js'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
