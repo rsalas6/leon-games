@@ -1162,7 +1162,7 @@ window.__race = { get player() { return player; }, get segments() { return segme
 
 /* ---------- Cámara ---------- */
 const camPos = new THREE.Vector3(0, 8, 12), camLook = new THREE.Vector3();
-let camShake = 0, ledgeK = 0;
+let camShake = 0;
 const vWant = new THREE.Vector3(), vLook = new THREE.Vector3();
 function updateCamera(dt) {
   const p = player.root.position;
@@ -1174,15 +1174,17 @@ function updateCamera(dt) {
     // Más alto con dinos grandes y al trepar, para que el dino no tape el camino
     const climb = player.root.rotation.x > .3 ? 4 : 0;
     const tall = (player.form === 'brachio' ? 2.5 : player.form === 'trex' ? 1 : 0) + climb;
-    // Cámara alta e inclinada (vista de 3/4 desde atrás y un poco a la derecha) para ver el camino y las bajadas
-    // Solo al bajar de un barranco: si la orilla queda justo detrás del dino, la cámara sube un momento para que no lo tape y luego regresa
-    let ledge = 0;
-    for (let k = 1; k <= 5; k += 1) if (segAt(player.d - k).type === 'cliff') ledge = CLIFF_H;
-    const under = ledge > p.y + 1 ? 1 : 0;
-    ledgeK += (under - ledgeK) * Math.min(1, dt * (under ? 6 : 2.5));
-    const baseY = Math.max(p.y, ledge * ledgeK);
-    vWant.set(p.x * .45 + 1.8, baseY + 10.5 + tall, p.z + 7.5 + tall * .4 - ledgeK * 4.5);
-    vLook.set(p.x * .6 + .4, p.y + tall * .3, p.z - 8 - climb + ledgeK * 2);
+    // Vista normal: detrás y un poco arriba del dino
+    let dz = 10 + tall * .6, cy = 7.5 + tall, lookZ = 7.5 + climb;
+    // Al bajar de un barranco: la cámara se queda de este lado de la orilla (más cerca y más alta) para que la orilla no tape al dino,
+    // y se va alejando sola hasta regresar a la vista normal conforme el dino avanza
+    const edge = segments.find(sg => sg.type === 'cliff' && sg.end <= player.d && player.d - sg.end < dz + 2);
+    if (edge && p.y < CLIFF_H - .3) {
+      const e = player.d - edge.end;
+      dz = Math.min(dz, Math.max(1.5, e - .6)); cy = Math.max(cy, 9); lookZ = 6;
+    }
+    vWant.set(p.x * .45, p.y + cy, p.z + dz);
+    vLook.set(p.x * .6, p.y + 1 + tall * .5, p.z - lookZ);
   }
   const k = Math.min(1, dt * 4);
   camPos.lerp(vWant, k); camLook.lerp(vLook, k);
