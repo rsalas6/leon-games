@@ -32,8 +32,8 @@ def build_page(src, out, up):
     head = '\n'.join(l for l in (head + '</style>').split('\n') if 'claude:viewport-fit-sides' not in l and 'rel="preconnect"' not in l)
     head = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^"]*">', f'<link rel="stylesheet" href="{up}vendor/fonts.css">', head)
     body = body.replace('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', f'{up}vendor/three.min.js')
-    if up:
-        body = body.replace('<script src=', f"<script>window.LEON_HUB='{up}';</script>\n<script src=", 1)
+    if up:  # tells the game it lives inside the hub, so it shows the home button
+        body = f"<script>window.LEON_HUB='{up}';</script>\n" + body
     page = f'''<!doctype html>
 <html lang="es">
 <head>

@@ -266,7 +266,7 @@ function start(i) {
       edges: [r ? -v[r - 1][c] : 0, c < cols - 1 ? h[r][c] : 0, r < rows - 1 ? v[r][c] : 0, c ? -h[r][c - 1] : 0] });
   }
   game = { i, cols, rows, pieces, drag: null, last: Date.now(), hinted: null, over: false };
-  $('#menu').hidden = true; $('#homeBtn').hidden = true; $('#title').style.visibility = 'hidden';
+  $('#menu').hidden = true; $('#title').style.visibility = 'hidden';
   $('#play').hidden = false; $('#backBtn').hidden = false;
   img.onload = () => { if (game && game.i === i) { layoutGame(true); } };
   img.src = src(IMAGES[i][0]);
