@@ -38,8 +38,9 @@ h1{font-family:var(--display);font-weight:400;margin:0;font-size:clamp(42px,11vw
 h1 span{color:var(--sun)}
 .apps{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(24px,6vw,56px)}
 .app{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:#fff}
-.icon{width:clamp(140px,34vw,210px);aspect-ratio:1;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 12px 0 rgba(42,31,61,.35),0 20px 30px rgba(0,0,0,.25);transition:transform .15s;animation:float 3s ease-in-out infinite}
-.app:nth-child(2) .icon{animation-delay:-1.5s}
+.icon{width:clamp(120px,28vw,190px);aspect-ratio:1;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 12px 0 rgba(42,31,61,.35),0 20px 30px rgba(0,0,0,.25);transition:transform .15s;animation:float 3s ease-in-out infinite}
+.app:nth-child(2) .icon{animation-delay:-1s}
+.app:nth-child(3) .icon{animation-delay:-2s}
 .icon img{width:100%;height:100%;display:block;object-fit:cover}
 @keyframes float{50%{transform:translateY(-10px)}}
 .app:active .icon{transform:scale(.92);animation:none}
@@ -71,6 +72,7 @@ h1 span{color:var(--sun)}
   <nav class="apps">
     <a class="app" href="dino-race/" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.png" alt=""></span><span class="name">Dino Race</span></a>
     <a class="app" href="dino-bath/" aria-label="Baño de Dinos"><span class="icon"><img src="icons/dino-bath.png" alt=""></span><span class="name">Baño de Dinos</span></a>
+    <a class="app" href="dino-kitchen/" aria-label="Cocina de Dinos"><span class="icon"><img src="icons/dino-kitchen.png" alt=""></span><span class="name">Cocina de Dinos</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
 </main>
