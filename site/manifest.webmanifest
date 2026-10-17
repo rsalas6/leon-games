@@ -1,0 +1,30 @@
+{
+  "name": "Juegos de León",
+  "short_name": "León",
+  "lang": "es",
+  "description": "Juegos de dinosaurios para León: Dino Race y Baño de Dinos. Funcionan sin internet.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#5ac8ff",
+  "theme_color": "#5ac8ff",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

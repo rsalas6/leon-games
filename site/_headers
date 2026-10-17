@@ -1,0 +1,10 @@
+/sw.js
+  Cache-Control: no-cache
+/*.html
+  Cache-Control: no-cache
+/
+  Cache-Control: no-cache
+/dino-race/
+  Cache-Control: no-cache
+/dino-bath/
+  Cache-Control: no-cache
