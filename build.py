@@ -67,6 +67,9 @@ def main():
     shutil.copytree(os.path.join(ROOT, 'img'), os.path.join(SITE, 'img'))
     for src, out, up in PAGES:
         build_page(src, out, up)
+    missing = [i for i in re.findall(r"\['(\d\d-[a-z-]+)',", read('games/dino-puzzle.html')) if not os.path.exists(os.path.join(ROOT, 'img/puzzle', i + '.webp'))]
+    if missing:
+        raise SystemExit(f'Missing puzzle images: {missing}')
     write(os.path.join(SITE, 'manifest.webmanifest'), json.dumps({
         'name': APP_NAME, 'short_name': 'León', 'lang': 'es',
         'description': 'Juegos de dinosaurios para León. Funcionan sin internet.',

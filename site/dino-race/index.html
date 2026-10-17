@@ -41,7 +41,7 @@ img{-webkit-user-drag:none}
 #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(30,20,50,.3) 100%)}
 
 /* HUD superior */
-#hud{position:absolute;left:0;right:0;top:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
+#hud{position:absolute;left:0;right:0;top:0;z-index:20;padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
 .toprow{width:100%;max-width:560px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .pill{font-family:var(--display);font-size:clamp(16px,4.4vw,22px);letter-spacing:.06em;color:#fff;background:var(--panel);padding:6px 16px;border-radius:999px;text-shadow:0 2px 0 rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
 .coin{width:22px;height:16px;border-radius:4px;background:linear-gradient(160deg,#ffe48a,var(--gold) 45%,var(--gold-d));box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);transform:skewX(-12deg)}
@@ -183,7 +183,7 @@ h2{font-family:var(--display);font-weight:400;margin:0;font-size:clamp(32px,9vw,
   <div id="hud">
     <div class="toprow">
       <div class="tools">
-        <button class="rbtn" id="homeBtn" aria-label="Mantén presionado para volver" hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg></button>
+        <button class="rbtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg></button>
         <button class="rbtn" id="muteBtn" aria-label="Silenciar sonido"></button>
         <button class="rbtn" id="fsBtn" aria-label="Pantalla completa"></button>
       </div>
@@ -373,12 +373,10 @@ const LOCK = '<svg viewBox="0 0 24 24"><path d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0
 function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
 $('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persist(); paintMute(); beep(660); });
 paintMute();
-// Casita para volver a los juegos (solo dentro de leon.beto.page): mantener presionada 1 segundo
+// Casita para volver a los juegos (solo dentro de leon.beto.page)
 if (window.LEON_HUB) {
-  const b = $('#homeBtn'); b.hidden = false; let t = null;
-  const cancel = () => { b.classList.remove('hold'); clearTimeout(t); };
-  b.addEventListener('pointerdown', e => { e.preventDefault(); b.classList.add('hold'); t = setTimeout(() => (location.href = window.LEON_HUB), 1000); });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, cancel));
+  const b = $('#homeBtn'); b.hidden = false;
+  b.addEventListener('click', () => { beep(520); location.href = window.LEON_HUB; });
 }
 
 /* ---------- Pantalla completa ---------- */
@@ -1232,8 +1230,9 @@ function updateCamera(dt) {
     // Más alto con dinos grandes y al trepar, para que el dino no tape el camino
     const climb = player.root.rotation.x > .3 ? 4 : 0;
     const tall = (player.form === 'brachio' ? 2.5 : player.form === 'trex' ? 1 : 0) + climb;
-    vWant.set(p.x * .45, p.y + 6.5 + tall, p.z + 10.5 + tall * .6);
-    vLook.set(p.x * .6, p.y + 1.2 + tall * .5, p.z - 7 - climb);
+    // Cámara alta e inclinada (vista de 3/4 desde atrás y un poco a la derecha) para ver el camino y las bajadas
+    vWant.set(p.x * .45 + 1.8, p.y + 9.5 + tall, p.z + 8.5 + tall * .4);
+    vLook.set(p.x * .6 + .4, p.y + .3 + tall * .3, p.z - 9 - climb);
   }
   const k = Math.min(1, dt * 4);
   camPos.lerp(vWant, k); camLook.lerp(vLook, k);

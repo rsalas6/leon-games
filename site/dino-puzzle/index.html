@@ -47,11 +47,6 @@ img{-webkit-user-drag:none}
 .side.end{justify-content:flex-end}
 h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);letter-spacing:.06em;text-align:center;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 6px 0 var(--ink)}
 
-/* Casita: mantener presionada para volver a los juegos */
-#homeBtn{position:relative}
-#homeBtn i{position:absolute;left:0;bottom:0;height:6px;width:0;background:var(--grass)}
-#homeBtn.hold i{animation:fill 1s steps(8,end) forwards}
-@keyframes fill{to{width:100%}}
 
 /* Menú */
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box;gap:18px}
@@ -144,7 +139,7 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 
 <div class="bar">
   <div class="side">
-  <button class="px ibtn" id="homeBtn" aria-label="Mantén presionado para volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg><i></i></button>
+  <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
   <button class="px ibtn" id="backBtn" aria-label="Elegir otro dibujo" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
   </div>
   <h1 id="title">ROMPECABEZAS</h1>
@@ -178,6 +173,11 @@ const IMAGES = [
   ['01-trex', 'T-rex'], ['02-trice', 'Triceratops'], ['03-brachio', 'Braquiosaurio'], ['04-stego', 'Estegosaurio'],
   ['05-ptero', 'Pterodáctilo'], ['06-egg', 'Huevito'], ['07-leon-trex', 'León y el T-rex'], ['08-dragon', 'Dragón'],
   ['09-ankylo', 'Anquilosaurio'], ['10-beach', 'Playa'], ['11-mosa', 'Mosasaurio'], ['12-train', 'Tren de dinos'],
+  ['13-lion', 'León'], ['14-elephant', 'Elefante'], ['15-giraffe', 'Jirafa'], ['16-monkey', 'Mono'],
+  ['17-panda', 'Panda'], ['18-penguins', 'Pingüinos'], ['19-puppy', 'Perrito'], ['20-kitten', 'Gatito'],
+  ['21-farm', 'Granja'], ['22-octopus', 'Pulpo'], ['23-turtle', 'Tortuga'], ['24-owl', 'Búho'],
+  ['25-firetruck', 'Camión de bomberos'], ['26-rocket', 'Cohete'], ['27-airplane', 'Avión'], ['28-tractor', 'Tractor'],
+  ['29-bunny', 'Conejito'], ['30-whale', 'Ballena'],
 ];
 const src = id => `${UP}img/puzzle/${id}.webp`;
 const GRIDS = { 2: [2, 1], 4: [2, 2], 6: [3, 2], 9: [3, 3], 12: [4, 3] };
@@ -222,10 +222,8 @@ $('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persis
 paintMute();
 
 if (window.LEON_HUB) {
-  const b = $('#homeBtn'); b.hidden = false; let t = null;
-  const cancel = () => { b.classList.remove('hold'); clearTimeout(t); };
-  b.addEventListener('pointerdown', e => { e.preventDefault(); b.classList.add('hold'); t = setTimeout(() => (location.href = window.LEON_HUB), 1000); });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, cancel));
+  const b = $('#homeBtn'); b.hidden = false;
+  b.addEventListener('click', () => { sfx.pick(); location.href = window.LEON_HUB; });
 }
 ['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
 document.addEventListener('contextmenu', e => e.preventDefault());

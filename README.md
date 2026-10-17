@@ -6,7 +6,7 @@ Built for iPhone and iPad: installable as an app (Add to Home Screen) and fully 
 | Game | Path | For |
 | --- | --- | --- |
 | Dino Race | `/dino-race/` | Switch dinosaurs to match the terrain and win the race (15 levels) |
-| Dino Puzzle | `/dino-puzzle/` | Drag-and-drop jigsaw with 12 pixel-art pictures; 2, 4, 6, 9 or 12 pieces, generous snapping and idle hints (made for a 2-year-old) |
+| Dino Puzzle | `/dino-puzzle/` | Drag-and-drop jigsaw with 30 pixel-art pictures (dinosaurs, animals, vehicles); 2, 4, 6, 9 or 12 pieces, generous snapping and idle hints (made for a 2-year-old) |
 
 ## Project layout
 
