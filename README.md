@@ -6,6 +6,7 @@ Built for iPhone and iPad: installable as an app (Add to Home Screen) and fully 
 | Game | Path | For |
 | --- | --- | --- |
 | Dino Race | `/dino-race/` | Switch dinosaurs to match the terrain and win the race (15 levels) |
+| Dino Puzzle | `/dino-puzzle/` | Drag-and-drop jigsaw with 12 pixel-art pictures; 2, 4, 6, 9 or 12 pieces, generous snapping and idle hints (made for a 2-year-old) |
 
 ## Project layout
 
@@ -32,3 +33,7 @@ Inside the hub, each game shows a home button that must be held for one second, 
 ```sh
 python3 build.py && python3 -m http.server 8000 --directory site
 ```
+
+## Art
+
+Pixel art (loading screen, hub background, icons, puzzle pictures) was generated with Codex image generation and is stored as WebP in `img/` so everything works offline.

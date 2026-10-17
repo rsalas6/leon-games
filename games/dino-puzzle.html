@@ -1,0 +1,455 @@
+<title>Dino Puzzle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: menú con cuadrícula de dibujos pixel art y selector de piezas; al jugar, tablero cuadrado con la imagen fantasma y piezas de rompecabezas regadas alrededor. Un solo look: pixel art brillante. */
+@font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
+:root{
+  --ink:#2a1f3d;
+  --sun:#ffd23a;
+  --sun-d:#d99a00;
+  --sky:#5ac8ff;
+  --grass:#6cc63a;
+  --paper:#fff6e0;
+  --berry:#ff5d8f;
+  --pix:'Press Start 2P',ui-monospace,monospace;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--sky);color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+img{-webkit-user-drag:none}
+.bg{position:fixed;inset:0;background:url(__UP__img/hub/bg-wide.webp) 50% 100%/cover no-repeat var(--sky);image-rendering:pixelated}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/hub/bg-tall.webp)}}
+.bg::after{content:'';position:absolute;inset:0;background:rgba(42,31,61,.18)}
+#probe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+
+/* Botón pixel: borde con esquinas recortadas y bisel */
+.px{border:0;background:var(--sun);box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset -4px -4px 0 0 rgba(0,0,0,.18),inset 4px 4px 0 0 rgba(255,255,255,.55),0 10px 0 0 rgba(42,31,61,.35)}
+.px:active{transform:translateY(4px);box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset 4px 4px 0 0 rgba(0,0,0,.18),0 6px 0 0 rgba(42,31,61,.35)}
+.px:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:16px}
+.side.end{justify-content:flex-end}
+h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);letter-spacing:.06em;text-align:center;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 6px 0 var(--ink)}
+
+/* Casita: mantener presionada para volver a los juegos */
+#homeBtn{position:relative}
+#homeBtn i{position:absolute;left:0;bottom:0;height:6px;width:0;background:var(--grass)}
+#homeBtn.hold i{animation:fill 1s steps(8,end) forwards}
+@keyframes fill{to{width:100%}}
+
+/* Menú */
+#menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box;gap:18px}
+#grid{flex:1;min-height:0;width:100%;max-width:1260px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(96px,14vw,170px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
+.card{position:relative;aspect-ratio:1;padding:0;background:#fff}
+.card img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:cover;image-rendering:pixelated;pointer-events:none}
+.card .star{position:absolute;right:-12px;top:-12px;width:34px;height:34px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+#sizes{display:flex;align-items:center;gap:clamp(10px,2.4vw,20px);flex-wrap:wrap;justify-content:center;background:rgba(42,31,61,.72);padding:12px 18px;box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink)}
+#sizes span{color:#fff;font-size:12px;letter-spacing:.1em}
+.sz{width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);padding:7px;background:#fff;display:grid;gap:3px}
+.sz b{background:#c9c0d6}
+.sz.on{background:var(--sun)}
+.sz.on b{background:var(--ink)}
+
+/* Juego */
+#play{position:fixed;inset:0;touch-action:none}
+#board{position:absolute;background:rgba(255,255,255,.55);box-shadow:0 -6px 0 0 var(--ink),0 6px 0 0 var(--ink),-6px 0 0 0 var(--ink),6px 0 0 0 var(--ink),0 14px 0 0 rgba(42,31,61,.3)}
+#board canvas{display:block;width:100%;height:100%}
+#slotHint{position:absolute;pointer-events:none;box-shadow:inset 0 0 0 5px var(--sun),0 0 0 3px var(--ink);animation:blink .5s steps(2,end) infinite;z-index:2}
+@keyframes blink{50%{opacity:.2}}
+.piece{position:absolute;left:0;top:0;touch-action:none;filter:drop-shadow(0 6px 0 rgba(42,31,61,.35));will-change:transform}
+.piece.drag{filter:drop-shadow(0 14px 0 rgba(42,31,61,.3))}
+.piece.placed{filter:none;transition:transform .14s steps(4,end)}
+.piece.wiggle{animation:wiggle .6s steps(4,end) 3}
+@keyframes wiggle{25%{margin-top:-10px}75%{margin-top:6px}}
+.spark{position:absolute;width:14px;height:14px;background:var(--sun);box-shadow:0 0 0 3px var(--ink);pointer-events:none;z-index:900;animation:spark .55s steps(6,end) forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%;image-rendering:pixelated}
+#win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:22px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);pointer-events:none}
+#win .big{font-size:clamp(28px,8vw,72px);color:var(--sun);text-shadow:4px 0 0 var(--ink),-4px 0 0 var(--ink),0 4px 0 var(--ink),0 -4px 0 var(--ink),4px 9px 0 var(--ink);animation:pop .6s steps(6,end) both}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+#win .row{display:flex;gap:28px;pointer-events:auto}
+.wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;font-size:clamp(14px,2.6vw,20px);display:flex;align-items:center;justify-content:center;gap:12px}
+.wbtn svg{width:30px;height:30px;shape-rendering:crispEdges}
+.wbtn.go{background:var(--grass)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" aria-hidden="true"></div>
+<div id="probe"></div>
+
+<div class="bar">
+  <div class="side">
+  <button class="px ibtn" id="homeBtn" aria-label="Mantén presionado para volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg><i></i></button>
+  <button class="px ibtn" id="backBtn" aria-label="Elegir otro dibujo" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+  </div>
+  <h1 id="title">ROMPECABEZAS</h1>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<main id="menu">
+  <div id="grid"></div>
+  <div id="sizes" role="group" aria-label="Número de piezas"><span>PIEZAS</span></div>
+</main>
+
+<div id="play" hidden>
+  <div id="board"><canvas id="ghost"></canvas></div>
+  <div id="pieces"></div>
+</div>
+
+<canvas id="confetti" hidden></canvas>
+<div id="win" hidden>
+  <div class="big">¡MUY BIEN!</div>
+  <div class="row">
+    <button class="px wbtn" id="menuBtn" aria-label="Elegir otro dibujo"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+    <button class="px wbtn go" id="nextBtn" aria-label="Siguiente dibujo"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M2 6h7V2h2l4 6-4 6H9v-4H2z"/></svg></button>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const UP = '__UP__';
+const IMAGES = [
+  ['01-trex', 'T-rex'], ['02-trice', 'Triceratops'], ['03-brachio', 'Braquiosaurio'], ['04-stego', 'Estegosaurio'],
+  ['05-ptero', 'Pterodáctilo'], ['06-egg', 'Huevito'], ['07-leon-trex', 'León y el T-rex'], ['08-dragon', 'Dragón'],
+  ['09-ankylo', 'Anquilosaurio'], ['10-beach', 'Playa'], ['11-mosa', 'Mosasaurio'], ['12-train', 'Tren de dinos'],
+];
+const src = id => `${UP}img/puzzle/${id}.webp`;
+const GRIDS = { 2: [2, 1], 4: [2, 2], 6: [3, 2], 9: [3, 3], 12: [4, 3] };
+
+let save = { pieces: 4, done: {}, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('dinoPuzzle')) || {}); } catch (e) {}
+if (!GRIDS[save.pieces]) save.pieces = 4;
+const persist = () => { try { localStorage.setItem('dinoPuzzle', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0);
+    }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+const sfx = {
+  pick: () => beep(520, .07, 'square', .05, 200),
+  miss: () => beep(220, .12, 'triangle', .08, -60),
+  snap: () => { beep(660, .08, 'square', .06); beep(990, .12, 'square', .06, 0, .07); },
+  win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => beep(f, .16, 'square', .06, 0, i * .12)),
+};
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persist(); paintMute(); sfx.pick(); });
+paintMute();
+
+if (window.LEON_HUB) {
+  const b = $('#homeBtn'); b.hidden = false; let t = null;
+  const cancel = () => { b.classList.remove('hold'); clearTimeout(t); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.classList.add('hold'); t = setTimeout(() => (location.href = window.LEON_HUB), 1000); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, cancel));
+}
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Menú ---------- */
+function buildMenu() {
+  const grid = $('#grid'); grid.innerHTML = '';
+  IMAGES.forEach(([id, name], i) => {
+    const b = document.createElement('button');
+    b.className = 'px card'; b.setAttribute('aria-label', name);
+    b.innerHTML = `<img src="${src(id)}" alt="" loading="lazy">${save.done[id] ? '<span class="star"></span>' : ''}`;
+    b.addEventListener('click', () => start(i));
+    grid.appendChild(b);
+  });
+  const sizes = $('#sizes'); sizes.querySelectorAll('.sz').forEach(n => n.remove());
+  Object.keys(GRIDS).forEach(n => {
+    const [c, r] = GRIDS[n], b = document.createElement('button');
+    b.className = 'px sz' + (+n === save.pieces ? ' on' : '');
+    b.style.gridTemplate = `repeat(${r},1fr)/repeat(${c},1fr)`;
+    b.setAttribute('aria-label', n + ' piezas'); b.setAttribute('aria-pressed', +n === save.pieces);
+    b.innerHTML = '<b></b>'.repeat(+n);
+    b.addEventListener('click', () => { save.pieces = +n; persist(); sfx.pick(); buildMenu(); });
+    sizes.appendChild(b);
+  });
+}
+function showMenu() {
+  stopGame();
+  $('#play').hidden = true; $('#win').hidden = true; $('#confetti').hidden = true;
+  $('#menu').hidden = false; $('#backBtn').hidden = true; $('#title').style.visibility = '';
+  if (window.LEON_HUB) $('#homeBtn').hidden = false;
+  buildMenu();
+}
+
+/* ---------- Forma de las piezas ---------- */
+// Lado con pestaña: s=1 sale, s=-1 entra, 0 recto. La pestaña es simétrica, así que dos vecinos encajan exacto.
+function edge(x, ax, ay, bx, by, s, k) {
+  if (!s) { x.lineTo(bx, by); return; }
+  const dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = uy, ny = -ux;
+  const P = (u, v) => [ax + ux * (L / 2 + (u - .5) * k) + nx * v * k * s, ay + uy * (L / 2 + (u - .5) * k) + ny * v * k * s];
+  x.lineTo(...P(.34, 0));
+  x.bezierCurveTo(...P(.4, 0), ...P(.43, .05), ...P(.39, .12));
+  x.bezierCurveTo(...P(.31, .24), ...P(.69, .24), ...P(.61, .12));
+  x.bezierCurveTo(...P(.57, .05), ...P(.6, 0), ...P(.66, 0));
+  x.lineTo(bx, by);
+}
+function piecePath(x, ox, oy, w, h, e) {
+  const k = Math.min(w, h);
+  x.beginPath(); x.moveTo(ox, oy);
+  edge(x, ox, oy, ox + w, oy, e[0], k);
+  edge(x, ox + w, oy, ox + w, oy + h, e[1], k);
+  edge(x, ox + w, oy + h, ox, oy + h, e[2], k);
+  edge(x, ox, oy + h, ox, oy, e[3], k);
+  x.closePath();
+}
+
+/* ---------- Juego ---------- */
+let game = null, L = null, zTop = 10;
+const img = new Image();
+const rand = (a, b) => a + Math.random() * (b - a);
+
+function safe() {
+  const s = getComputedStyle($('#probe'));
+  return { t: parseFloat(s.paddingTop) || 0, r: parseFloat(s.paddingRight) || 0, b: parseFloat(s.paddingBottom) || 0, l: parseFloat(s.paddingLeft) || 0 };
+}
+// Busca el tablero más grande que deje lugar para acomodar todas las piezas sueltas a los lados (horizontal) o abajo (vertical)
+function computeLayout() {
+  const W = innerWidth, H = innerHeight, sa = safe();
+  const top = sa.t + 84, bot = sa.b + 16, left = sa.l + 16, right = sa.r + 16;
+  const aw = W - left - right, ah = H - top - bot, land = aw > ah * 1.15;
+  const { cols, rows } = game, n = cols * rows, gap = 18;
+  let side = land ? Math.min(ah, aw * .56) : Math.min(aw, ah * .62), cells = [], bx, by;
+  for (let k = 0; k < 30; k++) {
+    side = Math.floor(side);
+    bx = Math.round(left + (aw - side) / 2); by = Math.round(land ? top + (ah - side) / 2 : top);
+    const pw = side / cols, ph = side / rows;
+    const regions = land
+      ? [[left, top, bx - gap - left, ah], [bx + side + gap, top, W - right - (bx + side + gap), ah]]
+      : [[left, by + side + gap, aw, H - bot - (by + side + gap)]];
+    cells = [];
+    regions.forEach(([rx, ry, rw, rh]) => {
+      const nc = Math.floor(rw / (pw * 1.04)), nr = Math.floor(rh / (ph * 1.04));
+      if (nc < 1 || nr < 1) return;
+      const sx = (rw - nc * pw) / (nc + 1), sy = (rh - nr * ph) / (nr + 1);
+      for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) cells.push([rx + sx + i * (pw + sx), ry + sy + j * (ph + sy)]);
+    });
+    if (cells.length >= n) break;
+    side *= .94;
+  }
+  return { W, H, top, bot, left, right, side, bx, by, cells };
+}
+
+function start(i) {
+  stopGame();
+  const [cols, rows] = GRIDS[save.pieces];
+  const h = [], v = [];
+  for (let r = 0; r < rows; r++) { h[r] = []; for (let c = 0; c < cols - 1; c++) h[r][c] = Math.random() < .5 ? 1 : -1; }
+  for (let r = 0; r < rows - 1; r++) { v[r] = []; for (let c = 0; c < cols; c++) v[r][c] = Math.random() < .5 ? 1 : -1; }
+  const pieces = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    pieces.push({ r, c, done: false, x: 0, y: 0,
+      edges: [r ? -v[r - 1][c] : 0, c < cols - 1 ? h[r][c] : 0, r < rows - 1 ? v[r][c] : 0, c ? -h[r][c - 1] : 0] });
+  }
+  game = { i, cols, rows, pieces, drag: null, last: Date.now(), hinted: null, over: false };
+  $('#menu').hidden = true; $('#homeBtn').hidden = true; $('#title').style.visibility = 'hidden';
+  $('#play').hidden = false; $('#backBtn').hidden = false;
+  img.onload = () => { if (game && game.i === i) { layoutGame(true); } };
+  img.src = src(IMAGES[i][0]);
+  if (img.complete && img.naturalWidth) layoutGame(true);
+  game.timer = setInterval(hintTick, 1000);
+}
+function stopGame() {
+  if (!game) return;
+  clearInterval(game.timer);
+  $('#pieces').innerHTML = ''; clearHint();
+  game = null;
+}
+
+function layoutGame(rescatter) {
+  if (!game || !img.naturalWidth) return;
+  L = computeLayout();
+  const { cols, rows } = game, pw = L.side / cols, ph = L.side / rows, pad = Math.ceil(Math.min(pw, ph) * .26) + 3;
+  Object.assign(game, { pw, ph, pad });
+  const board = $('#board');
+  Object.assign(board.style, { left: L.bx + 'px', top: L.by + 'px', width: L.side + 'px', height: L.side + 'px' });
+  drawGhost(.28);
+  const holder = $('#pieces');
+  game.pieces.forEach(p => {
+    if (!p.el) { p.el = document.createElement('canvas'); p.el.className = 'piece'; p.el._piece = p; holder.appendChild(p.el); }
+    drawPiece(p);
+    p.tx = L.bx + p.c * pw - pad; p.ty = L.by + p.r * ph - pad;
+    if (p.done) { p.x = p.tx; p.y = p.ty; }
+    put(p);
+  });
+  if (rescatter) scatter(game.pieces.filter(p => !p.done));
+  else game.pieces.filter(p => !p.done).forEach(p => { clampIn(p); put(p); });
+}
+function drawGhost(alpha) {
+  const c = $('#ghost'), dpr = Math.min(2, devicePixelRatio || 1), s = L.side;
+  c.width = Math.round(s * dpr); c.height = Math.round(s * dpr);
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.clearRect(0, 0, s, s); x.globalAlpha = alpha; x.drawImage(img, 0, 0, s, s); x.globalAlpha = 1;
+  if (alpha >= 1) return;
+  x.setLineDash([6, 6]); x.lineWidth = 2; x.strokeStyle = 'rgba(42,31,61,.45)';
+  game.pieces.forEach(p => { piecePath(x, p.c * game.pw, p.r * game.ph, game.pw, game.ph, p.edges); x.stroke(); });
+}
+function drawPiece(p) {
+  const { pw, ph, pad } = game, dpr = Math.min(2, devicePixelRatio || 1);
+  const ew = pw + pad * 2, eh = ph + pad * 2, c = p.el;
+  c.width = Math.round(ew * dpr); c.height = Math.round(eh * dpr);
+  c.style.width = ew + 'px'; c.style.height = eh + 'px';
+  p.ew = ew; p.eh = eh;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.save(); piecePath(x, pad, pad, pw, ph, p.edges); x.clip();
+  x.drawImage(img, pad - p.c * pw, pad - p.r * ph, L.side, L.side);
+  x.restore();
+  piecePath(x, pad, pad, pw, ph, p.edges);
+  x.lineJoin = 'round'; x.lineWidth = 3; x.strokeStyle = '#2a1f3d'; x.stroke();
+  x.lineWidth = 1.2; x.strokeStyle = 'rgba(255,255,255,.75)'; x.stroke();
+}
+function put(p) { p.el.style.transform = `translate(${p.x}px,${p.y}px)${p === game.drag?.p ? ' scale(1.06)' : ''}`; }
+function clampIn(p) {
+  p.x = Math.max(L.left - game.pad, Math.min(L.W - L.right - p.ew + game.pad, p.x));
+  p.y = Math.max(L.top - game.pad, Math.min(L.H - L.bot - p.eh + game.pad, p.y));
+}
+// Reparte las piezas sueltas en los huecos libres fuera del tablero
+function scatter(list) {
+  const { pw, ph, pad } = game, cells = L.cells.slice().sort(() => Math.random() - .5);
+  list.sort(() => Math.random() - .5).forEach((p, i) => {
+    const c = cells[i] || [rand(L.left, L.W - L.right - pw), rand(L.top, L.H - L.bot - ph)];
+    p.x = c[0] - pad + rand(-6, 6); p.y = c[1] - pad + rand(-6, 6);
+    p.el.style.zIndex = ++zTop; put(p);
+  });
+}
+
+/* ---------- Arrastrar y soltar ---------- */
+const play = $('#play');
+function pieceAt(cx, cy) {
+  for (const el of document.elementsFromPoint(cx, cy)) {
+    const p = el._piece; if (!p || p.done) continue;
+    const r = el.getBoundingClientRect();
+    const px = Math.floor((cx - r.left) / r.width * el.width), py = Math.floor((cy - r.top) / r.height * el.height);
+    if (el.getContext('2d', { willReadFrequently: true }).getImageData(px, py, 1, 1).data[3] > 10) return p;
+  }
+  // Dedos pequeños: si no tocó exacto, toma la pieza suelta más cercana
+  let best = null, bd = Math.min(game.pw, game.ph) * .7;
+  game.pieces.forEach(p => {
+    if (p.done) return;
+    const d = Math.hypot(cx - (p.x + p.ew / 2), cy - (p.y + p.eh / 2));
+    if (d < bd) { bd = d; best = p; }
+  });
+  return best;
+}
+play.addEventListener('pointerdown', e => {
+  if (!game || game.over || game.drag || !game.pw) return;
+  const p = pieceAt(e.clientX, e.clientY); if (!p) return;
+  e.preventDefault();
+  game.drag = { p, id: e.pointerId, dx: e.clientX - p.x, dy: e.clientY - p.y };
+  try { play.setPointerCapture(e.pointerId); } catch (err) {}
+  p.el.classList.remove('wiggle'); p.el.classList.add('drag'); p.el.style.zIndex = ++zTop; put(p);
+  touch(); sfx.pick();
+});
+play.addEventListener('pointermove', e => {
+  const d = game?.drag; if (!d || d.id !== e.pointerId) return;
+  d.p.x = e.clientX - d.dx; d.p.y = e.clientY - d.dy; put(d.p); touch();
+});
+function drop(e) {
+  const d = game?.drag; if (!d || d.id !== e.pointerId) return;
+  const p = d.p; game.drag = null; p.el.classList.remove('drag');
+  const snap = Math.min(game.pw, game.ph) * .42;
+  if (Math.hypot(p.x - p.tx, p.y - p.ty) < snap) place(p);
+  else { clampIn(p); put(p); sfx.miss(); }
+  touch();
+}
+play.addEventListener('pointerup', drop);
+play.addEventListener('pointercancel', drop);
+
+function place(p) {
+  p.done = true; p.x = p.tx; p.y = p.ty;
+  p.el.classList.add('placed'); p.el.style.zIndex = 1; put(p);
+  sfx.snap(); sparks(p.tx + p.ew / 2, p.ty + p.eh / 2, 8);
+  clearHint();
+  if (game.pieces.every(q => q.done)) setTimeout(win, 350);
+}
+function sparks(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('div'), a = i / n * Math.PI * 2, r = rand(50, 110);
+    s.className = 'spark'; s.style.left = x - 7 + 'px'; s.style.top = y - 7 + 'px';
+    s.style.setProperty('--dx', Math.cos(a) * r + 'px'); s.style.setProperty('--dy', Math.sin(a) * r + 'px');
+    s.style.background = ['#ffd23a', '#ff5d8f', '#5ac8ff', '#6cc63a'][i % 4];
+    document.body.appendChild(s); setTimeout(() => s.remove(), 600);
+  }
+}
+
+/* ---------- Pista si León se queda quieto ---------- */
+function touch() { if (game) { game.last = Date.now(); clearHint(); } }
+function clearHint() {
+  $('#slotHint')?.remove();
+  game?.pieces.forEach(p => p.el?.classList.remove('wiggle'));
+}
+function hintTick() {
+  if (!game || game.over || game.drag || Date.now() - game.last < 7000 || $('#slotHint')) return;
+  const p = game.pieces.find(q => !q.done); if (!p) return;
+  p.el.style.zIndex = ++zTop; p.el.classList.remove('wiggle'); void p.el.offsetWidth; p.el.classList.add('wiggle');
+  const h = document.createElement('div'); h.id = 'slotHint';
+  Object.assign(h.style, { left: p.c * game.pw + 'px', top: p.r * game.ph + 'px', width: game.pw + 'px', height: game.ph + 'px' });
+  $('#board').appendChild(h);
+  game.last = Date.now() - 2000;
+}
+
+/* ---------- Ganar ---------- */
+function win() {
+  if (!game) return;
+  game.over = true; clearInterval(game.timer);
+  save.done[IMAGES[game.i][0]] = true; persist();
+  drawGhost(1);
+  game.pieces.forEach(p => (p.el.style.visibility = 'hidden'));
+  sfx.win(); confetti();
+  const r = $('#board').getBoundingClientRect();
+  sparks(r.left + r.width / 2, r.top + r.height / 2, 16);
+  setTimeout(() => { if (game?.over) $('#win').hidden = false; }, 700);
+}
+function confetti() {
+  const c = $('#confetti'); c.hidden = false;
+  const W = c.width = Math.ceil(innerWidth / 4), H = c.height = Math.ceil(innerHeight / 4), x = c.getContext('2d');
+  const bits = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, v: rand(.6, 1.6), d: rand(-.4, .4), col: ['#ffd23a', '#ff5d8f', '#5ac8ff', '#6cc63a', '#fff'][Math.random() * 5 | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, W, H);
+    bits.forEach(b => { b.y += b.v; b.x += b.d; x.fillStyle = b.col; x.fillRect(b.x | 0, b.y | 0, 2, 2); });
+    if (t - t0 < 3200 && !c.hidden) requestAnimationFrame(f); else c.hidden = true;
+  })(t0);
+}
+
+$('#backBtn').addEventListener('click', () => { sfx.pick(); showMenu(); });
+$('#menuBtn').addEventListener('click', () => { sfx.pick(); showMenu(); });
+$('#nextBtn').addEventListener('click', () => {
+  sfx.pick(); const i = game ? (game.i + 1) % IMAGES.length : 0;
+  $('#win').hidden = true; $('#confetti').hidden = true; start(i);
+});
+let rz = null;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (game && !game.over) layoutGame(true); else if (game?.over) { L = computeLayout(); layoutGame(false); drawGhost(1); } }, 120); });
+
+// Precarga los dibujos para que funcionen sin internet desde el primer toque
+IMAGES.forEach(([id]) => { const im = new Image(); im.src = src(id); });
+showMenu();
+window.__puzzle = { start, get game() { return game; }, place };
+})();
+</script>

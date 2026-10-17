@@ -14,58 +14,54 @@
 <title>Juegos de León</title>
 <link rel="stylesheet" href="vendor/fonts.css">
 <style>
-/* Layout: cielo con colinas y nubes; los juegos como íconos grandes de app en una cuadrícula centrada. Un solo look brillante, pensado para dedos pequeños. */
+/* Layout: valle de dinosaurios en pixel art de fondo; título pixel arriba y los juegos como cartuchos/íconos grandes en una fila centrada. Un solo look: pixel art brillante para dedos pequeños. */
+@font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
 :root{
-  --sky-top:#5ac8ff;
-  --sky-low:#bff0e0;
-  --hill:#7bd63a;
-  --hill-d:#5db82a;
   --ink:#2a1f3d;
   --sun:#ffd23a;
-  --paper:#fffaf0;
-  --display:'Lilita One','Trebuchet MS','Arial Rounded MT Bold',sans-serif;
+  --sky:#5ac8ff;
+  --grass:#6cc63a;
+  --paper:#fff6e0;
+  --berry:#ff5d8f;
+  --pix:'Press Start 2P',ui-monospace,monospace;
   --body:'Nunito','Avenir Next',system-ui,sans-serif;
   color-scheme:light;
 }
 [hidden]{display:none!important}
-html,body{height:100%;margin:0;overflow:hidden;color:var(--ink);font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;background:var(--sky-top)}
+html,body{height:100%;margin:0;overflow:hidden;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;background:var(--sky)}
 a,button{touch-action:manipulation;-webkit-touch-callout:none}
 img{-webkit-user-drag:none}
-.world{position:fixed;inset:0;background:linear-gradient(var(--sky-top),var(--sky-low) 70%);overflow:hidden}
-.sun{position:absolute;right:8%;top:9%;width:min(22vw,130px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff6b0,var(--sun) 60%);box-shadow:0 0 0 18px rgba(255,210,58,.25),0 0 0 40px rgba(255,210,58,.12);animation:spin 30s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.cloud{position:absolute;height:44px;width:120px;background:#fff;border-radius:44px;opacity:.95;animation:drift linear infinite}
-.cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
-.cloud::before{width:56px;height:56px;left:18px;top:-26px}
-.cloud::after{width:42px;height:42px;left:58px;top:-18px}
-@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 160px))}}
-.hill{position:absolute;bottom:-40vh;border-radius:50%;background:var(--hill)}
-.hill.a{left:-30vw;width:110vw;height:70vh}
-.hill.b{right:-35vw;width:120vw;height:62vh;background:var(--hill-d)}
+.world{position:fixed;inset:0;background:url(img/hub/bg-wide.webp) 50% 100%/cover no-repeat var(--sky);image-rendering:pixelated}
+@media (orientation:portrait){.world{background-image:url(img/hub/bg-tall.webp)}}
 
-.page{position:relative;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(20px,5vh,44px);padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-h1{font-family:var(--display);font-weight:400;margin:0;font-size:clamp(42px,11vw,76px);line-height:.95;color:#fff;text-align:center;text-shadow:0 5px 0 var(--ink),0 10px 0 rgba(0,0,0,.15);letter-spacing:.02em;text-wrap:balance}
-h1 span{color:var(--sun)}
-.apps{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(24px,6vw,56px)}
-.app{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:#fff}
-.icon{width:clamp(120px,28vw,190px);aspect-ratio:1;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 12px 0 rgba(42,31,61,.35),0 20px 30px rgba(0,0,0,.25);transition:transform .15s;animation:float 3s ease-in-out infinite}
-.app:nth-child(2) .icon{animation-delay:-1s}
-.app:nth-child(3) .icon{animation-delay:-2s}
-.icon img{width:100%;height:100%;display:block;object-fit:cover}
-@keyframes float{50%{transform:translateY(-10px)}}
-.app:active .icon{transform:scale(.92);animation:none}
+.page{position:relative;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(26px,6vh,56px);padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:center;gap:.5em;line-height:1;text-align:center}
+.t1{font-size:clamp(16px,3.6vw,30px);color:#fff;letter-spacing:.12em;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 6px 0 var(--ink)}
+.t2{display:flex;gap:.08em;padding-top:.3em;font-size:clamp(44px,11vw,96px);color:var(--sun);text-shadow:.07em 0 0 var(--ink),-.07em 0 0 var(--ink),0 .07em 0 var(--ink),0 -.07em 0 var(--ink),.07em .14em 0 var(--ink),0 .2em 0 rgba(0,0,0,.2)}
+.t2 span{position:relative}
+.acc::before{content:'';position:absolute;left:44%;top:-.3em;width:.16em;height:.16em;background:var(--sun);box-shadow:.16em -.16em 0 var(--sun);filter:drop-shadow(.05em 0 0 var(--ink)) drop-shadow(-.05em 0 0 var(--ink)) drop-shadow(0 .05em 0 var(--ink)) drop-shadow(0 -.05em 0 var(--ink))}
+
+.apps{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(28px,7vw,72px)}
+.app{display:flex;flex-direction:column;align-items:center;gap:18px;text-decoration:none;color:#fff}
+.icon{width:clamp(130px,24vw,250px);aspect-ratio:1;max-width:100%;background:#fff;padding:6px;box-sizing:border-box;box-shadow:0 -6px 0 0 var(--ink),0 6px 0 0 var(--ink),-6px 0 0 0 var(--ink),6px 0 0 0 var(--ink),inset -6px -6px 0 0 rgba(0,0,0,.12),0 16px 0 0 rgba(42,31,61,.35);animation:bob 1.2s steps(2,end) infinite}
+.app:nth-child(2) .icon{animation-delay:-.6s}
+.app:nth-child(3) .icon{animation-delay:-.3s}
+.icon img{width:100%;height:100%;display:block;object-fit:cover;image-rendering:pixelated}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.app:active .icon{transform:translateY(6px);animation:none}
 .app:focus-visible{outline:none}
-.app:focus-visible .icon{box-shadow:0 0 0 6px var(--ink),0 12px 0 rgba(42,31,61,.35)}
-.name{font-family:var(--display);font-size:clamp(20px,5vw,28px);letter-spacing:.04em;text-shadow:0 3px 0 var(--ink);white-space:nowrap}
-.parent{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);border:0;background:rgba(42,31,61,.55);color:#fff;font-family:var(--body);font-weight:800;font-size:13px;padding:8px 14px;border-radius:99px;cursor:pointer}
-.sheet{position:fixed;inset:0;display:flex;align-items:flex-start;overflow-y:auto;box-sizing:border-box;padding-top:calc(env(safe-area-inset-top,0px) + 16px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:rgba(42,31,61,.55)}
-.card{margin:auto;width:min(100%,440px);box-sizing:border-box;background:var(--paper);border-radius:28px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 0 rgba(0,0,0,.18)}
-.card h2{font-family:var(--display);font-weight:400;font-size:30px;margin:0;text-align:center}
-.card p{margin:0;font-weight:700;line-height:1.45;color:#5a4d6e}
-.card ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-weight:800;line-height:1.4}
-.ok{align-self:center;font-family:var(--display);font-size:22px;letter-spacing:.06em;border:0;cursor:pointer;color:#fff;background:linear-gradient(#8fe04a,#5db82a);padding:12px 36px;border-radius:999px;box-shadow:0 5px 0 #3f8a1c}
-@media (orientation:landscape) and (max-height:520px){.icon{width:clamp(110px,22vh,170px)}h1{font-size:44px}}
-@media (prefers-reduced-motion:reduce){.sun,.cloud,.icon{animation:none}}
+.app:focus-visible .icon{outline:5px solid #fff;outline-offset:8px}
+.name{font-size:clamp(11px,2.2vw,16px);letter-spacing:.08em;white-space:nowrap;background:var(--ink);padding:8px 12px;box-shadow:0 -3px 0 0 #fff,0 3px 0 0 #fff,-3px 0 0 0 #fff,3px 0 0 0 #fff}
+
+.parent{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);border:0;background:rgba(42,31,61,.75);color:#fff;font-family:var(--body);font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer}
+.sheet{position:fixed;inset:0;display:flex;align-items:flex-start;overflow-y:auto;box-sizing:border-box;padding-top:calc(env(safe-area-inset-top,0px) + 16px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:rgba(42,31,61,.6)}
+.card{margin:auto;width:min(100%,440px);box-sizing:border-box;background:var(--paper);padding:24px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 -6px 0 0 var(--ink),0 6px 0 0 var(--ink),-6px 0 0 0 var(--ink),6px 0 0 0 var(--ink)}
+.card h2{font-family:var(--pix);font-weight:400;font-size:18px;line-height:1.4;margin:0;text-align:center}
+.card p{margin:0;font-family:var(--body);font-weight:700;line-height:1.45;color:#5a4d6e}
+.card ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-family:var(--body);font-weight:800;line-height:1.4}
+.ok{align-self:center;font-family:var(--pix);font-size:16px;letter-spacing:.06em;border:0;cursor:pointer;color:var(--ink);background:var(--grass);padding:14px 26px;box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset -4px -4px 0 0 rgba(0,0,0,.18)}
+@media (orientation:landscape) and (max-height:520px){.icon{width:clamp(100px,24vh,160px)}.t2{font-size:40px}.page{gap:18px}}
+@media (prefers-reduced-motion:reduce){.icon{animation:none}}
 </style>
 </head>
 <body>
@@ -117,26 +113,20 @@ h1 span{color:var(--sun)}
 })();
 </script>
 
-<div class="world" aria-hidden="true">
-  <div class="sun"></div>
-  <div class="cloud" style="top:14%;animation-duration:46s;animation-delay:-10s"></div>
-  <div class="cloud" style="top:28%;animation-duration:60s;animation-delay:-35s;transform:scale(.8)"></div>
-  <div class="cloud" style="top:6%;animation-duration:52s;animation-delay:-22s"></div>
-  <div class="hill a"></div>
-  <div class="hill b"></div>
-</div>
+<div class="world" aria-hidden="true"></div>
 
 <main class="page">
-  <h1>Juegos de <span>León</span></h1>
+  <h1 aria-label="Juegos de León"><span class="t1">JUEGOS DE</span><span class="t2"><span>L</span><span>E</span><span class="acc">O</span><span>N</span></span></h1>
   <nav class="apps">
-    <a class="app" href="dino-race/" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.png" alt=""></span><span class="name">Dino Race</span></a>
+    <a class="app" href="dino-race/" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.png" alt=""></span><span class="name">CARRERA</span></a>
+    <a class="app" href="dino-puzzle/" aria-label="Rompecabezas"><span class="icon"><img src="icons/dino-puzzle.png" alt=""></span><span class="name">PUZZLE</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
 </main>
 
 <div class="sheet" id="help" hidden>
   <div class="card">
-    <h2>Instalar como app</h2>
+    <h2>INSTALAR COMO APP</h2>
     <p>Así los juegos se abren en pantalla completa y funcionan sin internet:</p>
     <ol>
       <li>Abre esta página en Safari.</li>
