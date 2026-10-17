@@ -6,8 +6,6 @@ Built for iPhone and iPad: installable as an app (Add to Home Screen) and fully 
 | Game | Path | For |
 | --- | --- | --- |
 | Dino Race | `/dino-race/` | Switch dinosaurs to match the terrain and win the race (15 levels) |
-| Dino Kitchen | `/dino-kitchen/` | Cook 15 recipes by adding ingredients in order, then mix, blend or bake and feed the dinosaur (made for a 2-year-old) |
-| Dino Bath | `/dino-bath/` | Clean a muddy dinosaur step by step: brush, soap, water, towel, teeth, stars (15 levels, made for a 2-year-old) |
 
 ## Project layout
 

@@ -14,8 +14,6 @@ INTRO = open(os.path.join(ROOT, 'shared/intro.html'), encoding='utf-8').read()  
 PAGES = [
     ('hub.html', 'index.html', ''),
     ('games/dino-race.html', 'dino-race/index.html', '../'),
-    ('games/dino-bath.html', 'dino-bath/index.html', '../'),
-    ('games/dino-kitchen.html', 'dino-kitchen/index.html', '../'),
 ]
 APP_NAME = 'Juegos de León'
 
@@ -68,7 +66,7 @@ def main():
         build_page(src, out, up)
     write(os.path.join(SITE, 'manifest.webmanifest'), json.dumps({
         'name': APP_NAME, 'short_name': 'León', 'lang': 'es',
-        'description': 'Juegos de dinosaurios para León: Dino Race, Baño de Dinos y Cocina de Dinos. Funcionan sin internet.',
+        'description': 'Juegos de dinosaurios para León. Funcionan sin internet.',
         'start_url': './', 'scope': './', 'display': 'fullscreen', 'orientation': 'any',
         'background_color': '#5ac8ff', 'theme_color': '#5ac8ff',
         'icons': [
@@ -77,7 +75,7 @@ def main():
             {'src': 'icons/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'},
         ],
     }, ensure_ascii=False, indent=2))
-    files = ['./', 'dino-race/', 'dino-bath/', 'dino-kitchen/']
+    files = ['./', 'dino-race/']
     for d, _, fs in os.walk(SITE):
         for f in fs:
             rel = os.path.relpath(os.path.join(d, f), SITE).replace(os.sep, '/')
@@ -85,7 +83,7 @@ def main():
                 files.append(rel)
     sw = read('sw.template.js').replace('__VERSION__', version).replace('__FILES__', ', '.join(f"'{f}'" for f in sorted(files)))
     write(os.path.join(SITE, 'sw.js'), sw)
-    write(os.path.join(SITE, '_headers'), '/sw.js\n  Cache-Control: no-cache\n/*.html\n  Cache-Control: no-cache\n/\n  Cache-Control: no-cache\n/dino-race/\n  Cache-Control: no-cache\n/dino-bath/\n  Cache-Control: no-cache\n/dino-kitchen/\n  Cache-Control: no-cache\n')
+    write(os.path.join(SITE, '_headers'), '/sw.js\n  Cache-Control: no-cache\n/*.html\n  Cache-Control: no-cache\n/\n  Cache-Control: no-cache\n/dino-race/\n  Cache-Control: no-cache\n')
     print(f'site/ ready (version {version}, {len(files)} cached files)')
 
 if __name__ == '__main__':

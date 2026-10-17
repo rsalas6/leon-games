@@ -2,7 +2,7 @@
   "name": "Juegos de León",
   "short_name": "León",
   "lang": "es",
-  "description": "Juegos de dinosaurios para León: Dino Race, Baño de Dinos y Cocina de Dinos. Funcionan sin internet.",
+  "description": "Juegos de dinosaurios para León. Funcionan sin internet.",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
