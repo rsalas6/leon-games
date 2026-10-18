@@ -17,6 +17,10 @@ PAGES = [
     ('games/dino-puzzle.html', 'dino-puzzle/index.html', '../'),
 ]
 APP_NAME = 'Juegos de León'
+# iOS home-screen apps (black-translucent status bar) report a viewport shorter than the screen by the status bar height,
+# leaving an empty strip at the bottom. Size the full-screen layers to the real screen height when that happens.
+FULLH = '''<style>@media (display-mode: standalone), (display-mode: fullscreen){html,body{height:var(--fullh,100%)!important}#app,.bg,.world,#menu,#play,#win,#confetti,#leonIntro{bottom:auto!important;height:var(--fullh,100%)!important}}</style>
+<script>(()=>{const fit=()=>{if(!(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))return;const land=innerWidth>innerHeight,h=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=h-innerHeight;document.documentElement.style.setProperty('--fullh',(gap>0&&gap<=90?h:innerHeight)+'px')};fit();addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,300))})()</script>'''
 
 def read(p):
     return open(os.path.join(ROOT, p), encoding='utf-8').read()
@@ -48,6 +52,7 @@ def build_page(src, out, up):
 <link rel="apple-touch-icon" href="{up}icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="{up}icons/icon-192.png">
 {head}
+{FULLH}
 </head>
 <body>
 {INTRO}{body}<script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('{up}sw.js',{{scope:'{up or './'}'}});</script>

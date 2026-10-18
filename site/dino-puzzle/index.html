@@ -84,6 +84,8 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 .wbtn.go{background:var(--grass)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
 </style>
+<style>@media (display-mode: standalone), (display-mode: fullscreen){html,body{height:var(--fullh,100%)!important}#app,.bg,.world,#menu,#play,#win,#confetti,#leonIntro{bottom:auto!important;height:var(--fullh,100%)!important}}</style>
+<script>(()=>{const fit=()=>{if(!(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))return;const land=innerWidth>innerHeight,h=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=h-innerHeight;document.documentElement.style.setProperty('--fullh',(gap>0&&gap<=90?h:innerHeight)+'px')};fit();addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,300))})()</script>
 </head>
 <body>
 <div id="leonIntro" aria-hidden="true">
@@ -100,7 +102,7 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 <style>
 @font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
 #leonIntro{--li-ink:#2a1f3d;--li-sun:#ffd23a;--li-sky:#8fd8ff;position:fixed;inset:0;z-index:9999;overflow:hidden;background:var(--li-sky);font-family:'Press Start 2P',ui-monospace,monospace;color:#fff;transition:opacity .45s;-webkit-user-select:none;user-select:none;touch-action:none}
-#leonIntro.out{opacity:0;pointer-events:none}
+#leonIntro.out{opacity:0}
 .li-scene{position:absolute;inset:-2%;background:url(../img/leon-loading.webp) 56% 100%/cover no-repeat;image-rendering:pixelated;animation:li-zoom 3.4s ease-out both}
 .li-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(42,31,61,.38),rgba(42,31,61,0) 42%)}
 .li-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + max(5vh,18px));display:flex;flex-direction:column;align-items:center;gap:min(2.4vw,16px)}
@@ -130,7 +132,9 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
   let gone = false;
   const done = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 500); };
   setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 900 : 3100);
-  el.addEventListener('pointerdown', done);
+  // El toque que salta la intro no debe llegar a los botones de atrás: la capa sigue atrapando toques mientras se desvanece
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); done(); });
+  ['click', 'pointerup', 'touchend'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 })();
 </script>
 <script>window.LEON_HUB='../';</script>

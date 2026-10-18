@@ -253,16 +253,16 @@ const LEVELS = [
   { b: 'selva',    d: ['raptor', 'mosa', 'stego', 'trex'] },
   { b: 'desierto', d: ['raptor', 'stego', 'ptero'] },
   { b: 'desierto', d: ['raptor', 'trex', 'compy', 'ptero'] },
-  { b: 'desierto', d: ['raptor', 'stego', 'ptero', 'compy', 'trex'] },
+  { b: 'desierto', d: ['raptor', 'stego', 'ptero', 'compy'] },
   { b: 'pantano',  d: ['raptor', 'brachio', 'mosa'] },
   { b: 'pantano',  d: ['raptor', 'brachio', 'trex', 'mosa'] },
-  { b: 'pantano',  d: ['raptor', 'brachio', 'mosa', 'ptero', 'stego'] },
+  { b: 'pantano',  d: ['raptor', 'brachio', 'mosa', 'ptero'] },
   { b: 'nieve',    d: ['raptor', 'trice', 'mosa', 'ptero'] },
-  { b: 'nieve',    d: ['raptor', 'trice', 'ptero', 'compy', 'stego'] },
-  { b: 'nieve',    d: ['raptor', 'trice', 'stego', 'mosa', 'compy', 'ptero'] },
-  { b: 'volcan',   d: ['raptor', 'stego', 'ptero', 'compy', 'trex'] },
-  { b: 'volcan',   d: ['raptor', 'trex', 'brachio', 'ptero', 'trice', 'compy'] },
-  { b: 'volcan',   d: ['raptor', 'stego', 'trice', 'ptero', 'trex', 'compy'] },
+  { b: 'nieve',    d: ['raptor', 'trice', 'ptero', 'compy'] },
+  { b: 'nieve',    d: ['raptor', 'trice', 'stego', 'mosa'] },
+  { b: 'volcan',   d: ['raptor', 'stego', 'ptero', 'trex'] },
+  { b: 'volcan',   d: ['raptor', 'trex', 'brachio', 'compy'] },
+  { b: 'volcan',   d: ['raptor', 'trice', 'ptero', 'trex'] },
 ];
 const MAX_LEVEL = LEVELS.length;
 const levelDef = n => LEVELS[Math.min(MAX_LEVEL, Math.max(1, n)) - 1];
