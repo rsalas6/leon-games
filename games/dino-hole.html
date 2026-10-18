@@ -1,0 +1,404 @@
+<title>Dino Hoyo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: mundo visto desde arriba a pantalla completa; el hoyo sigue el dedo. Barra arriba con casita, nivel, avance y sonido. Menú de niveles como cuadrícula de mundos. Un solo look: pixel art brillante. */
+@font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
+:root{
+  --ink:#2a1f3d;
+  --sun:#ffd23a;
+  --sky:#5ac8ff;
+  --grass:#6cc63a;
+  --berry:#ff5d8f;
+  --pix:'Press Start 2P',ui-monospace,monospace;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#3c8a2e;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.bg{position:fixed;inset:0;background:url(__UP__img/hub/bg-wide.webp) 50% 100%/cover no-repeat var(--sky);image-rendering:pixelated}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/hub/bg-tall.webp)}}
+.bg::after{content:'';position:absolute;inset:0;background:rgba(42,31,61,.18)}
+
+.px{border:0;background:var(--sun);box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset -4px -4px 0 0 rgba(0,0,0,.18),inset 4px 4px 0 0 rgba(255,255,255,.55),0 10px 0 0 rgba(42,31,61,.35)}
+.px:active{transform:translateY(4px)}
+.px:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:16px}
+.side.end{justify-content:flex-end}
+h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);letter-spacing:.06em;text-align:center;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 6px 0 var(--ink)}
+#hud{display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
+#lvl{font-size:clamp(11px,2.2vw,15px);color:#fff;background:var(--ink);padding:8px 12px;box-shadow:0 -3px 0 0 #fff,0 3px 0 0 #fff,-3px 0 0 0 #fff,3px 0 0 0 #fff}
+#meter{display:flex;align-items:center;gap:10px}
+#meterBar{width:clamp(140px,34vw,320px);height:18px;box-sizing:border-box;padding:3px;background:var(--ink);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--ink)}
+#meterBar i{display:block;height:100%;width:0;background:var(--grass);transition:width .2s steps(4,end)}
+#bossIcon{width:44px;height:44px;background:#fff;box-shadow:0 0 0 3px var(--ink);image-rendering:pixelated}
+
+#menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,17vw,190px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
+.lv{position:relative;aspect-ratio:1;padding:0;background:#fff}
+.lv canvas{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);pointer-events:none}
+.lv b{position:absolute;left:8px;top:8px;font-weight:400;font-size:14px;color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink)}
+.lv .star{position:absolute;right:-12px;top:-12px;width:34px;height:34px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+
+#arrow{position:fixed;left:0;top:0;width:56px;height:56px;margin:-28px 0 0 -28px;pointer-events:none;z-index:40;animation:blink .5s steps(2,end) infinite}
+@keyframes blink{50%{opacity:.35}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%;image-rendering:pixelated}
+#win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;pointer-events:none;background:rgba(42,31,61,.25)}
+#win .big{font-size:clamp(28px,8vw,72px);color:var(--sun);text-shadow:4px 0 0 var(--ink),-4px 0 0 var(--ink),0 4px 0 var(--ink),0 -4px 0 var(--ink),4px 9px 0 var(--ink);animation:pop .6s steps(6,end) both}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+#win .row{display:flex;gap:28px;pointer-events:auto}
+.wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;display:flex;align-items:center;justify-content:center}
+.wbtn svg{width:30px;height:30px;shape-rendering:crispEdges}
+.wbtn.go{background:var(--grass)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" id="menuBg" aria-hidden="true"></div>
+<canvas id="game" hidden></canvas>
+<svg id="arrow" viewBox="0 0 16 16" hidden aria-hidden="true"><path fill="#2a1f3d" d="M6 1h4v1h1v1h1v1h1v1h1v2h-4v8H5V7H1V5h1V4h1V3h1V2h1V1z"/><path fill="#ffd23a" d="M7 2h2v1h1v1h1v1h1v1H9v8H7V6H4V5h1V4h1V3h1z"/></svg>
+
+<div class="bar">
+  <div class="side">
+    <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
+    <button class="px ibtn" id="backBtn" aria-label="Elegir otro nivel" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+  </div>
+  <h1 id="title">DINO HOYO</h1>
+  <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="meter"><div id="meterBar"><i></i></div><canvas id="bossIcon" width="88" height="88"></canvas></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<main id="menu"><div id="levels"></div></main>
+
+<canvas id="confetti" hidden></canvas>
+<div id="win" hidden>
+  <div class="big">¡MUY BIEN!</div>
+  <div class="row">
+    <button class="px wbtn" id="menuBtn" aria-label="Elegir otro nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+    <button class="px wbtn go" id="nextBtn" aria-label="Siguiente nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M2 6h7V2h2l4 6-4 6H9v-4H2z"/></svg></button>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const UP = '__UP__';
+const THEMES = ['selva', 'playa', 'nieve', 'desierto', 'volcan'];
+// Cada mundo tiene dos niveles: uno corto (se come el objeto 12) y uno largo (se come el objeto 16, el más grande)
+const LEVELS = [
+  ...THEMES.map(t => ({ theme: t, boss: 11, world: 1700 })),
+  ...THEMES.map(t => ({ theme: t, boss: 15, world: 2500 })),
+];
+const SIZE = i => 26 * Math.pow(1.2, i);      // tamaño (en unidades del mundo) del objeto i de la hoja
+const RAD = i => SIZE(i) * .42;               // radio que necesita el hoyo para tragárselo
+const GROW = .14;                             // cuánto crece el hoyo por cada cosa que se come
+
+let save = { done: {}, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('dinoHole')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('dinoHole', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0); }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+let lastGulp = 0;
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  gulp: i => { const n = performance.now(); if (n - lastGulp < 60) return; lastGulp = n; beep(700 - i * 30, .12, 'square', .05, -300 + i * 10); },
+  bump: () => beep(140, .08, 'triangle', .06),
+  grow: () => { beep(523, .08, 'square', .05); beep(784, .1, 'square', .05, 0, .08); },
+  win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => beep(f, .16, 'square', .06, 0, i * .12)),
+};
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) {
+  const b = $('#homeBtn'); b.hidden = false;
+  b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; });
+}
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Arte: hojas de 4x4 objetos y pisos repetibles ---------- */
+const ART = {};
+function loadImg(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; }); }
+// Recorta cada objeto de la hoja a su contenido visible (alfa) para dibujarlo centrado y del tamaño correcto
+function sliceSheet(im) {
+  const c = document.createElement('canvas'), w = c.width = im.naturalWidth, h = c.height = im.naturalHeight;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
+  const data = x.getImageData(0, 0, w, h).data, cw = w / 4, ch = h / 4, out = [];
+  for (let k = 0; k < 16; k++) {
+    const ox = Math.round((k % 4) * cw), oy = Math.round(Math.floor(k / 4) * ch), ew = Math.round(cw), eh = Math.round(ch);
+    let x0 = ew, y0 = eh, x1 = -1, y1 = -1;
+    for (let yy = 0; yy < eh; yy += 2) for (let xx = 0; xx < ew; xx += 2) {
+      if (data[((oy + yy) * w + ox + xx) * 4 + 3] > 60) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+    }
+    if (x1 < 0) { x0 = 0; y0 = 0; x1 = ew - 1; y1 = eh - 1; }
+    out.push([ox + x0, oy + y0, x1 - x0 + 2, y1 - y0 + 2]);
+  }
+  return out;
+}
+async function loadTheme(t) {
+  if (ART[t]) return ART[t];
+  const [sheet, ground] = await Promise.all([loadImg(`${UP}img/hole/sheet-${t}.webp`), loadImg(`${UP}img/hole/ground-${t}.webp`)]);
+  return (ART[t] = { sheet, ground, rects: sliceSheet(sheet) });
+}
+function drawSprite(x, art, i, cx, cy, size) {
+  const [sx, sy, sw, sh] = art.rects[i], k = size / Math.max(sw, sh);
+  x.drawImage(art.sheet, sx, sy, sw, sh, cx - sw * k / 2, cy - sh * k / 2, sw * k, sh * k);
+}
+
+/* ---------- Menú de niveles ---------- */
+async function buildMenu() {
+  const box = $('#levels'); box.innerHTML = '';
+  LEVELS.forEach((L, n) => {
+    const b = document.createElement('button');
+    b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1));
+    b.innerHTML = `<canvas width="200" height="200"></canvas><b>${n + 1}</b>${save.done[n] ? '<span class="star"></span>' : ''}`;
+    b.addEventListener('click', () => { sfx.tap(); start(n); });
+    box.appendChild(b);
+    loadTheme(L.theme).then(art => {
+      const x = b.querySelector('canvas').getContext('2d');
+      x.fillStyle = x.createPattern(art.ground, 'repeat'); x.save(); x.scale(.4, .4); x.fillRect(0, 0, 500, 500); x.restore();
+      drawSprite(x, art, L.boss, 100, 104, 150);
+    }).catch(() => {});
+  });
+}
+function showMenu() {
+  game = null; arrowEl.hidden = true;
+  $('#game').hidden = true; $('#win').hidden = true; $('#confetti').hidden = true; $('#hud').hidden = true;
+  $('#menu').hidden = false; $('#menuBg').hidden = false; $('#backBtn').hidden = true; $('#title').hidden = false;
+  buildMenu();
+}
+
+/* ---------- Juego ---------- */
+const cv = $('#game'), cx = cv.getContext('2d'), arrowEl = $('#arrow');
+let game = null, dpr = 1, VW = 0, VH = 0;
+const rand = (a, b) => a + Math.random() * (b - a);
+function resize() {
+  dpr = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight;
+  cv.width = Math.round(VW * dpr); cv.height = Math.round(VH * dpr);
+}
+addEventListener('resize', resize); resize();
+
+function placeItems(L) {
+  const items = [], W = L.world, boss = L.boss;
+  const tryPlace = (i, n) => {
+    const r = SIZE(i) * .5;
+    for (let k = 0; k < n; k++) {
+      for (let tries = 0; tries < 30; tries++) {
+        const x = rand(r + 20, W - r - 20), y = rand(r + 20, W - r - 20);
+        if (Math.hypot(x - W / 2, y - W / 2) < 150) continue;   // espacio libre donde empieza el hoyo
+        if (items.some(o => Math.hypot(o.x - x, o.y - y) < (o.r + r) * .9)) continue;
+        items.push({ i, x, y, r, rad: RAD(i), fall: 0, shake: 0, seed: Math.random() * 6 }); break;
+      }
+    }
+  };
+  // Primero lo grande (para que quepa), luego lo chico rellenando huecos
+  const area = (W / 1700) ** 2;
+  tryPlace(boss, 1);
+  for (let i = boss - 1; i >= 0; i--) tryPlace(i, Math.round((4 + (boss - 1 - i) * 2.6) * area));
+  return items;
+}
+async function start(n) {
+  const L = LEVELS[n];
+  let art; try { art = await loadTheme(L.theme); } catch (e) { return; }
+  const r0 = 34;
+  game = { n, L, art, items: placeItems(L), hole: { x: L.world / 2, y: L.world / 2, r: r0, show: r0 }, target: null, zoom: 1, falling: [], over: false, t: 0, eaten: 0, lastEat: 0 };
+  game.bossItem = game.items.find(o => o.i === L.boss);
+  game.pattern = cx.createPattern(art.ground, 'repeat');
+  const bi = $('#bossIcon').getContext('2d'); bi.clearRect(0, 0, 88, 88); drawSprite(bi, art, L.boss, 44, 44, 80);
+  $('#lvl').textContent = 'NIVEL ' + (n + 1);
+  $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
+  $('#game').hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false;
+  updateMeter();
+}
+
+/* Control: el hoyo va hacia donde está el dedo */
+let pointer = null;
+const keys = {};
+cv.addEventListener('pointerdown', e => { pointer = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId); } catch (err) {} });
+cv.addEventListener('pointermove', e => { if (pointer && pointer.id === e.pointerId) { pointer.x = e.clientX; pointer.y = e.clientY; } });
+['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, e => { if (pointer && pointer.id === e.pointerId) pointer = null; }));
+addEventListener('keydown', e => (keys[e.key] = true));
+addEventListener('keyup', e => (keys[e.key] = false));
+
+function toWorld(sx, sy) { const g = game, z = g.zoom; return { x: g.cam.x + (sx - VW / 2) / z, y: g.cam.y + (sy - VH / 2) / z }; }
+
+function grow(it) {
+  const h = game.hole, sizesBefore = sizesFit(h.r);
+  h.r = Math.min(Math.sqrt(h.r * h.r + GROW * it.rad * it.rad) + .1, 900);
+  // Si ya puede comerse algo de un tamaño nuevo, suena un "¡crecí!"
+  if (sizesFit(h.r) > sizesBefore) sfx.grow();
+}
+function sizesFit(r) { let n = 0; while (n < 16 && RAD(n) < r * .95) n++; return n;
+}
+function edible(it) { return it.rad < game.hole.r * .95; }
+
+function step(dt) {
+  const g = game; if (!g) return;
+  g.t += dt;
+  const h = g.hole;
+  // Movimiento
+  const speed = 300 + h.r * 1.2;
+  let dx = 0, dy = 0;
+  if (pointer && g.cam) { const w = toWorld(pointer.x, pointer.y); dx = w.x - h.x; dy = w.y - h.y; }
+  if (keys.ArrowLeft) dx = -1e3; if (keys.ArrowRight) dx = 1e3; if (keys.ArrowUp) dy = -1e3; if (keys.ArrowDown) dy = 1e3;
+  const d = Math.hypot(dx, dy);
+  if (d > 4 && !g.over) { const m = Math.min(d, speed * dt) / d; h.x += dx * m; h.y += dy * m; }
+  h.x = Math.max(h.r * .6, Math.min(g.L.world - h.r * .6, h.x));
+  h.y = Math.max(h.r * .6, Math.min(g.L.world - h.r * .6, h.y));
+  h.show += (h.r - h.show) * Math.min(1, dt * 6);
+
+  // Comer: lo que cabe y ya está casi adentro se cae; lo que cabe y está cerca se acerca solito (ayuda para manitas pequeñas)
+  for (const it of g.items) {
+    if (it.fall) continue;
+    const dist = Math.hypot(it.x - h.x, it.y - h.y);
+    if (edible(it)) {
+      if (dist < h.r - it.rad * .35) { it.fall = 1e-6; it.fx = it.x; it.fy = it.y; g.falling.push(it); sfx.gulp(it.i); }
+      else if (dist < h.r + it.r * 1.2) { const k = Math.min(1, dt * 2.2); it.x += (h.x - it.x) * k * .5; it.y += (h.y - it.y) * k * .5; }
+    } else if (dist < h.r + it.r * .3) {
+      if (it.shake <= 0) { it.shake = .35; if (g.t - (it.lastBump || -9) > .8) { it.lastBump = g.t; sfx.bump(); } }
+    }
+    if (it.shake > 0) it.shake -= dt;
+  }
+  for (const it of g.falling) {
+    it.fall += dt / .45;
+    if (it.fall >= 1 && !it.gone) {
+      it.gone = true; g.eaten++; grow(it); updateMeter();
+      if (it === g.bossItem) winLevel();
+    }
+  }
+  g.falling = g.falling.filter(it => !it.gone);
+  g.items = g.items.filter(it => !it.gone);
+  // Si se acaban las cosas que caben antes de poder con el jefe, aparecen más cositas cerca
+  if (!g.over && !edible(g.bossItem) && g.items.filter(edible).length < 4) refill();
+
+  // Cámara: sigue al hoyo y se aleja conforme crece
+  const zWant = Math.min(VW, VH) / (Math.max(420, h.show * 5));
+  g.zoom += (zWant - g.zoom) * Math.min(1, dt * 2);
+  g.cam = g.cam || { x: h.x, y: h.y };
+  g.cam.x += (h.x - g.cam.x) * Math.min(1, dt * 6); g.cam.y += (h.y - g.cam.y) * Math.min(1, dt * 6);
+  // La cámara no enseña lo que está fuera del mundo
+  const hw = VW / 2 / g.zoom, hh = VH / 2 / g.zoom, W = g.L.world;
+  g.cam.x = hw * 2 >= W ? W / 2 : Math.max(hw, Math.min(W - hw, g.cam.x));
+  g.cam.y = hh * 2 >= W ? W / 2 : Math.max(hh, Math.min(W - hh, g.cam.y));
+}
+function refill() {
+  const g = game, h = g.hole, maxI = g.items.reduce((m, it) => (edible(it) ? Math.max(m, it.i) : m), 0);
+  let top = 0; while (top < g.L.boss && RAD(top + 1) < h.r * .95) top++;
+  for (let k = 0; k < 10; k++) {
+    const i = Math.max(0, top - (k % 3)), a = Math.random() * Math.PI * 2, dist = rand(h.r * 2.5, h.r * 6);
+    const x = Math.max(40, Math.min(g.L.world - 40, h.x + Math.cos(a) * dist)), y = Math.max(40, Math.min(g.L.world - 40, h.y + Math.sin(a) * dist));
+    g.items.push({ i, x, y, r: SIZE(i) * .5, rad: RAD(i), fall: 0, shake: 0, seed: Math.random() * 6 });
+  }
+}
+function updateMeter() {
+  const g = game, need = RAD(g.L.boss) / .95, p = Math.min(1, (g.hole.r - 34) / (need - 34));
+  $('#meterBar i').style.width = Math.max(0, p * 100) + '%';
+}
+
+function draw() {
+  const g = game; if (!g || !g.cam) return;
+  const z = g.zoom, h = g.hole, art = g.art;
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = '#2a1f3d'; cx.fillRect(0, 0, VW, VH);
+  cx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (VW / 2 - g.cam.x * z), dpr * (VH / 2 - g.cam.y * z));
+  // Piso
+  cx.save(); cx.scale(.75, .75); cx.fillStyle = g.pattern; cx.fillRect(0, 0, g.L.world / .75, g.L.world / .75); cx.restore();
+  // Velo suave para que los objetos resalten sobre pisos muy llamativos
+  const wash = { volcan: 'rgba(42,31,61,.38)', selva: 'rgba(255,255,255,.12)' }[g.L.theme];
+  if (wash) { cx.fillStyle = wash; cx.fillRect(0, 0, g.L.world, g.L.world); }
+  // Borde del mundo
+  cx.lineWidth = 14; cx.strokeStyle = '#2a1f3d'; cx.strokeRect(-7, -7, g.L.world + 14, g.L.world + 14);
+  // Hoyo
+  const R = h.show, wob = Math.sin(g.t * 3) * R * .015;
+  cx.fillStyle = '#ff9a2e'; cx.beginPath(); cx.arc(h.x, h.y, R + 7 + wob, 0, Math.PI * 2); cx.fill();
+  cx.fillStyle = '#2a1f3d'; cx.beginPath(); cx.arc(h.x, h.y, R + 2, 0, Math.PI * 2); cx.fill();
+  const grd = cx.createRadialGradient(h.x, h.y - R * .2, R * .1, h.x, h.y, R);
+  grd.addColorStop(0, '#000'); grd.addColorStop(1, '#1b1230');
+  cx.fillStyle = grd; cx.beginPath(); cx.arc(h.x, h.y, R, 0, Math.PI * 2); cx.fill();
+  // Lo que se está cayendo: se encoge girando hacia el centro, recortado al hoyo
+  if (g.falling.length) {
+    cx.save(); cx.beginPath(); cx.arc(h.x, h.y, R, 0, Math.PI * 2); cx.clip();
+    for (const it of g.falling) {
+      const k = Math.min(1, it.fall), e = k * k;
+      const x = it.fx + (h.x - it.fx) * e, y = it.fy + (h.y - it.fy) * e + e * R * .3;
+      cx.save(); cx.translate(x, y); cx.rotate(e * (it.seed > 3 ? 1.4 : -1.4)); cx.globalAlpha = 1 - e * .6;
+      drawSprite(cx, art, it.i, 0, 0, it.r * 2 * (1 - e * .75)); cx.restore();
+    }
+    cx.restore();
+  }
+  // Objetos parados (los de atrás primero); con sombrita para que se vean sobre el piso
+  const vx0 = g.cam.x - VW / 2 / z - 300, vx1 = g.cam.x + VW / 2 / z + 300, vy0 = g.cam.y - VH / 2 / z - 300, vy1 = g.cam.y + VH / 2 / z + 300;
+  const vis = g.items.filter(it => !it.fall && it.x > vx0 && it.x < vx1 && it.y > vy0 && it.y < vy1).sort((a, b) => a.y - b.y);
+  cx.fillStyle = 'rgba(42,31,61,.22)';
+  for (const it of vis) { cx.beginPath(); cx.ellipse(it.x, it.y + it.r * .62, it.r * .62, it.r * .2, 0, 0, Math.PI * 2); cx.fill(); }
+  for (const it of vis) {
+    const sh = it.shake > 0 ? Math.sin(g.t * 60) * it.r * .06 : 0, bob = Math.sin(g.t * 2 + it.seed) * it.r * .02;
+    drawSprite(cx, art, it.i, it.x + sh, it.y + bob, it.r * 2);
+  }
+  // Flecha hacia el jefe cuando ya cabe en el hoyo y está fuera de la pantalla
+  const b = g.bossItem;
+  if (b && !b.fall && edible(b) && !g.over) {
+    const sx = (b.x - g.cam.x) * z + VW / 2, sy = (b.y - g.cam.y) * z + VH / 2, m = 70;
+    if (sx < 0 || sx > VW || sy < 0 || sy > VH) {
+      const a = Math.atan2(sy - VH / 2, sx - VW / 2);
+      const ex = Math.max(m, Math.min(VW - m, VW / 2 + Math.cos(a) * VW)), ey = Math.max(m + 70, Math.min(VH - m, VH / 2 + Math.sin(a) * VH));
+      arrowEl.hidden = false; arrowEl.style.transform = `translate(${ex}px,${ey}px) rotate(${a + Math.PI / 2}rad)`;
+    } else arrowEl.hidden = true;
+  } else arrowEl.hidden = true;
+}
+
+function winLevel() {
+  const g = game; g.over = true; save.done[g.n] = true; persist();
+  sfx.win(); confetti(); arrowEl.hidden = true;
+  setTimeout(() => { if (game === g) $('#win').hidden = false; }, 900);
+}
+function confetti() {
+  const c = $('#confetti'); c.hidden = false;
+  const W = c.width = Math.ceil(innerWidth / 4), H = c.height = Math.ceil(innerHeight / 4), x = c.getContext('2d');
+  const bits = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, v: rand(.6, 1.6), d: rand(-.4, .4), col: ['#ffd23a', '#ff5d8f', '#5ac8ff', '#6cc63a', '#fff'][Math.random() * 5 | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, W, H);
+    bits.forEach(b => { b.y += b.v; b.x += b.d; x.fillStyle = b.col; x.fillRect(b.x | 0, b.y | 0, 2, 2); });
+    if (t - t0 < 3200 && !c.hidden) requestAnimationFrame(f); else c.hidden = true;
+  })(t0);
+}
+
+$('#backBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#menuBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#nextBtn').addEventListener('click', () => { sfx.tap(); const n = game ? (game.n + 1) % LEVELS.length : 0; $('#win').hidden = true; $('#confetti').hidden = true; start(n); });
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (game) { step(dt); draw(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+showMenu();
+window.__hole = { start, step, draw, get game() { return game; } };
+})();
+</script>
