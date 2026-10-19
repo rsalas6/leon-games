@@ -516,20 +516,27 @@ function dino(kind, c) {
 }
 // Cada mundo: 16 cosas de la más chiquita a la más grande; la última es el jefe del nivel largo
 const THEMES = {
-  selva: { grass: 0x4ea640, grassN: .4, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => Math.random() < .5 ? F.tree() : F.palm(3), butterflies: true, ground: [0x74c446, 0x68b83c], sky: 0x9ee8d6, items: [() => F.flower(0xff5d8f), () => F.mushroom(), () => F.egg(), () => F.fern(), () => F.rock(), () => F.bush(), () => dino('compy', 0xff9a2e), () => F.log(), () => dino('raptor', 0x3fae4a), () => F.palm(1.8), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), () => F.palm(3), () => F.tree(), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a)] },
-  playa: { grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => F.rock(0x9a90b8), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), () => F.bucket(), () => F.ball(), () => F.sandcastle(), () => F.surfboard(), () => F.turtle(), () => F.umbrella(), () => dino('compy', 0x5ac8ff), () => F.boat(), () => F.chair(), () => F.palm(3), () => dino('mosa', 0x3f86c8), () => F.lighthouse(), () => F.ship()] },
-  nieve: { grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => F.pine(true), butterflies: false, ground: [0xd6e8fa, 0xc8def5], sky: 0xd8ecff, items: [() => F.snowball(), () => F.egg(0xdcefff, 0x5ab0e0), () => F.penguin(), () => F.pine(true), () => F.sled(), () => F.snowman(), () => F.seal(), () => F.rock(0xa8bccf), () => dino('raptor', 0x5ab0e0), () => F.bear(), () => F.hut(true), () => dino('trice', 0x8a96c8), () => F.mammoth(), () => F.igloo(), () => F.iceberg(), () => F.mountain()] },
-  desierto: { grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? F.cactus(2) : F.rock(0xb58a6a), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [() => F.rock(0xc89e7a), () => F.bone(), () => dino('compy', 0xc08850), () => F.cactus(1), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), () => F.rock(0xb58a6a), () => F.cactus(2), () => F.tent(), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), () => F.rock(0xa07050), () => F.pyramid()] },
-  volcan: { grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), () => F.mushroom(0xff8a2a), () => F.crystal(), () => F.rock(0x5a5058), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), () => F.chest(), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano()] },
+  selva: { pond: 0x3aa8e8, grass: 0x4ea640, grassN: .4, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => Math.random() < .5 ? F.tree() : F.palm(3), butterflies: true, ground: [0x74c446, 0x68b83c], sky: 0x9ee8d6, items: [() => F.flower(0xff5d8f), () => F.mushroom(), () => F.egg(), () => F.fern(), () => F.rock(), () => F.bush(), () => dino('compy', 0xff9a2e), () => F.log(), () => dino('raptor', 0x3fae4a), () => F.palm(1.8), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), () => F.palm(3), () => F.tree(), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a)] },
+  playa: { pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => F.rock(0x9a90b8), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), () => F.bucket(), () => F.ball(), () => F.sandcastle(), () => F.surfboard(), () => F.turtle(), () => F.umbrella(), () => dino('compy', 0x5ac8ff), () => F.boat(), () => F.chair(), () => F.palm(3), () => dino('mosa', 0x3f86c8), () => F.lighthouse(), () => F.ship()] },
+  nieve: { pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => F.pine(true), butterflies: false, ground: [0xd6e8fa, 0xc8def5], sky: 0xd8ecff, items: [() => F.snowball(), () => F.egg(0xdcefff, 0x5ab0e0), () => F.penguin(), () => F.pine(true), () => F.sled(), () => F.snowman(), () => F.seal(), () => F.rock(0xa8bccf), () => dino('raptor', 0x5ab0e0), () => F.bear(), () => F.hut(true), () => dino('trice', 0x8a96c8), () => F.mammoth(), () => F.igloo(), () => F.iceberg(), () => F.mountain()] },
+  desierto: { pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? F.cactus(2) : F.rock(0xb58a6a), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [() => F.rock(0xc89e7a), () => F.bone(), () => dino('compy', 0xc08850), () => F.cactus(1), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), () => F.rock(0xb58a6a), () => F.cactus(2), () => F.tent(), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), () => F.rock(0xa07050), () => F.pyramid()] },
+  volcan: { pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), () => F.mushroom(0xff8a2a), () => F.crystal(), () => F.rock(0x5a5058), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), () => F.chest(), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano()] },
 };
 const THEME_KEYS = Object.keys(THEMES);
-// Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande)
+// Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande).
+// Los mundos son islas: su orilla es un círculo deformado por dos ondas (h = [a1, k1, p1, a2, k2, p2]) para que cada uno tenga otra forma
+const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2],
+                [.22, 2, 1.4, .1, 4, .3], [.16, 3, 2.2, .12, 6, 1.1], [.2, 5, .4, .08, 2, 2.6], [.26, 2, 2.9, .08, 3, .7], [.15, 4, 1.8, .12, 5, 2.2]];
 const LEVELS = [
-  ...THEME_KEYS.map(t => ({ theme: t, boss: 11, world: 56 })),
-  ...THEME_KEYS.map(t => ({ theme: t, boss: 15, world: 84 })),
-];
+  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 11, R: 40, h: SHAPES[k], total: 260 })),
+  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 15, R: 56, h: SHAPES[k + 5], total: 480 })),
+].map(L => Object.assign(L, { world: Math.round(L.R * 2.8) }));
+const shapeR = (L, a) => L.R * (1 + L.h[0] * Math.sin(L.h[1] * a + L.h[2]) + L.h[3] * Math.sin(L.h[4] * a + L.h[5]));
+// ¿El punto (x, z) está dentro de la isla, con un margen m hacia adentro?
+const inside = (L, x, z, m = 0) => { const c = L.world / 2, dx = x - c, dz = z - c; return Math.hypot(dx, dz) < shapeR(L, Math.atan2(dz, dx)) - m; };
+const inPond = (g, x, z, m = 0) => g.ponds.some(p => Math.hypot(x - p.x, z - p.z) < p.r + m);
 const SIZE = i => .6 * Math.pow(1.21, i);      // ancho en el piso (metros) del objeto i
-const GROW = .16;                              // cuánto crece el hoyo por cada cosa que se come
+const GROW = .12;                              // cuánto crece el hoyo por cada cosa que se come
 const R0 = 1.25;                               // radio inicial del hoyo
 const fits = (rad, r) => rad < r * .92;
 
@@ -542,6 +549,60 @@ function makeItem(theme, i) {
   const wrap = new THREE.Group(); wrap.add(g);
   wrap.rotation.y = rand(0, Math.PI * 2);
   return wrap;
+}
+
+// Molde de cada objeto: geometría unida con colores por vértice + su contorno, para dibujarlo con InstancedMesh
+const protos = {};
+function proto(theme, i) {
+  const key = theme + i; if (protos[key]) return protos[key];
+  const g = THEMES[theme].items[i]();
+  const anim = g.userData.anim; if (anim) anim(0, 0);
+  const s = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+  g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7)); g.updateMatrixWorld(true);
+  const body = [], out = [], col = [], c = new THREE.Color(), e = new THREE.Color(), sc = new THREE.Matrix4();
+  g.traverse(m => {
+    if (!m.isMesh || m.material === OUT_MAT) return;
+    const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
+    const wantOut = i >= 2 && !m.userData.noOutline && m.material.color && m.material.color.getHex() !== 0xffffff;
+    if (wantOut) { const o = geo.clone(); o.applyMatrix4(sc.makeScale(1.08, 1.08, 1.08)); o.applyMatrix4(m.matrixWorld); out.push(o); }
+    geo.applyMatrix4(m.matrixWorld);
+    c.copy(m.material.color || c.setHex(0xffffff));
+    if (m.material.emissive) c.add(e.copy(m.material.emissive).multiplyScalar(m.material.emissiveIntensity * .5));
+    const n = geo.attributes.position.count; for (let k = 0; k < n; k++) col.push(c.r, c.g, c.b);
+    body.push(geo);
+  });
+  const join = (list, colors) => {
+    const pos = [], nor = [];
+    list.forEach(gg => { const p = gg.attributes.position, nn = gg.attributes.normal; for (let k = 0; k < p.count; k++) { pos.push(p.getX(k), p.getY(k), p.getZ(k)); nor.push(nn.getX(k), nn.getY(k), nn.getZ(k)); } });
+    const r = new THREE.BufferGeometry(); r.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); r.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    if (colors) r.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    r.computeBoundingSphere(); return r;
+  };
+  return (protos[key] = { body: join(body, col), out: out.length ? join(out) : null, dino: !!anim, tick: !!g.userData.tick });
+}
+const instMat = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: GRAD });
+let pools = {};
+function makePools(L, counts) {
+  Object.values(pools).forEach(p => { scene.remove(p.body); p.out && scene.remove(p.out); }); pools = {};
+  counts.forEach((n, i) => {
+    if (!n) return;
+    const pr = proto(L.theme, i), cap = n + 40;
+    const body = new THREE.InstancedMesh(pr.body, instMat, cap); body.castShadow = true; body.count = 0; body.frustumCulled = false; scene.add(body);
+    let out = null; if (pr.out) { out = new THREE.InstancedMesh(pr.out, OUT_MAT, cap); out.count = 0; out.frustumCulled = false; scene.add(out); }
+    pools[i] = { body, out, cap };
+  });
+}
+const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+function poolAdd(i, obj) {
+  const p = pools[i]; if (!p || p.body.count >= p.cap) return -1;
+  const k = p.body.count++; if (p.out) p.out.count = p.body.count;
+  return k;
+}
+function poolSync(it) {
+  const p = pools[it.i]; it.obj.updateMatrix();
+  const m = it.gone ? ZERO : it.obj.matrix;
+  p.body.setMatrixAt(it.slot, m); p.body.instanceMatrix.needsUpdate = true;
+  if (p.out) { p.out.setMatrixAt(it.slot, m); p.out.instanceMatrix.needsUpdate = true; }
 }
 
 /* ---------- Escena ---------- */
@@ -560,23 +621,29 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize);
 
 // Piso con un agujero de verdad: el sombreador descarta los píxeles dentro del hoyo
-const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 };
+const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 },
+  shapeA = { value: new THREE.Vector4() }, shapeB = { value: new THREE.Vector3() }, pondsU = { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] }, pondColU = { value: new THREE.Color() };
 const groundMat = new THREE.MeshToonMaterial({ color: 0x7bd63a, gradientMap: GRAD });
 groundMat.onBeforeCompile = sh => {
-  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU;
+  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
     .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;')
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;\nuniform vec4 uShapeA;\nuniform vec3 uShapeB;\nuniform vec3 uPonds[3];\nuniform vec3 uPondCol;')
     .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
       if (distance(vWPos.xz, uHole.xy) < uHole.z) discard;`)
     .replace('vec4 diffuseColor = vec4( diffuse, opacity );', `vec4 diffuseColor = vec4( diffuse, opacity );
       float n = sin(vWPos.x * .21 + 1.3) * sin(vWPos.z * .17) + sin(vWPos.x * .07 + vWPos.z * .09) * .8;
       diffuseColor.rgb = mix(diffuseColor.rgb, uAlt, smoothstep(.15, .55, n));
-      vec2 q = abs(vWPos.xz - vec2(uWorld * 0.5));
-      float edge = max(q.x, q.y) - uWorld * 0.5;
-      if (edge > 0.0) {
-        float w = sin(vWPos.x * .35 + uTime * 1.5) * sin(vWPos.z * .3 - uTime * 1.2);
-        diffuseColor.rgb = mix(uOut, uOut * 1.25, uWave * smoothstep(.3, .9, w));
+      vec2 dv = vWPos.xz - vec2(uWorld * 0.5);
+      float ang = atan(dv.y, dv.x);
+      float edge = length(dv) - uShapeA.x * (1.0 + uShapeA.y * sin(uShapeA.z * ang + uShapeA.w) + uShapeB.x * sin(uShapeB.y * ang + uShapeB.z));
+      float w = sin(vWPos.x * .35 + uTime * 1.5) * sin(vWPos.z * .3 - uTime * 1.2);
+      if (edge > 0.0) diffuseColor.rgb = mix(uOut, uOut * 1.25, uWave * smoothstep(.3, .9, w));
+      else if (edge > -1.6) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, .96, .82), .45);
+      for (int i = 0; i < 3; i++) {
+        float pd = distance(vWPos.xz, uPonds[i].xy) - uPonds[i].z;
+        if (pd < 0.0) diffuseColor.rgb = mix(uPondCol, uPondCol * 1.25, smoothstep(.3, .9, w));
+        else if (pd < .7 && uPonds[i].z > 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, .96, .82), .5);
       }`);
 };
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), groundMat);
@@ -649,19 +716,18 @@ let decor = [], butterflies = [];
 function buildScenery(L) {
   decor.forEach(o => { scene.remove(o); o.geometry && o.geometry.dispose(); }); decor = []; butterflies = [];
   const T = THEMES[L.theme], W = L.world, m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
-  const nT = Math.round(W * W * T.grassN);
+  const spot = () => { for (let k = 0; k < 40; k++) { const x = rand(0, W), z = rand(0, W); if (inside(L, x, z, .5) && !inPond(game, x, z, .3)) return v.set(x, 0, z); } return v.set(W / 2, 0, W / 2); };
+  const area = Math.PI * L.R * L.R, nT = Math.round(area * T.grassN);
   const grass = new THREE.InstancedMesh(tuftGeo, decoMat(new THREE.MeshToonMaterial({ color: T.grass, gradientMap: GRAD, side: THREE.DoubleSide }), true), nT);
-  for (let i = 0; i < nT; i++) { q.setFromAxisAngle(v.set(0, 1, 0), Math.random() * 6.3); const k = rand(.7, 1.5); m4.compose(v.set(rand(0, W), 0, rand(0, W)), q, sc.set(k, k, k)); grass.setMatrixAt(i, m4); }
-  const nF = Math.round(W * W * .05);
+  for (let i = 0; i < nT; i++) { q.setFromAxisAngle(v.set(0, 1, 0), Math.random() * 6.3); const k = rand(.7, 1.5); m4.compose(spot(), q, sc.set(k, k, k)); grass.setMatrixAt(i, m4); }
+  const nF = Math.round(area * .05);
   const flowers = new THREE.InstancedMesh(flowerGeo, decoMat(new THREE.MeshBasicMaterial({ color: 0xffffff }), false), nF);
   const fc = new THREE.Color();
-  for (let i = 0; i < nF; i++) { const k = rand(.7, 1.3); m4.compose(v.set(rand(0, W), 0, rand(0, W)), q.identity(), sc.set(k, 1, k)); flowers.setMatrixAt(i, m4); flowers.setColorAt(i, fc.setHex(T.flowers[i % T.flowers.length])); }
-  // Árboles alrededor del mundo, fuera del área de juego
-  const ring = [];
-  for (let d = 0; d < W * 4; d += 5.5) {
-    const side = Math.floor(d / W), u = d % W, off = rand(2.5, 9);
-    const x = side === 0 ? u : side === 1 ? W + off : side === 2 ? W - u : -off;
-    const z = side === 0 ? -off : side === 1 ? u : side === 2 ? W + off : W - u;
+  for (let i = 0; i < nF; i++) { const k = rand(.7, 1.3); m4.compose(spot(), q.identity(), sc.set(k, 1, k)); flowers.setMatrixAt(i, m4); flowers.setColorAt(i, fc.setHex(T.flowers[i % T.flowers.length])); }
+  // Árboles alrededor de la isla, fuera del área de juego
+  const ring = [], steps = Math.round(Math.PI * 2 * L.R * 1.15 / 5.5);
+  for (let k = 0; k < steps; k++) {
+    const a = k / steps * Math.PI * 2, rr = shapeR(L, a) + rand(2.5, 8), x = W / 2 + Math.cos(a) * rr, z = W / 2 + Math.sin(a) * rr;
     const o = T.border(); const s0 = new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()); o.scale.multiplyScalar(rand(3, 5) / Math.max(s0.x, s0.z, s0.y * .6));
     o.position.set(x, 0, z); o.rotation.y = rand(0, 6.3); ring.push(o);
   }
@@ -671,7 +737,7 @@ function buildScenery(L) {
     const b = new THREE.Group(), c = T.flowers[i % T.flowers.length], wings = [];
     for (const sd of [-1, 1]) { const w = new THREE.Group(); const wm = ell(.22, .02, .16, M(c)); wm.position.x = sd * .2; w.add(wm); b.add(w); wings.push(w); }
     b.add(ell(.04, .04, .14, M(0x2a1f3d)));
-    b.userData = { wings, ax: rand(4, W - 4), az: rand(4, W - 4), r: rand(1.5, 4), sp: rand(.4, .9), ph: rand(0, 6.3), alive: true };
+    const sp0 = spot().clone(); b.userData = { wings, ax: sp0.x, az: sp0.z, r: rand(1.5, 4), sp: rand(.4, .9), ph: rand(0, 6.3), alive: true };
     scene.add(b); decor.push(b); butterflies.push(b);
   }
 }
@@ -720,39 +786,67 @@ function showMenu() {
 /* ---------- Juego ---------- */
 const arrowEl = $('#arrow');
 let game = null;
-function clearWorld() { if (game) game.items.forEach(it => scene.remove(it.obj)); }
+function clearWorld() { if (game) game.items.forEach(it => it.solo && scene.remove(it.obj)); Object.values(pools).forEach(p => { p.body.count = 0; if (p.out) p.out.count = 0; }); }
 
-function placeItems(L) {
-  const items = [], W = L.world, boss = L.boss, area = Math.pow(W / 56, 1.5);
-  const add = (i, n) => {
+// Reparte las cosas por la isla: muchas chiquitas y pocas grandes; el jefe va lejos del inicio
+function itemCounts(L) {
+  const w = []; let sum = 0;
+  for (let i = 0; i < L.boss; i++) { w[i] = 2.5 + (L.boss - 1 - i) * 1.6; sum += w[i]; }
+  const n = w.map(x => Math.max(2, Math.round(x / sum * L.total))); n[L.boss] = 1; return n;
+}
+function placeItems(L, counts) {
+  const items = [], W = L.world, c = W / 2, cell = 6, grid = new Map();
+  const near = (x, z) => { const out = []; const gx = Math.floor(x / cell), gz = Math.floor(z / cell); for (let a = -3; a <= 3; a++) for (let b = -3; b <= 3; b++) { const l = grid.get((gx + a) + ',' + (gz + b)); if (l) out.push(...l); } return out; };
+  const put = it => { const k = Math.floor(it.x / cell) + ',' + Math.floor(it.z / cell); (grid.get(k) || grid.set(k, []).get(k)).push(it); items.push(it); };
+  const add = (i, n, farFromStart) => {
     const r = SIZE(i) * .5;
-    for (let k = 0; k < n; k++) for (let tries = 0; tries < 30; tries++) {
-      const x = rand(r + 1, W - r - 1), z = rand(r + 1, W - r - 1);
-      if (Math.hypot(x - W / 2, z - W / 2) < 4 + r) continue;   // espacio libre donde empieza el hoyo
-      if (items.some(o => Math.hypot(o.x - x, o.z - z) < (o.r + r) * .95)) continue;
-      items.push(newItem(L.theme, i, x, z)); break;
+    for (let k = 0; k < n; k++) for (let tries = 0; tries < 40; tries++) {
+      const x = rand(1, W - 1), z = rand(1, W - 1);
+      if (!inside(L, x, z, r + 1) || inPond(game, x, z, r + .5)) continue;
+      const d0 = Math.hypot(x - c, z - c);
+      if (d0 < 4 + r || (farFromStart && d0 < L.R * .45)) continue;   // espacio libre donde empieza la rana; el jefe lejos
+      if (near(x, z).some(o => Math.hypot(o.x - x, o.z - z) < (o.r + r) * .95)) continue;
+      put(newItem(L.theme, i, x, z)); break;
     }
   };
-  add(boss, 1);
-  for (let i = boss - 1; i >= 0; i--) add(i, Math.round((2.2 + (boss - 1 - i) * 1.15) * area));
+  add(L.boss, 1, true);
+  for (let i = L.boss - 1; i >= 0; i--) add(i, counts[i]);
   return items;
 }
+let soloDinos = 0;
 function newItem(theme, i, x, z) {
-  const obj = makeItem(theme, i); obj.position.set(x, 0, z); scene.add(obj);
-  const anim = obj.children[0].userData.anim;
-  return { i, x, z, r: SIZE(i) * .5, obj, anim, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: rand(0, 6.28), walk: anim ? rand(.25, .55) : 0 };
+  const pr = proto(theme, i);
+  // Hasta 12 dinos por nivel caminan con patitas animadas; el jefe y los objetos con humo también van aparte
+  const solo = pr.tick || game.L.boss === i || (pr.dino && soloDinos < 12);
+  let obj, anim = null, slot = -1;
+  if (solo) { obj = makeItem(theme, i); anim = obj.children[0].userData.anim; scene.add(obj); if (pr.dino) soloDinos++; }
+  else { obj = new THREE.Object3D(); obj.rotation.y = rand(0, Math.PI * 2); slot = poolAdd(i, obj); if (slot < 0) return null; }
+  obj.position.set(x, 0, z);
+  const it = { i, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? rand(.25, .55) : 0 };
+  if (!solo) poolSync(it);
+  return it;
 }
 
 function start(n) {
   clearWorld();
   const L = LEVELS[n], T = THEMES[L.theme];
   worldU.value = L.world; altU.value.setHex(T.ground[1]); groundMat.color.setHex(T.ground[0]);
-  ground.scale.set(L.world + 160, L.world + 160, 1); ground.position.set(L.world / 2, 0, L.world / 2);
-  scene.background = new THREE.Color(T.sky); scene.fog = new THREE.Fog(T.sky, 70, 240);
+  ground.scale.set(L.world + 220, L.world + 220, 1); ground.position.set(L.world / 2, 0, L.world / 2);
+  scene.background = new THREE.Color(T.sky); scene.fog = new THREE.Fog(T.sky, 90, 300);
   hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave;
+  game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2, ponds: [] };
+  shapeA.value.set(L.R, L.h[0], L.h[1], L.h[2]); shapeB.value.set(L.h[3], L.h[4], L.h[5]); pondColU.value.setHex(T.pond);
+  // 2 o 3 charcos (agua, hielo o lava según el mundo) que no estén en el centro
+  for (let k = 0, tries = 0; k < 3 && tries < 200; tries++) {
+    const a = rand(0, 6.3), d = rand(L.R * .3, L.R * .75), x = L.world / 2 + Math.cos(a) * d, z = L.world / 2 + Math.sin(a) * d, r = rand(3, L.R * .12);
+    if (!inside(L, x, z, r + 3) || game.ponds.some(p => Math.hypot(p.x - x, p.z - z) < p.r + r + 6)) continue;
+    game.ponds.push({ x, z, r }); k++;
+  }
+  pondsU.value.forEach((v, k) => { const p = game.ponds[k]; v.set(p ? p.x : -999, p ? p.z : -999, p ? p.r : 0); });
   buildScenery(L);
-  game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2 };
-  game.items = placeItems(L);
+  soloDinos = 0;
+  const counts = itemCounts(L); makePools(L, counts);
+  game.items = placeItems(L, counts).filter(Boolean);
   game.boss = game.items.find(it => it.i === L.boss);
   $('#bossIcon').src = thumb(L.theme, L.boss);
   $('#lvl').textContent = 'NIVEL ' + (n + 1);
@@ -797,7 +891,9 @@ function step(dt) {
   const mag = Math.min(1, Math.hypot(mx, mz)), speed = 7 + g.r * 1.6;
   if (mag > .05 && !g.over) { g.hx += mx * speed * dt; g.hz += mz * speed * dt; g.look.set(mx / mag, mz / mag); }
   else g.look.multiplyScalar(.9);
-  const W = g.L.world; g.hx = Math.max(g.r * .5, Math.min(W - g.r * .5, g.hx)); g.hz = Math.max(g.r * .5, Math.min(W - g.r * .5, g.hz));
+  // La rana no sale de la isla
+  const W = g.L.world, c0 = W / 2, ha = Math.atan2(g.hz - c0, g.hx - c0), hmax = shapeR(g.L, ha) - g.r * .5, hd = Math.hypot(g.hx - c0, g.hz - c0);
+  if (hd > hmax) { g.hx = c0 + Math.cos(ha) * hmax; g.hz = c0 + Math.sin(ha) * hmax; }
   g.show += (g.r - g.show) * Math.min(1, dt * 5);
 
   for (const it of g.items) {
@@ -807,9 +903,9 @@ function step(dt) {
       it.head += rand(-.6, .6) * dt;
       const sp = it.walk * dt * (1 + it.i * .08);
       it.x -= Math.sin(it.head) * sp; it.z -= Math.cos(it.head) * sp;
-      if (it.x < it.r || it.x > W - it.r || it.z < it.r || it.z > W - it.r) { it.head += Math.PI; it.x = Math.max(it.r, Math.min(W - it.r, it.x)); it.z = Math.max(it.r, Math.min(W - it.r, it.z)); }
+      if (!inside(g.L, it.x, it.z, it.r) || inPond(g, it.x, it.z, it.r)) { it.x += Math.sin(it.head) * sp * 2; it.z += Math.cos(it.head) * sp * 2; it.head += Math.PI * rand(.7, 1.3); }
       it.obj.rotation.y = it.head;
-      it.anim(g.t * 6 + it.seed, 3);
+      if (it.anim) it.anim(g.t * 6 + it.seed, 3); else it.obj.position.y = Math.abs(Math.sin(g.t * 6 + it.seed)) * it.r * .15;
     }
     const dist = Math.hypot(it.x - g.hx, it.z - g.hz);
     if (fits(it.r, g.r)) {
@@ -819,8 +915,8 @@ function step(dt) {
       if (it.shake <= 0) { it.shake = .35; if (g.t - (it.lastBump || -9) > .8) { it.lastBump = g.t; sfx.bump(); } }
     }
     if (it.shake > 0) { it.shake -= dt; it.obj.rotation.z = Math.sin(g.t * 50) * .06; } else it.obj.rotation.z = 0;
-    it.obj.position.set(it.x, 0, it.z);
-    const tick = it.obj.children[0].userData.tick; if (tick) tick(g.t);
+    it.obj.position.x = it.x; it.obj.position.z = it.z; if (!it.walk || it.anim) it.obj.position.y = 0;
+    if (it.solo) { const tick = it.obj.children[0].userData.tick; if (tick) tick(g.t); } else if (it.walk || it.shake > -1) poolSync(it);
   }
   // Caída: se desliza al centro, se inclina y se hunde en la oscuridad
   for (const it of g.falling) {
@@ -830,8 +926,9 @@ function step(dt) {
     const y = it.obj.position.y - it.vy * dt;
     it.obj.position.set(it.x, y, it.z);
     it.obj.rotation.x += it.tilt.y * dt * 2.2; it.obj.rotation.z -= it.tilt.x * dt * 2.2;
+    if (!it.solo) poolSync(it);
     if (y < -(SIZE(it.i) * 1.2 + 2) && !it.gone) {
-      it.gone = true; scene.remove(it.obj); g.eaten++; grow(it); updateMeter();
+      it.gone = true; if (it.solo) scene.remove(it.obj); else poolSync(it); g.eaten++; grow(it); updateMeter();
       if (it === g.boss) winLevel();
     }
   }
@@ -861,10 +958,11 @@ function step(dt) {
 }
 function refill() {
   const g = game; let top = 0; while (top < g.L.boss && fits(SIZE(top + 1) * .5, g.r)) top++;
-  for (let k = 0; k < 10; k++) {
+  for (let k = 0; k < 30 && g.items.length < 2000; k++) {
     const i = Math.max(0, top - (k % 3)), a = Math.random() * Math.PI * 2, dist = rand(g.r * 3, g.r * 7);
-    const x = Math.max(1, Math.min(g.L.world - 1, g.hx + Math.cos(a) * dist)), z = Math.max(1, Math.min(g.L.world - 1, g.hz + Math.sin(a) * dist));
-    g.items.push(newItem(g.L.theme, i, x, z));
+    const x = g.hx + Math.cos(a) * dist, z = g.hz + Math.sin(a) * dist;
+    if (!inside(g.L, x, z, SIZE(i) * .5 + 1) || inPond(g, x, z, 1)) continue;
+    const it = newItem(g.L.theme, i, x, z); if (it) g.items.push(it);
   }
 }
 function updateMeter() {
@@ -936,7 +1034,7 @@ function loop(now) {
 resize();
 requestAnimationFrame(loop);
 showMenu();
-window.__hole = { start, step, render: () => renderer.render(scene, camera), get game() { return game; } };
+window.__hole = { inside, start, step, render: () => renderer.render(scene, camera), get game() { return game; } };
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'});</script>
