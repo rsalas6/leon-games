@@ -887,7 +887,9 @@ function buildLevel(level) {
   let d = 0;
   const push = (type, len) => { segments.push({ type, start: d, end: d + len, len }); d += len; };
   push('ground', 26);
-  const count = Math.min(5 + Math.floor(level / 2), 12);
+  // Cada nivel tiene su propio largo: unas carreras cortitas y otras largas (hasta el doble)
+  const LEN = [1, 1.2, 1.5, 1, 1.8, 1.2, 1, 1.7, 1.3, 2, 1.1, 1.6, 1.3, 2.2, 2];
+  const count = Math.min(Math.round((5 + Math.floor(level / 2)) * LEN[level - 1]), 26);
   let bag = [], prev = 'ground';
   for (let i = 0; i < count; i++) {
     if (!bag.length) bag = avail.slice().sort(() => Math.random() - .5);

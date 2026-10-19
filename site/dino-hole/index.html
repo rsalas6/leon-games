@@ -52,7 +52,7 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
 #levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,17vw,190px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
 .lv{position:relative;aspect-ratio:1;padding:0;background:#fff}
-.lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:cover;image-rendering:pixelated;pointer-events:none}
+.lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:cover;pointer-events:none}
 .lv b{position:absolute;left:10px;top:10px;font-weight:400;font-size:14px;color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink)}
 .lv .star{position:absolute;right:-12px;top:-12px;width:34px;height:34px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
 
@@ -518,7 +518,7 @@ function dino(kind, c) {
 const THEMES = {
   selva: { pond: 0x3aa8e8, grass: 0x4ea640, grassN: .4, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => Math.random() < .5 ? F.tree() : F.palm(3), butterflies: true, ground: [0x74c446, 0x68b83c], sky: 0x9ee8d6, items: [() => F.flower(0xff5d8f), () => F.mushroom(), () => F.egg(), () => F.fern(), () => F.rock(), () => F.bush(), () => dino('compy', 0xff9a2e), () => F.log(), () => dino('raptor', 0x3fae4a), () => F.palm(1.8), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), () => F.palm(3), () => F.tree(), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a)] },
   playa: { pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => F.rock(0x9a90b8), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), () => F.bucket(), () => F.ball(), () => F.sandcastle(), () => F.surfboard(), () => F.turtle(), () => F.umbrella(), () => dino('compy', 0x5ac8ff), () => F.boat(), () => F.chair(), () => F.palm(3), () => dino('mosa', 0x3f86c8), () => F.lighthouse(), () => F.ship()] },
-  nieve: { pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => F.pine(true), butterflies: false, ground: [0xd6e8fa, 0xc8def5], sky: 0xd8ecff, items: [() => F.snowball(), () => F.egg(0xdcefff, 0x5ab0e0), () => F.penguin(), () => F.pine(true), () => F.sled(), () => F.snowman(), () => F.seal(), () => F.rock(0xa8bccf), () => dino('raptor', 0x5ab0e0), () => F.bear(), () => F.hut(true), () => dino('trice', 0x8a96c8), () => F.mammoth(), () => F.igloo(), () => F.iceberg(), () => F.mountain()] },
+  nieve: { pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => F.pine(true), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), () => F.egg(0xdcefff, 0x5ab0e0), () => F.penguin(), () => F.pine(true), () => F.sled(), () => F.snowman(), () => F.seal(), () => F.rock(0xa8bccf), () => dino('raptor', 0x5ab0e0), () => F.bear(), () => F.hut(true), () => dino('trice', 0x8a96c8), () => F.mammoth(), () => F.igloo(), () => F.iceberg(), () => F.mountain()] },
   desierto: { pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? F.cactus(2) : F.rock(0xb58a6a), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [() => F.rock(0xc89e7a), () => F.bone(), () => dino('compy', 0xc08850), () => F.cactus(1), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), () => F.rock(0xb58a6a), () => F.cactus(2), () => F.tent(), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), () => F.rock(0xa07050), () => F.pyramid()] },
   volcan: { pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), () => F.mushroom(0xff8a2a), () => F.crystal(), () => F.rock(0x5a5058), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), () => F.chest(), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano()] },
 };
@@ -788,39 +788,114 @@ const arrowEl = $('#arrow');
 let game = null;
 function clearWorld() { if (game) game.items.forEach(it => it.solo && scene.remove(it.obj)); Object.values(pools).forEach(p => { p.body.count = 0; if (p.out) p.out.count = 0; }); }
 
-// Reparte las cosas por la isla: muchas chiquitas y pocas grandes; el jefe va lejos del inicio
-function itemCounts(L) {
-  const w = []; let sum = 0;
-  for (let i = 0; i < L.boss; i++) { w[i] = 2.5 + (L.boss - 1 - i) * 1.6; sum += w[i]; }
-  const n = w.map(x => Math.max(2, Math.round(x / sum * L.total))); n[L.boss] = 1; return n;
+/* ---------- Mini pueblos: las cosas se acomodan en grupos con sentido (aldea de iglús, club de playa, campamento...) ---------- */
+// Formas de acomodar: anillo, cuadrícula, fila y montoncito
+const ringP = (i, n, R, off = 0) => Array.from({ length: n }, (_, k) => { const a = k / n * Math.PI * 2 + off; return { i, x: Math.cos(a) * R, z: Math.sin(a) * R, ry: -a - Math.PI / 2 }; });
+const gridP = (i, rows, cols, sp, dx = 0, dz = 0) => { const o = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) o.push({ i, x: (c - (cols - 1) / 2) * sp + dx, z: (r - (rows - 1) / 2) * sp + dz, ry: 0 }); return o; };
+const rowP = (i, n, sp, dz = 0) => Array.from({ length: n }, (_, k) => ({ i, x: (k - (n - 1) / 2) * sp, z: dz, ry: Math.PI / 2 }));
+const patchP = (i, n, R) => Array.from({ length: n }, () => { const a = rand(0, 6.3), d = R * Math.sqrt(Math.random()); return { i, x: Math.cos(a) * d, z: Math.sin(a) * d, ry: rand(0, 6.3) }; });
+const one = (i, x = 0, z = 0, ry = 0) => [{ i, x, z, ry }];
+// Recetas por mundo: [radio del grupo, cuántas veces puede salir, función que arma el grupo]
+const TOWNS = {
+  selva: [
+    [6, 9, () => [...patchP(0, 14, 5), ...patchP(3, 4, 4.5)]],                       // prado de flores
+    [3.5, 6, () => [...ringP(1, 8, 2.4), ...one(4)]],                                  // anillo de hongos
+    [3, 6, () => [...ringP(2, 5, 1.1), ...patchP(6, 3, 3)]],                           // nido de huevos con compys
+    [5, 5, () => [...patchP(4, 5, 4), ...patchP(3, 4, 4.5), ...patchP(5, 3, 4)]],      // jardín de rocas
+    [8, 5, () => [...patchP(9, 4, 6), ...patchP(13, 2, 6), ...patchP(5, 5, 7), ...rowP(7, 2, 2.6, 3)]], // arboleda
+    [7, 4, () => [...patchP(8, 3, 4), ...patchP(10, 2, 5)]],                           // manada de raptors y estegos
+    [8, 3, () => [...patchP(11, 2, 5), ...patchP(12, 3, 7)]],                          // triceratops entre palmeras
+    [10, 2, () => [...one(14), ...patchP(13, 2, 8)]],                                  // braquiosaurio en el bosque
+  ],
+  playa: [
+    [9, 4, () => [...gridP(8, 2, 4, 3.4), ...gridP(11, 2, 4, 3.4, 0, 1.6), ...patchP(4, 3, 7), ...patchP(3, 3, 6)]], // club de playa
+    [5, 6, () => [...ringP(5, 5, 3), ...one(3), ...patchP(0, 6, 4.5)]],                // reino de castillos de arena
+    [5, 5, () => [...rowP(6, 6, 1.4), ...patchP(1, 4, 4)]],                            // tienda de surf
+    [4, 6, () => [...patchP(7, 3, 3), ...patchP(0, 6, 4), ...patchP(2, 3, 3.5)]],      // nido de tortugas
+    [7, 4, () => [...patchP(12, 4, 6), ...patchP(9, 3, 5)]],                           // palmar con dinos
+    [8, 3, () => [...rowP(10, 3, 4), ...one(14, 0, -5)]],                              // puerto con botes y faro
+    [6, 7, () => [...patchP(0, 8, 5), ...patchP(1, 6, 5), ...patchP(2, 3, 4)]],        // conchas y cangrejos
+    [10, 2, () => [...one(13), ...patchP(10, 2, 7)]],                                  // mosasaurio
+  ],
+  nieve: [
+    [9, 3, () => [...ringP(13, 5, 7), ...ringP(5, 5, 3.5, .6), ...patchP(2, 8, 6), ...patchP(4, 2, 5)]], // aldea de iglús
+    [9, 3, () => [...gridP(10, 2, 3, 5.5), ...rowP(3, 6, 2.2, 6), ...patchP(4, 3, 7)]], // pueblo de cabañas
+    [5, 6, () => [...patchP(2, 12, 4.5), ...patchP(1, 4, 3)]],                         // colonia de pingüinos
+    [4, 6, () => [...patchP(6, 4, 3.5), ...patchP(7, 3, 4), ...patchP(0, 5, 4)]],      // playa de focas
+    [7, 6, () => [...patchP(3, 10, 6), ...patchP(0, 6, 6)]],                           // bosque de pinos
+    [8, 3, () => [...patchP(12, 3, 7), ...patchP(9, 2, 6)]],                           // manada de mamuts y osos
+    [7, 3, () => [...patchP(8, 3, 5), ...patchP(11, 2, 6)]],                           // dinos del frío
+    [10, 2, () => [...one(14), ...patchP(7, 4, 6)]],                                   // iceberg
+  ],
+  desierto: [
+    [8, 4, () => [...ringP(8, 5, 5), ...one(10), ...patchP(5, 3, 3.5), ...patchP(9, 2, 7)]], // campamento
+    [7, 4, () => [...gridP(7, 3, 4, 3), ...patchP(3, 6, 6)]],                          // sembradío de cactus
+    [8, 3, () => [...rowP(9, 5, 3.2)]],                                                 // caravana de camellos
+    [9, 3, () => [...gridP(13, 2, 3, 6), ...patchP(4, 4, 7)]],                         // pueblito
+    [5, 7, () => [...patchP(1, 6, 4), ...patchP(4, 3, 3), ...patchP(6, 3, 4), ...patchP(0, 6, 4)]], // excavación de fósiles
+    [5, 5, () => [...patchP(2, 4, 4), ...patchP(3, 4, 4), ...patchP(0, 5, 4)]],        // lagartijas y cactus
+    [8, 3, () => [...patchP(11, 2, 5), ...one(12, 0, 0)]],                             // oasis con estegos
+    [9, 2, () => [...one(14), ...patchP(6, 4, 6)]],                                    // roca gigante
+  ],
+  volcan: [
+    [4, 7, () => [...patchP(3, 10, 3.2), ...one(8)]],                                  // cueva de cristales con tesoro
+    [7, 5, () => [...patchP(5, 7, 6), ...patchP(4, 4, 6)]],                            // bosque seco
+    [3.5, 6, () => [...ringP(1, 5, 1.3), ...patchP(6, 3, 3), ...patchP(2, 4, 3.5)]],   // nido de dinos rojos
+    [7, 4, () => [...gridP(7, 2, 3, 4.5), ...patchP(0, 8, 6)]],                        // campo de lava
+    [7, 4, () => [...patchP(9, 2, 5), ...patchP(10, 3, 5)]],                           // manada
+    [8, 3, () => [...patchP(11, 2, 6), ...patchP(12, 3, 7)]],                          // nido de pterodáctilos entre rocas
+    [9, 2, () => [...patchP(13, 2, 6), ...one(14)]],                                   // T-rex y triceratops
+    [5, 6, () => [...patchP(0, 8, 4), ...patchP(4, 4, 4), ...patchP(2, 3, 3)]],        // piedritas
+  ],
+};
+// Arma el mapa: primero un jardincito de cosas chiquitas alrededor de la rana, luego el jefe lejos y luego los pueblos por toda la isla
+function generateLayout(L) {
+  const W = L.world, c = W / 2, out = [], centers = [];
+  const ok = (x, z, r) => inside(L, x, z, r + .6) && !inPond(game, x, z, r + .4);
+  ringP(0, 10, 6).concat(ringP(1, 8, 8.5, .3), ringP(0, 12, 11, .1)).forEach(p => out.push({ i: p.i, x: c + p.x, z: c + p.z, ry: p.ry }));
+  centers.push({ x: c, z: c, r: 12 });
+  for (let t = 0; t < 200; t++) {
+    const a = rand(0, 6.3), d = rand(L.R * .5, L.R * .85), x = c + Math.cos(a) * d, z = c + Math.sin(a) * d;
+    if (!ok(x, z, SIZE(L.boss) * .5 + 1)) continue;
+    out.push({ i: L.boss, x, z, ry: rand(0, 6.3) }); centers.push({ x, z, r: SIZE(L.boss) * .6 + 3 }); break;
+  }
+  const recipes = TOWNS[L.theme].filter(r => r[2]().every(p => p.i < L.boss)).map(r => ({ r: r[0], max: r[1] * (L.boss === 15 ? 2 : 1), make: r[2], used: 0 }));
+  for (let tries = 0; tries < 600 && out.length < L.total; tries++) {
+    const opts = recipes.filter(r => r.used < r.max); if (!opts.length) break;
+    const rc = opts[Math.random() * opts.length | 0];
+    const x = rand(0, W), z = rand(0, W);
+    if (!inside(L, x, z, rc.r * .7) || centers.some(q => Math.hypot(q.x - x, q.z - z) < (q.r + rc.r) * .85)) continue;
+    rc.used++; centers.push({ x, z, r: rc.r });
+    const rot = rand(0, 6.3), cs = Math.cos(rot), sn = Math.sin(rot);
+    rc.make().forEach(p => out.push({ i: p.i, x: x + p.x * cs - p.z * sn, z: z + p.x * sn + p.z * cs, ry: p.ry - rot }));
+  }
+  // Que haya de todos los tamaños para poder ir creciendo
+  for (let i = 0; i < L.boss; i++) {
+    let have = out.filter(p => p.i === i).length;
+    for (let t = 0; have < 4 && t < 80; t++) { const x = rand(0, W), z = rand(0, W); if (ok(x, z, SIZE(i) * .5)) { out.push({ i, x, z, ry: rand(0, 6.3) }); have++; } }
+  }
+  return out.filter(p => ok(p.x, p.z, SIZE(p.i) * .5));
 }
-function placeItems(L, counts) {
-  const items = [], W = L.world, c = W / 2, cell = 6, grid = new Map();
-  const near = (x, z) => { const out = []; const gx = Math.floor(x / cell), gz = Math.floor(z / cell); for (let a = -3; a <= 3; a++) for (let b = -3; b <= 3; b++) { const l = grid.get((gx + a) + ',' + (gz + b)); if (l) out.push(...l); } return out; };
-  const put = it => { const k = Math.floor(it.x / cell) + ',' + Math.floor(it.z / cell); (grid.get(k) || grid.set(k, []).get(k)).push(it); items.push(it); };
-  const add = (i, n, farFromStart) => {
-    const r = SIZE(i) * .5;
-    for (let k = 0; k < n; k++) for (let tries = 0; tries < 40; tries++) {
-      const x = rand(1, W - 1), z = rand(1, W - 1);
-      if (!inside(L, x, z, r + 1) || inPond(game, x, z, r + .5)) continue;
-      const d0 = Math.hypot(x - c, z - c);
-      if (d0 < 4 + r || (farFromStart && d0 < L.R * .45)) continue;   // espacio libre donde empieza la rana; el jefe lejos
-      if (near(x, z).some(o => Math.hypot(o.x - x, o.z - z) < (o.r + r) * .95)) continue;
-      put(newItem(L.theme, i, x, z)); break;
-    }
-  };
-  add(L.boss, 1, true);
-  for (let i = L.boss - 1; i >= 0; i--) add(i, counts[i]);
+function placeItems(L, layout) {
+  const items = [], cell = 6, grid = new Map();
+  const near = (x, z) => { const o = []; const gx = Math.floor(x / cell), gz = Math.floor(z / cell); for (let a = -3; a <= 3; a++) for (let b = -3; b <= 3; b++) { const l = grid.get((gx + a) + ',' + (gz + b)); if (l) o.push(...l); } return o; };
+  for (const p of layout) {
+    const r = SIZE(p.i) * .5;
+    if (near(p.x, p.z).some(o => Math.hypot(o.x - p.x, o.z - p.z) < (o.r + r) * .8)) continue;
+    const it = newItem(L.theme, p.i, p.x, p.z, p.ry); if (!it) continue;
+    const k = Math.floor(it.x / cell) + ',' + Math.floor(it.z / cell); (grid.get(k) || grid.set(k, []).get(k)).push(it); items.push(it);
+  }
   return items;
 }
 let soloDinos = 0;
-function newItem(theme, i, x, z) {
+function newItem(theme, i, x, z, ry = rand(0, Math.PI * 2)) {
   const pr = proto(theme, i);
   // Hasta 12 dinos por nivel caminan con patitas animadas; el jefe y los objetos con humo también van aparte
   const solo = pr.tick || game.L.boss === i || (pr.dino && soloDinos < 12);
   let obj, anim = null, slot = -1;
   if (solo) { obj = makeItem(theme, i); anim = obj.children[0].userData.anim; scene.add(obj); if (pr.dino) soloDinos++; }
-  else { obj = new THREE.Object3D(); obj.rotation.y = rand(0, Math.PI * 2); slot = poolAdd(i, obj); if (slot < 0) return null; }
+  else { obj = new THREE.Object3D(); slot = poolAdd(i, obj); if (slot < 0) return null; }
+  obj.rotation.y = ry;
   obj.position.set(x, 0, z);
   const it = { i, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? rand(.25, .55) : 0 };
   if (!solo) poolSync(it);
@@ -845,8 +920,10 @@ function start(n) {
   pondsU.value.forEach((v, k) => { const p = game.ponds[k]; v.set(p ? p.x : -999, p ? p.z : -999, p ? p.r : 0); });
   buildScenery(L);
   soloDinos = 0;
-  const counts = itemCounts(L); makePools(L, counts);
-  game.items = placeItems(L, counts).filter(Boolean);
+  const layout = generateLayout(L), counts = [];
+  layout.forEach(p => (counts[p.i] = (counts[p.i] || 0) + 1));
+  makePools(L, counts);
+  game.items = placeItems(L, layout);
   game.boss = game.items.find(it => it.i === L.boss);
   $('#bossIcon').src = thumb(L.theme, L.boss);
   $('#lvl').textContent = 'NIVEL ' + (n + 1);
