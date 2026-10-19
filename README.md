@@ -7,7 +7,7 @@ Built for iPhone and iPad: installable as an app (Add to Home Screen) and fully 
 | --- | --- | --- |
 | Dino Race | `/dino-race/` | Switch dinosaurs to match the terrain and win the race (15 levels) |
 | Dino Puzzle | `/dino-puzzle/` | Drag-and-drop jigsaw with 30 pixel-art pictures (dinosaurs, animals, vehicles); 2, 4, 6, 9 or 12 pieces, generous snapping and idle hints (made for a 2-year-old) |
-| Dino Hole | `/dino-hole/` | Hole.io-style 3D game (tilted camera, frog hole with eyes): drag the hole to swallow things smaller than it, grow, and finally eat the big boss (10 levels in 5 worlds, made for a 2-year-old) |
+| Rana Glotona | `/dino-hole/` | Hole.io-style 3D game: a hungry frog hole with eyes and tongue, joystick control, swaying grass and butterflies: drag the hole to swallow things smaller than it, grow, and finally eat the big boss (10 levels in 5 worlds, made for a 2-year-old) |
 
 ## Project layout
 

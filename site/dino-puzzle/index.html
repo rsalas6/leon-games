@@ -30,9 +30,11 @@
 html,body{height:100%;margin:0;overflow:hidden;background:var(--sky);color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
 img{-webkit-user-drag:none}
-.bg{position:fixed;inset:0;background:url(../img/hub/bg-wide.webp) 50% 100%/cover no-repeat var(--sky);image-rendering:pixelated}
-@media (orientation:portrait){.bg{background-image:url(../img/hub/bg-tall.webp)}}
-.bg::after{content:'';position:absolute;inset:0;background:rgba(42,31,61,.18)}
+.bg{position:fixed;inset:0;background:url(../img/menus/bg-puzzle-wide.webp) 50% 50%/cover no-repeat #fff4dc;image-rendering:pixelated;transition:opacity .3s}
+@media (orientation:portrait){.bg{background-image:url(../img/menus/bg-puzzle-tall.webp)}}
+.bg::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.3)}
+/* Al armar: fondo claro y liso para que las piezas resalten */
+.playbg{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,#fffaf0,#ffe9c8 55%,#ffd9e6)}
 #probe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 
 /* Botón pixel: borde con esquinas recortadas y bisel */
@@ -140,6 +142,7 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 <script>window.LEON_HUB='../';</script>
 
 <div class="bg" aria-hidden="true"></div>
+<div class="playbg" id="playBg" aria-hidden="true" hidden></div>
 <div id="probe"></div>
 
 <div class="bar">
@@ -256,7 +259,7 @@ function buildMenu() {
 }
 function showMenu() {
   stopGame();
-  $('#play').hidden = true; $('#win').hidden = true; $('#confetti').hidden = true;
+  $('#play').hidden = true; $('#playBg').hidden = true; $('#win').hidden = true; $('#confetti').hidden = true;
   $('#menu').hidden = false; $('#backBtn').hidden = true; $('#title').style.visibility = '';
   if (window.LEON_HUB) $('#homeBtn').hidden = false;
   buildMenu();
@@ -333,7 +336,7 @@ function start(i) {
   }
   game = { i, cols, rows, pieces, drag: null, last: Date.now(), hinted: null, over: false };
   $('#menu').hidden = true; $('#title').style.visibility = 'hidden';
-  $('#play').hidden = false; $('#backBtn').hidden = false;
+  $('#play').hidden = false; $('#playBg').hidden = false; $('#backBtn').hidden = false;
   img.onload = () => { if (game && game.i === i) { layoutGame(true); } };
   img.src = src(IMAGES[i][0]);
   if (img.complete && img.naturalWidth) layoutGame(true);
