@@ -44,6 +44,9 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .name{font-size:clamp(11px,2.2vw,16px);letter-spacing:.08em;white-space:nowrap;background:var(--ink);padding:8px 12px;box-shadow:0 -3px 0 0 #fff,0 3px 0 0 #fff,-3px 0 0 0 #fff,3px 0 0 0 #fff}
 
 .parent{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);border:0;background:rgba(42,31,61,.75);color:#fff;font-family:var(--body);font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer}
+.upd{right:auto;left:max(14px,env(safe-area-inset-left,0px))}
+.upd.new{background:var(--sun);color:var(--ink);box-shadow:0 0 0 3px var(--ink);animation:glow .8s steps(2,end) infinite}
+@keyframes glow{50%{transform:scale(1.08)}}
 .sheet{position:fixed;inset:0;display:flex;align-items:flex-start;overflow-y:auto;box-sizing:border-box;padding-top:calc(env(safe-area-inset-top,0px) + 16px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:rgba(42,31,61,.6)}
 .card{margin:auto;width:min(100%,440px);box-sizing:border-box;background:var(--paper);padding:24px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 -6px 0 0 var(--ink),0 6px 0 0 var(--ink),-6px 0 0 0 var(--ink),6px 0 0 0 var(--ink)}
 .card h2{font-family:var(--pix);font-weight:400;font-size:18px;line-height:1.4;margin:0;text-align:center}
@@ -64,6 +67,7 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     <a class="app" href="dino-hole/" aria-label="Rana Glotona"><span class="icon"><img src="icons/dino-hole.png" alt=""></span><span class="name">RANA</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
+  <button class="parent upd" id="updBtn">Actualizar</button>
 </main>
 
 <div class="sheet" id="help" hidden>
@@ -87,6 +91,20 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
   btn.hidden = standalone;
   btn.addEventListener('click', () => { help.hidden = false; });
   document.getElementById('helpOk').addEventListener('click', () => { help.hidden = true; });
+  // Actualizar: revisa si hay una versión publicada más nueva; al tocar, borra la copia guardada y descarga todo otra vez
+  const upd = document.getElementById('updBtn');
+  fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()).then(d => {
+    if (window.LEON_VERSION && d.v !== window.LEON_VERSION) { upd.textContent = '¡Nueva versión! Actualizar'; upd.classList.add('new'); }
+  }).catch(() => {});
+  upd.addEventListener('click', async () => {
+    if (!navigator.onLine) { upd.textContent = 'Necesitas internet'; setTimeout(() => (upd.textContent = 'Actualizar'), 2500); return; }
+    upd.textContent = 'Actualizando…'; upd.classList.remove('new');
+    try {
+      if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+      if (window.caches) for (const k of await caches.keys()) await caches.delete(k);
+    } catch (e) {}
+    location.replace(location.pathname + '?v=' + Date.now());
+  });
   ['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
   document.addEventListener('contextmenu', e => e.preventDefault());
 })();

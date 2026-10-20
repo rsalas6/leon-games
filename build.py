@@ -30,7 +30,7 @@ def write(p, s):
     os.makedirs(os.path.dirname(p), exist_ok=True)
     open(p, 'w', encoding='utf-8').write(s)
 
-def build_page(src, out, up):
+def build_page(src, out, up, version):
     s = read(src).replace('/*__DINO_KIT__*/', KIT)
     write(os.path.join(PREVIEW, os.path.basename(src)), s)  # fragment for artifact preview (CDN links kept)
     head, body = s.split('</style>\n', 1)
@@ -49,6 +49,7 @@ def build_page(src, out, up):
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="{APP_NAME}">
 <meta name="theme-color" content="#5ac8ff">
+<script>window.LEON_VERSION='{version}';</script>
 <link rel="manifest" href="{up}manifest.webmanifest">
 <link rel="apple-touch-icon" href="{up}icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="{up}icons/icon-192.png">
@@ -72,7 +73,7 @@ def main():
     shutil.copytree(os.path.join(ROOT, 'icons'), os.path.join(SITE, 'icons'))
     shutil.copytree(os.path.join(ROOT, 'img'), os.path.join(SITE, 'img'))
     for src, out, up in PAGES:
-        build_page(src, out, up)
+        build_page(src, out, up, version)
     missing = [i for i in re.findall(r"\['(\d\d-[a-z-]+)',", read('games/dino-puzzle.html')) if not os.path.exists(os.path.join(ROOT, 'img/puzzle', i + '.webp'))]
     if missing:
         raise SystemExit(f'Missing puzzle images: {missing}')
@@ -92,11 +93,12 @@ def main():
     for d, _, fs in os.walk(SITE):
         for f in fs:
             rel = os.path.relpath(os.path.join(d, f), SITE).replace(os.sep, '/')
-            if rel not in ('sw.js', '_headers') and not f.startswith('.'):
+            if rel not in ('sw.js', '_headers', 'version.json') and not f.startswith('.'):
                 files.append(rel)
+    write(os.path.join(SITE, 'version.json'), json.dumps({'v': version}))  # read by the hub's update button
     sw = read('sw.template.js').replace('__VERSION__', version).replace('__FILES__', ', '.join(f"'{f}'" for f in sorted(files)))
     write(os.path.join(SITE, 'sw.js'), sw)
-    write(os.path.join(SITE, '_headers'), ''.join(f'{p}\n  Cache-Control: no-cache\n' for p in ['/sw.js', '/*.html', '/'] + ['/' + d for d in dirs]))
+    write(os.path.join(SITE, '_headers'), ''.join(f'{p}\n  Cache-Control: no-cache\n' for p in ['/sw.js', '/version.json', '/*.html', '/'] + ['/' + d for d in dirs]))
     print(f'site/ ready (version {version}, {len(files)} cached files)')
 
 if __name__ == '__main__':
