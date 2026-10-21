@@ -10,6 +10,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(ROOT, 'site')
 PREVIEW = os.path.join(ROOT, 'preview')
 KIT = open(os.path.join(ROOT, 'shared/dino-kit.js'), encoding='utf-8').read()
+MODELS_JS = open(os.path.join(ROOT, 'shared/models.js'), encoding='utf-8').read()  # glTF model loader shared by the 3D games
 INTRO = open(os.path.join(ROOT, 'shared/intro.html'), encoding='utf-8').read()  # LEÓN GAMES splash shown when any page opens
 PAGES = [
     ('hub.html', 'index.html', ''),
@@ -31,7 +32,7 @@ def write(p, s):
     open(p, 'w', encoding='utf-8').write(s)
 
 def build_page(src, out, up, version):
-    s = read(src).replace('/*__DINO_KIT__*/', KIT)
+    s = read(src).replace('/*__DINO_KIT__*/', KIT).replace('/*__MODELS__*/', MODELS_JS)
     write(os.path.join(PREVIEW, os.path.basename(src)), s)  # fragment for artifact preview (CDN links kept)
     head, body = s.split('</style>\n', 1)
     head = '\n'.join(l for l in (head + '</style>').split('\n') if 'claude:viewport-fit-sides' not in l and 'rel="preconnect"' not in l)
@@ -72,6 +73,7 @@ def main():
     shutil.copytree(os.path.join(ROOT, 'vendor'), os.path.join(SITE, 'vendor'))
     shutil.copytree(os.path.join(ROOT, 'icons'), os.path.join(SITE, 'icons'))
     shutil.copytree(os.path.join(ROOT, 'img'), os.path.join(SITE, 'img'))
+    shutil.copytree(os.path.join(ROOT, 'models'), os.path.join(SITE, 'models'))
     for src, out, up in PAGES:
         build_page(src, out, up, version)
     missing = [i for i in re.findall(r"\['(\d\d-[a-z-]+)',", read('games/dino-puzzle.html')) if not os.path.exists(os.path.join(ROOT, 'img/puzzle', i + '.webp'))]
