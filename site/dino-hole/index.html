@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021134917';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021135318';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -59,6 +59,11 @@ h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);lett
 #bossIcon{width:52px;height:52px;border-radius:14px;background:#fff;box-shadow:0 0 0 3px var(--ink)}
 
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#skins{display:flex;gap:16px;margin-bottom:14px}
+.skin{width:56px;height:56px;border-radius:50%;border:0;padding:0;cursor:pointer;box-shadow:0 0 0 4px #fff,0 0 0 8px var(--ink),0 6px 0 8px rgba(42,31,61,.3);position:relative}
+.skin::before,.skin::after{content:'';position:absolute;top:8px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:inset 3px 3px 0 4px #1a1420}
+.skin::before{left:9px}.skin::after{right:9px}
+.skin.on{transform:scale(1.18);box-shadow:0 0 0 4px var(--sun),0 0 0 8px var(--ink),0 6px 0 8px rgba(42,31,61,.3)}
 #levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,17vw,190px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
 .lv{position:relative;aspect-ratio:1;padding:0;background:#fff}
 .lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;object-fit:cover;pointer-events:none}
@@ -170,7 +175,7 @@ h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);lett
   <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
 </div>
 
-<main id="menu"><div id="levels"></div></main>
+<main id="menu"><div id="skins" role="group" aria-label="Color de la rana"></div><div id="levels"></div></main>
 <div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
 
 <canvas id="confetti" hidden></canvas>
@@ -508,6 +513,7 @@ const rand = (a, b) => a + Math.random() * (b - a);
 let save = { done: {}, muted: false };
 try { Object.assign(save, JSON.parse(localStorage.getItem('dinoHole3d')) || {}); } catch (e) {}
 const persist = () => { try { localStorage.setItem('dinoHole3d', JSON.stringify(save)); } catch (e) {} };
+
 
 /* ---------- Sonido (sintetizado, sin voz) ---------- */
 let actx = null;
@@ -876,7 +882,9 @@ const rim = new THREE.Group(); hole.add(rim);
 const ringMesh = (a, b, c, y) => { const m = new THREE.Mesh(new THREE.RingGeometry(a, b, 56), new THREE.MeshBasicMaterial({ color: c })); m.rotation.x = -Math.PI / 2; m.position.y = y; rim.add(m); return m; };
 ringMesh(1.16, 1.24, 0x2a1f3d, .02);
 // Labios gorditos en 3D (verde por fuera, rosa por dentro) y cachetes chapeados
-const lip = new THREE.Mesh(new THREE.TorusGeometry(1.06, .11, 10, 56), M(0x5fc83a)); lip.rotation.x = Math.PI / 2; lip.position.y = .05; rim.add(lip);
+// Materiales propios de la rana: León puede elegir su color en el menú
+const frogMat = new THREE.MeshLambertMaterial({ color: 0x5fc83a }), frogMatD = new THREE.MeshLambertMaterial({ color: 0x48a82e });
+const lip = new THREE.Mesh(new THREE.TorusGeometry(1.06, .11, 10, 56), frogMat); lip.rotation.x = Math.PI / 2; lip.position.y = .05; rim.add(lip);
 const lip2 = new THREE.Mesh(new THREE.TorusGeometry(.96, .05, 8, 56), M(0xff6f91)); lip2.rotation.x = Math.PI / 2; lip2.position.y = .07; rim.add(lip2);
 addOutlines(lip);
 // Cachetes que se inflan al masticar
@@ -884,14 +892,13 @@ const cheeks = [];
 for (const sx of [-1, 1]) { const ch = ell(.26, .12, .2, M(0xff8fb0)); ch.position.set(sx * .9, .14, .45); ch.rotation.y = sx * .5; rim.add(ch); cheeks.push(ch); }
 // Cabeza de rana: una loma verde detrás de la boca, con manchitas y dos ojos grandes encima
 const headRig = new THREE.Group(); rim.add(headRig);
-const FROG = 0x5fc83a, FROG_D = 0x48a82e;
-const dome = ell(1.18, .62, .78, M(FROG)); dome.position.set(0, -.08, -1.18); headRig.add(dome);
-[[-.55, .3, -1.05, .16], [.6, .25, -1.0, .13], [.1, .42, -1.45, .18], [-.25, .45, -1.6, .1]].forEach(([x, y, z, r]) => { const sp = ell(r, r * .4, r, M(FROG_D)); sp.position.set(x, y, z); headRig.add(sp); });
+const dome = ell(1.18, .62, .78, frogMat); dome.position.set(0, -.08, -1.18); headRig.add(dome);
+[[-.55, .3, -1.05, .16], [.6, .25, -1.0, .13], [.1, .42, -1.45, .18], [-.25, .45, -1.6, .1]].forEach(([x, y, z, r]) => { const sp = ell(r, r * .4, r, frogMatD); sp.position.set(x, y, z); headRig.add(sp); });
 const eyeRig = new THREE.Group(); headRig.add(eyeRig);
 const pupils = [], balls = [];
 for (const s of [-1, 1]) {
   const e = new THREE.Group(); e.position.set(s * .5, .38, -1.22); eyeRig.add(e);
-  const bump = ell(.4, .34, .4, M(FROG)); e.add(bump);
+  const bump = ell(.4, .34, .4, frogMat); e.add(bump);
   const ball = new THREE.Group(); ball.position.set(0, .3, .12); e.add(ball); balls.push(ball);
   ball.add(ell(.32, .32, .3, M(0xffffff)));
   const pu = ell(.15, .18, .08, M(0x1a1420)); pu.position.set(0, 0, .27); ball.add(pu); pupils.push(pu);
@@ -909,6 +916,22 @@ const tongueGeo = new THREE.CylinderGeometry(1, 1, 1, 10); tongueGeo.rotateX(Mat
 const tongue = new THREE.Mesh(tongueGeo, M(0xff5d8f)); tongueRig.add(tongue);
 const tongueTip = ell(1, .7, 1, M(0xff7aa3)); tongueRig.add(tongueTip);
 tongueRig.visible = false;
+
+const FROG_COLORS = [[0x5fc83a, 0x48a82e], [0xff7eb3, 0xe85a95], [0x5ab0ff, 0x3a8ee0], [0xffc83a, 0xe0a020]];
+function setFrogColor(k) { const [a, b] = FROG_COLORS[k] || FROG_COLORS[0]; frogMat.color.setHex(a); frogMatD.color.setHex(b); }
+// Ondas en la boca cada vez que traga algo
+const RIPPLE_GEO = new THREE.RingGeometry(.9, 1, 40).rotateX(-Math.PI / 2), ripples = [];
+for (let k = 0; k < 5; k++) { const m = new THREE.Mesh(RIPPLE_GEO, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false })); m.visible = false; scene.add(m); ripples.push({ m, t: 1 }); }
+let rippleI = 0;
+function ripple() { const r = ripples[rippleI++ % ripples.length]; r.t = 0; r.m.visible = true; }
+function updateRipples(dt) {
+  const g = game;
+  for (const r of ripples) {
+    if (r.t >= 1) { r.m.visible = false; continue; }
+    r.t += dt * 1.6; const k = Math.min(1, r.t);
+    r.m.position.set(g.hx, .06, g.hz); r.m.scale.setScalar(g.show * (1.1 + k * 1.2)); r.m.material.opacity = (1 - k) * .7;
+  }
+}
 
 /* ---------- Escenario vivo: pasto que se mece, florecitas, mariposas y árboles en la orilla ---------- */
 // Las matas y flores desaparecen dentro del hoyo, igual que el piso
@@ -1019,6 +1042,13 @@ function thumb(theme, i) {
   return (thumbs[key] = thumbR.domElement.toDataURL());
 }
 function buildMenu() {
+  const sk = $('#skins'); sk.innerHTML = '';
+  FROG_COLORS.forEach(([c], k) => {
+    const b = document.createElement('button'); b.className = 'skin' + ((save.frog || 0) === k ? ' on' : ''); b.style.background = '#' + c.toString(16).padStart(6, '0');
+    b.setAttribute('aria-label', 'Rana color ' + (k + 1));
+    b.addEventListener('click', () => { save.frog = k; persist(); setFrogColor(k); sfx.grow(); buildMenu(); });
+    sk.appendChild(b);
+  });
   const box = $('#levels'); box.innerHTML = '';
   LEVELS.forEach((L, n) => {
     const b = document.createElement('button');
@@ -1205,7 +1235,7 @@ function startNow(n) {
   $('#lvl').textContent = 'NIVEL ' + (n + 1); $('#score').textContent = '0';
   $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
   app.hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false;
-  resize(); camPos = null; updateMeter(); music(true);
+  resize(); camPos = null; updateMeter(); music(true); setFrogColor(save.frog || 0); game.pop = 0;
 }
 
 /* Control tipo joystick: donde se pone el dedo queda el centro; arrastrar desde ahí mueve la rana en esa dirección */
@@ -1298,7 +1328,10 @@ function step(dt) {
     // Los dinos caminan despacito por el mundo
     if (it.walk) {
       it.head += rand(-.6, .6) * dt;
-      const sp = it.walk * dt * Math.min(2.2, 1 + it.i * .08);
+      const fdx = it.x - g.hx, fdz = it.z - g.hz, fd = Math.hypot(fdx, fdz);
+      it.scared = fits(it.r, g.r) && fd < g.r + 5 && fd > .01;
+      if (it.scared) it.head = Math.atan2(-fdx / fd, -fdz / fd);   // huye en dirección contraria a la rana
+      const sp = it.walk * dt * Math.min(2.2, 1 + it.i * .08) * (it.scared ? 1.8 : 1);
       it.x -= Math.sin(it.head) * sp; it.z -= Math.cos(it.head) * sp;
       if (!inside(g.L, it.x, it.z, it.r) || inPond(g, it.x, it.z, it.r)) { it.x += Math.sin(it.head) * sp * 2; it.z += Math.cos(it.head) * sp * 2; it.head += Math.PI * rand(.7, 1.3); }
       it.obj.rotation.y = it.head;
@@ -1325,7 +1358,7 @@ function step(dt) {
     it.obj.rotation.x += it.tilt.y * dt * 2.2; it.obj.rotation.z -= it.tilt.x * dt * 2.2;
     if (!it.solo) poolSync(it);
     if (y < -(SIZE(it.i) * 1.2 + 2) && !it.gone) {
-      it.gone = true; if (it.solo) scene.remove(it.obj); else poolSync(it); g.eaten++; grow(it); addPoints(it); burst(Math.min(10, 3 + (it.i >> 1)), it.i); updateMeter();
+      it.gone = true; ripple(); if (it.solo) scene.remove(it.obj); else poolSync(it); g.eaten++; grow(it); addPoints(it); burst(Math.min(10, 3 + (it.i >> 1)), it.i); updateMeter();
       if (it === g.boss) winLevel();
     }
   }
@@ -1349,6 +1382,11 @@ function step(dt) {
   rim.scale.x = rim.scale.z = R * (1 + ch * .1);
   cheeks.forEach(c => c.scale.set(.26 * (1 + ch * .9), .12 * (1 + ch * 1.4), .2 * (1 + ch * .9)));   // cachetes inflados al masticar
   headRig.position.y = Math.abs(Math.sin(g.t * 8)) * .06 * (g.look.length() > .3 ? 1 : 0) + ch * .08;
+  // Al empezar sale brincando del piso; al ganar baila
+  if (g.pop < 1) { g.pop = Math.min(1, g.pop + dt * 1.6); const p = g.pop, back = 1 + 2.7 * Math.pow(p - 1, 3) + 1.7 * Math.pow(p - 1, 2); headRig.scale.setScalar(Math.max(.01, back)); headRig.position.y += (1 - p) * -1.2; }
+  else headRig.scale.setScalar(1);
+  if (g.over) { headRig.position.y += Math.abs(Math.sin(g.t * 9)) * .5; headRig.rotation.z = Math.sin(g.t * 9) * .25; } else headRig.rotation.z = 0;
+  updateRipples(dt);
   crown.visible = fits(g.boss.r, g.r) && !g.over; crown.rotation.y += dt * 1.5;
   updateTongue(dt);  updateCamera(dt);
 }
