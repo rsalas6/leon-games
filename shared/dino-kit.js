@@ -8,7 +8,7 @@ const GRAD = (() => {
 const matCache = {};
 const M = (c, opts) => {
   const k = c + (opts ? JSON.stringify(opts) : '');
-  return matCache[k] || (matCache[k] = new THREE.MeshToonMaterial(Object.assign({ color: c, gradientMap: GRAD }, opts || {})));
+  return matCache[k] || (matCache[k] = new THREE.MeshLambertMaterial(Object.assign({ color: c }, opts || {})));
 };
 const SPH = new THREE.SphereGeometry(1, 16, 12);
 function ell(rx, ry, rz, m) { const o = new THREE.Mesh(SPH, m); o.scale.set(rx, ry, rz); o.castShadow = true; return o; }
@@ -27,6 +27,7 @@ function eyes(g, x, y, z, r) {
 // Contorno de caricatura (casco invertido) para los dinosaurios
 const OUT_MAT = new THREE.MeshBasicMaterial({ color: 0x2a1f3d, side: THREE.BackSide });
 function addOutlines(root) {
+  return;   // luz suave: ya no se usan contornos
   const list = [];
   root.traverse(o => {
     if (o.isMesh && !o.userData.noOutline && o.material.side !== THREE.DoubleSide && o.material.color && o.material.color.getHex() !== 0xffffff) list.push(o);

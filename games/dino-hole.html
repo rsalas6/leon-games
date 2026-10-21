@@ -95,10 +95,13 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="__UP__vendor/GLTFLoader.js"></script>
+<script src="__UP__vendor/SkeletonUtils.js"></script>
+<script>/*__MODELS__*/</script>
 <script>
 /*__DINO_KIT__*/
 
-(() => {
+(async () => {
 const $ = s => document.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
 
@@ -204,19 +207,47 @@ const F = {
   sled: () => grp(at(box(.5, .08, 1, M(0xe8423a)), 0, .3, 0), at(box(.05, .05, 1.1, M(0x8a96a8)), .22, .08, 0), at(box(.05, .05, 1.1, M(0x8a96a8)), -.22, .08, 0), at(box(.05, .25, .05, M(0x8a96a8)), .22, .18, .3), at(box(.05, .25, .05, M(0x8a96a8)), -.22, .18, .3), at(box(.05, .25, .05, M(0x8a96a8)), .22, .18, -.3), at(box(.05, .25, .05, M(0x8a96a8)), -.22, .18, -.3)),
   snowball: () => grp(at(ell(.35, .33, .35, M(WHITE)), 0, .33, 0)),
 };
+// Modelos de Kenney (naturaleza, piratas, invierno, comida) repintados con colores alegres
+const NAT = { grass: 0x7ed957, leafsGreen: 0x5cc241, leafsDark: 0x2f9e44, leafsFall: 0xff9a2e, woodBark: 0x9c6234, woodBarkDark: 0x7a4a2a, woodInner: 0xf0d5a8, wood: 0xc8844a,
+  woodDark: 0x8a5a34, woodBirch: 0xf5ead5, stone: 0xb9bdd0, stoneDark: 0x8e94a8, _defaultMat: 0xb9bdd0, dirt: 0xa5683a, colorRed: 0xe8423a, colorRedDark: 0xb02a30,
+  colorTan: 0xf2c48a, colorYellow: 0xffc83a, colorPurple: 0xa98bff };
+const K = (name, over) => () => recolor(modelClone('k/' + name), nm => (over && over[nm] != null) ? over[nm] : NAT[nm] != null ? NAT[nm] : null);
+// Dinosaurio de Quaternius pintado de un color; si camina, usa su animación de caminar
+const lightOf = c => new THREE.Color(c).lerp(new THREE.Color(0xfff2c8), .55).getHex();
+const darkOf = c => new THREE.Color(c).multiplyScalar(.62).getHex();
+function qdino(name, c) {
+  if (!MODELS[name]) return null;
+  const m = recolor(modelClone(name), nm => /black/i.test(nm) ? null : /light|yellow/i.test(nm) ? lightOf(c) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(c) : c);
+  m.rotation.y = Math.PI;   // miran a +Z; en el juego caminan hacia -Z
+  const g = new THREE.Group(); g.add(m);
+  const mixer = new THREE.AnimationMixer(m), clips = MODELS[name].animations;
+  const act = mixer.clipAction(clips.find(a => a.name === 'walk') || clips[0]); act.play();
+  let lastT = null;
+  g.userData.anim = t => { const dt = lastT == null ? 0 : Math.max(0, Math.min(.5, t - lastT)); lastT = t; mixer.update(dt / 6); };
+  return g;
+}
+const QD = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para' };
 function dino(kind, c) {
+  if (QD[kind]) { const q = qdino(QD[kind], c); if (q) return q; }
   const d = BUILDERS[kind](c), g = new THREE.Group(); g.add(d.g);
   g.userData.anim = d.anim; return g;
 }
 // Cada mundo: 16 cosas de la más chiquita a la más grande; la última es el jefe del nivel largo
 const THEMES = {
-  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .4, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => Math.random() < .5 ? F.tree() : F.palm(3), butterflies: true, ground: [0x74c446, 0x68b83c], sky: 0x9ee8d6, items: [() => F.flower(0xff5d8f), () => F.mushroom(), () => F.egg(), () => F.fern(), () => F.rock(), () => F.bush(), () => dino('compy', 0xff9a2e), () => F.log(), () => dino('raptor', 0x3fae4a), () => F.palm(1.8), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), () => F.palm(3), () => F.tree(), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('brachio', 0x6a8ad8)] },
-  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => F.rock(0x9a90b8), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), () => F.bucket(), () => F.ball(), () => F.sandcastle(), () => F.surfboard(), () => F.turtle(), () => F.umbrella(), () => dino('compy', 0x5ac8ff), () => F.boat(), () => F.chair(), () => F.palm(3), () => dino('mosa', 0x3f86c8), () => F.lighthouse(), () => F.ship(), () => dino('mosa', 0x2f6fc0)] },
-  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => F.pine(true), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), () => F.egg(0xdcefff, 0x5ab0e0), () => F.penguin(), () => F.pine(true), () => F.sled(), () => F.snowman(), () => F.seal(), () => F.rock(0xa8bccf), () => dino('raptor', 0x5ab0e0), () => F.bear(), () => F.hut(true), () => dino('trice', 0x8a96c8), () => F.mammoth(), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x9ab0e0)] },
-  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? F.cactus(2) : F.rock(0xb58a6a), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [() => F.rock(0xc89e7a), () => F.bone(), () => dino('compy', 0xc08850), () => F.cactus(1), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), () => F.rock(0xb58a6a), () => F.cactus(2), () => F.tent(), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), () => F.rock(0xa07050), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
-  volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), () => F.mushroom(0xff8a2a), () => F.crystal(), () => F.rock(0x5a5058), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), () => F.chest(), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('trex', 0xb8321a)] },
+  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('brachio', 0x6a8ad8)] },
+  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('mosa', 0x2f6fc0)] },
+  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x9ab0e0)] },
+  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
+  volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('trex', 0xb8321a)] },
 };
 const THEME_KEYS = Object.keys(THEMES);
+// Cargar modelos (se guardan con la app para jugar sin internet)
+$('#title').textContent = 'CARGANDO…';
+await loadModels(['raptor', 'stego', 'trex', 'trice', 'apato', 'para', ...['flower_redA', 'mushroom_red', 'grass_leafsLarge', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'plant_bushLarge', 'log_large', 'tree_palmShort',
+  'tree_palmTall', 'tree_oak', 'tree_fat', 'tree_default', 'tree_pineRoundA', 'bottle-large', 'barrel', 'chest', 'boat-row-small', 'cannon', 'palm-bend', 'palm-straight', 'ship-small', 'tower-complete-small', 'ship-pirate-large',
+  'present-a-cube', 'present-b-round', 'sled', 'snowman', 'reindeer', 'tree-snow-c', 'tree-snow-b', 'train-wagon', 'train-locomotive', 'cactus_short', 'cactus_tall', 'tent_detailedClosed', 'mushroom_tanGroup',
+  'rocks-sand-a', 'rock_tallA'].map(n => 'k/' + n)], '__UP__models/');
+$('#title').textContent = 'RANA GLOTONA';
 // Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande).
 // Los mundos son islas: su orilla es un círculo deformado por dos ondas (h = [a1, k1, p1, a2, k2, p2]) para que cada uno tenga otra forma
 const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2],
@@ -238,9 +269,8 @@ const fits = (rad, r) => rad < r * .92;
 // Crea el objeto i del mundo, lo escala a su tamaño y le pone contorno
 function makeItem(theme, i) {
   const g = THEMES[theme].items[i]();
-  const s = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+  const s = modelBox(g).getSize(new THREE.Vector3());
   g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7));
-  if (i >= 2) addOutlines(g);
   const wrap = new THREE.Group(); wrap.add(g);
   wrap.rotation.y = rand(0, Math.PI * 2);
   return wrap;
@@ -248,23 +278,71 @@ function makeItem(theme, i) {
 
 // Molde de cada objeto: geometría unida con colores por vértice + su contorno, para dibujarlo con InstancedMesh
 const protos = {};
+// Lee los píxeles de una textura (las paletas de Kenney) para convertirlas en colores por vértice
+const texPix = new Map();
+function texSampler(tex) {
+  const img = tex && tex.image; if (!img) return null;
+  if (!texPix.has(img)) {
+    const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+    const x = cv.getContext('2d'); x.drawImage(img, 0, 0); texPix.set(img, { w: cv.width, h: cv.height, d: x.getImageData(0, 0, cv.width, cv.height).data });
+  }
+  const t = texPix.get(img);
+  const ru = tex.repeat.x, rv = tex.repeat.y, ou = tex.offset.x, ov = tex.offset.y;
+  return (u, v, out) => { u = u * ru + ou; v = v * rv + ov; const px = Math.min(t.w - 1, Math.max(0, Math.floor((u - Math.floor(u)) * t.w))), py = Math.min(t.h - 1, Math.max(0, Math.floor((v - Math.floor(v)) * t.h))), o = (py * t.w + px) * 4; return out.setRGB(t.d[o] / 255, t.d[o + 1] / 255, t.d[o + 2] / 255); };
+}
+// Separa los datos "entrelazados" (posición, normal y uv en un solo arreglo): toNonIndexed() de Three r128 no los entiende
+function deinterleave(geo) {
+  const g = new THREE.BufferGeometry();
+  for (const name in geo.attributes) {
+    const a = geo.attributes[name], n = a.count, sz = a.itemSize, arr = new Float32Array(n * sz);
+    for (let k = 0; k < n; k++) { arr[k * sz] = a.getX(k); if (sz > 1) arr[k * sz + 1] = a.getY(k); if (sz > 2) arr[k * sz + 2] = a.getZ(k); if (sz > 3) arr[k * sz + 3] = a.getW(k); }
+    g.setAttribute(name, new THREE.BufferAttribute(arr, sz));
+  }
+  if (geo.index) g.setIndex(geo.index.clone());
+  geo.groups.forEach(gr => g.addGroup(gr.start, gr.count, gr.materialIndex));
+  return g;
+}
+// Congela la pose de un modelo con esqueleto en una geometría normal
+function bakeSkinned(m) {
+  const g = deinterleave(m.geometry), p = g.attributes.position, v = new THREE.Vector3();
+  for (let k = 0; k < p.count; k++) { v.fromBufferAttribute(m.geometry.attributes.position, k); m.boneTransform(k, v); p.setXYZ(k, v.x, v.y, v.z); }
+  g.deleteAttribute('skinIndex'); g.deleteAttribute('skinWeight'); g.computeVertexNormals(); return g;
+}
 function proto(theme, i) {
   const key = theme + i; if (protos[key]) return protos[key];
   const g = THEMES[theme].items[i]();
-  const anim = g.userData.anim; if (anim) anim(0, 0);
-  const s = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+  const anim = g.userData.anim;
+  // Los modelos con esqueleto se congelan en su pose natural, ANTES de animar (la animación reinicia el giro del esqueleto)
+  // y antes de escalar; el tamaño se reajusta al final
+  g.updateMatrixWorld(true);
+  const baked = new Map();
+  g.traverse(m => { if (m.isSkinnedMesh) { const b = bakeSkinned(m); b.applyMatrix4(m.matrixWorld); baked.set(m, b); } });
+  if (anim) anim(0, 0);
+  const s = modelBox(g).getSize(new THREE.Vector3());
   g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7)); g.updateMatrixWorld(true);
-  const body = [], out = [], col = [], c = new THREE.Color(), e = new THREE.Color(), sc = new THREE.Matrix4();
+  const body = [], col = [], c = new THREE.Color(), e = new THREE.Color(), tc = new THREE.Color();
   g.traverse(m => {
     if (!m.isMesh || m.material === OUT_MAT) return;
-    const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
-    const wantOut = i >= 2 && !m.userData.noOutline && m.material.color && m.material.color.getHex() !== 0xffffff;
-    if (wantOut) { const o = geo.clone(); o.applyMatrix4(sc.makeScale(1.08, 1.08, 1.08)); o.applyMatrix4(m.matrixWorld); out.push(o); }
-    geo.applyMatrix4(m.matrixWorld);
-    c.copy(m.material.color || c.setHex(0xffffff));
-    if (m.material.emissive) c.add(e.copy(m.material.emissive).multiplyScalar(m.material.emissiveIntensity * .5));
-    const n = geo.attributes.position.count; for (let k = 0; k < n; k++) col.push(c.r, c.g, c.b);
-    body.push(geo);
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    let geo = baked.get(m) || deinterleave(m.geometry);
+    // Una pieza por material (algunos modelos usan grupos)
+    const groups = geo.groups.length && mats.length > 1 ? geo.groups : [{ start: 0, count: geo.index ? geo.index.count : geo.attributes.position.count, materialIndex: 0 }];
+    const flat = geo.index ? geo.toNonIndexed() : geo;
+    if (!baked.has(m)) flat.applyMatrix4(m.matrixWorld);
+    const uv = flat.attributes.uv;
+    for (const gr of groups) {
+      const mt = mats[gr.materialIndex] || mats[0], samp = mt.map && uv ? texSampler(mt.map) : null;
+      c.copy(mt.color || c.setHex(0xffffff));
+      if (mt.emissive) c.add(e.copy(mt.emissive).multiplyScalar((mt.emissiveIntensity || 1) * .5));
+      const part = new THREE.BufferGeometry(), pos = flat.attributes.position, nor = flat.attributes.normal;
+      const P = [], N = [];
+      for (let k = gr.start; k < gr.start + gr.count; k++) {
+        P.push(pos.getX(k), pos.getY(k), pos.getZ(k)); N.push(nor.getX(k), nor.getY(k), nor.getZ(k));
+        if (samp) { samp(uv.getX(k), uv.getY(k), tc).multiply(c); col.push(tc.r, tc.g, tc.b); } else col.push(c.r, c.g, c.b);
+      }
+      part.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); part.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+      body.push(part);
+    }
   });
   const join = (list, colors) => {
     const pos = [], nor = [];
@@ -273,9 +351,13 @@ function proto(theme, i) {
     if (colors) r.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     r.computeBoundingSphere(); return r;
   };
-  return (protos[key] = { body: join(body, col), out: out.length ? join(out) : null, dino: !!anim, tick: !!g.userData.tick });
+  // Reajusta el molde a su tamaño real (los modelos con esqueleto pueden venir con otra escala) y lo apoya en el piso
+  const geo = join(body, col); geo.computeBoundingBox();
+  const bb = geo.boundingBox, sz = bb.getSize(new THREE.Vector3()), k = SIZE(i) / Math.max(sz.x, sz.z, sz.y * .7);
+  geo.translate(-(bb.min.x + bb.max.x) / 2, -bb.min.y, -(bb.min.z + bb.max.z) / 2); geo.scale(k, k, k); geo.computeBoundingSphere();
+  return (protos[key] = { body: geo, out: null, dino: !!anim, tick: !!g.userData.tick });
 }
-const instMat = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: GRAD });
+const instMat = new THREE.MeshLambertMaterial({ vertexColors: true });
 let pools = {};
 function makePools(L, counts) {
   Object.values(pools).forEach(p => { scene.remove(p.body); p.out && scene.remove(p.out); }); pools = {};
@@ -309,8 +391,8 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadow
 app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, 1, .1, 600);
-const hemi = new THREE.HemisphereLight(0xffffff, 0x7a9a50, .75); scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xfff0d0, .85); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xb0c890, .95); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff0d0, .75); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004;
 scene.add(sun, sun.target);
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
@@ -318,7 +400,13 @@ addEventListener('resize', resize);
 // Piso con un agujero de verdad: el sombreador descarta los píxeles dentro del hoyo
 const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 },
   shapeA = { value: new THREE.Vector4() }, shapeB = { value: new THREE.Vector3() }, pondsU = { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] }, pondColU = { value: new THREE.Color() };
-const groundMat = new THREE.MeshToonMaterial({ color: 0x7bd63a, gradientMap: GRAD });
+const groundTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 2600; i++) { const v = 215 + Math.random() * 40 | 0; x.fillStyle = `rgb(${v},${v},${v})`; const r = 1 + Math.random() * 3; x.fillRect(Math.random() * 256, Math.random() * 256, r, r); }
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(60, 60); return t;
+})();
+const groundMat = new THREE.MeshLambertMaterial({ color: 0x7bd63a, map: groundTex });
 groundMat.onBeforeCompile = sh => {
   sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
@@ -402,15 +490,19 @@ function mergeGroup(objs) {
     o.updateMatrixWorld(true);
     o.traverse(m => {
       if (!m.isMesh || m.material === OUT_MAT) return;
-      const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
+      const dg = deinterleave(m.geometry), g = dg.index ? dg.toNonIndexed() : dg;
       g.applyMatrix4(m.matrixWorld);
-      const p = g.attributes.position, n = g.attributes.normal; c.copy(m.material.color || c.setHex(0xffffff));
-      for (let i = 0; i < p.count; i++) { pos.push(p.getX(i), p.getY(i), p.getZ(i)); nor.push(n.getX(i), n.getY(i), n.getZ(i)); col.push(c.r, c.g, c.b); }
+      const mt = Array.isArray(m.material) ? m.material[0] : m.material, uv = g.attributes.uv, samp = mt.map && uv ? texSampler(mt.map) : null, tc = new THREE.Color();
+      const p = g.attributes.position, n = g.attributes.normal; c.copy(mt.color || c.setHex(0xffffff));
+      for (let i = 0; i < p.count; i++) {
+        pos.push(p.getX(i), p.getY(i), p.getZ(i)); nor.push(n.getX(i), n.getY(i), n.getZ(i));
+        if (samp) { samp(uv.getX(i), uv.getY(i), tc).multiply(c); col.push(tc.r, tc.g, tc.b); } else col.push(c.r, c.g, c.b);
+      }
     });
   });
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  const mesh = new THREE.Mesh(g, new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: GRAD })); mesh.castShadow = true; return mesh;
+  const mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true })); mesh.castShadow = true; return mesh;
 }
 let decor = [], butterflies = [];
 function buildScenery(L) {
@@ -418,7 +510,7 @@ function buildScenery(L) {
   const T = THEMES[L.theme], W = L.world, m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
   const spot = () => { for (let k = 0; k < 40; k++) { const x = rand(0, W), z = rand(0, W); if (inside(L, x, z, .5) && !inPond(game, x, z, .3)) return v.set(x, 0, z); } return v.set(W / 2, 0, W / 2); };
   const area = Math.PI * L.R * L.R, nT = Math.round(area * T.grassN);
-  const grass = new THREE.InstancedMesh(tuftGeo, decoMat(new THREE.MeshToonMaterial({ color: T.grass, gradientMap: GRAD, side: THREE.DoubleSide }), true), nT);
+  const grass = new THREE.InstancedMesh(tuftGeo, decoMat(new THREE.MeshLambertMaterial({ color: T.grass, emissive: T.grass, emissiveIntensity: .55, side: THREE.DoubleSide }), true), nT);
   for (let i = 0; i < nT; i++) { q.setFromAxisAngle(v.set(0, 1, 0), Math.random() * 6.3); const k = rand(.7, 1.5); m4.compose(spot(), q, sc.set(k, k, k)); grass.setMatrixAt(i, m4); }
   const nF = Math.round(area * .05);
   const flowers = new THREE.InstancedMesh(flowerGeo, decoMat(new THREE.MeshBasicMaterial({ color: 0xffffff }), false), nF);
@@ -427,8 +519,8 @@ function buildScenery(L) {
   // Árboles alrededor de la isla, fuera del área de juego
   const ring = [], steps = Math.round(Math.PI * 2 * L.R * 1.15 / 5.5);
   for (let k = 0; k < steps; k++) {
-    const a = k / steps * Math.PI * 2, rr = shapeR(L, a) + rand(2.5, 8), x = W / 2 + Math.cos(a) * rr, z = W / 2 + Math.sin(a) * rr;
-    const o = T.border(); const s0 = new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()); o.scale.multiplyScalar(rand(3, 5) / Math.max(s0.x, s0.z, s0.y * .6));
+    const a = k / steps * Math.PI * 2, rr = shapeR(L, a) + rand(5, 12), x = W / 2 + Math.cos(a) * rr, z = W / 2 + Math.sin(a) * rr;
+    const o = T.border(); const s0 = new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()); o.scale.multiplyScalar(rand(4, 6.5) / Math.max(s0.x * 1.4, s0.z * 1.4, s0.y));
     o.position.set(x, 0, z); o.rotation.y = rand(0, 6.3); ring.push(o);
   }
   // A lo lejos: colinas, islitas, picos nevados, mesetas o volcanes, para que el mundo se sienta enorme
@@ -861,6 +953,7 @@ function loop(now) {
 resize();
 requestAnimationFrame(loop);
 showMenu();
-window.__hole = { inside, start, step, render: () => renderer.render(scene, camera), get game() { return game; } };
+window.__dbg = { proto, bakeSkinned, THEMES, qdino };
+window.__hole = { renderer, scene, camera, inside, start, step, render: () => renderer.render(scene, camera), get game() { return game; } };
 })();
 </script>

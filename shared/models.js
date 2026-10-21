@@ -9,6 +9,13 @@ function loadModels(names, base) {
       g.scene.traverse(o => {
         if (!o.isMesh) return;
         o.castShadow = true; o.receiveShadow = true;
+        // Pesos del esqueleto en decimales (vienen como enteros 0-255/65535 y Three r128 no los convierte al calcular poses a mano)
+        const sw = o.geometry && o.geometry.attributes.skinWeight;
+        if (sw && sw.normalized && !(sw.array instanceof Float32Array)) {
+          const max = sw.array instanceof Uint8Array ? 255 : 65535, f = new Float32Array(sw.array.length);
+          for (let i = 0; i < f.length; i++) f[i] = sw.array[i] / max;
+          o.geometry.setAttribute('skinWeight', new THREE.BufferAttribute(f, sw.itemSize));
+        }
         const conv = mt => { const l = new THREE.MeshLambertMaterial({ name: mt.name, color: mt.color.clone(), map: mt.map || null, skinning: !!o.isSkinnedMesh, vertexColors: mt.vertexColors }); if (l.map) l.map.encoding = THREE.LinearEncoding; return l; };
         o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
       });
