@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021000945';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021134917';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -67,6 +67,11 @@ h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);lett
 
 #joy{position:fixed;left:0;top:0;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:rgba(255,255,255,.22);box-shadow:inset 0 0 0 5px rgba(255,255,255,.75),0 0 0 4px rgba(42,31,61,.35);pointer-events:none;z-index:30}
 #joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px #2a1f3d,0 6px 0 rgba(42,31,61,.35)}
+#lvlLoad{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(42,31,61,.55);color:#fff;font-size:clamp(28px,6vw,44px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+#lvlLoad span{width:min(60vw,360px);height:22px;padding:4px;box-sizing:border-box;border-radius:99px;background:var(--ink);box-shadow:0 0 0 4px #fff}
+#lvlLoad i{display:block;height:100%;width:8%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);transition:width .2s}
+.sizeup{position:fixed;left:50%;top:32%;z-index:46;pointer-events:none;white-space:nowrap;font-size:clamp(30px,7vw,64px);color:var(--sun);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:sizeup 1.4s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes sizeup{0%{transform:translate(-50%,0) scale(.2);opacity:0}15%{transform:translate(-50%,0) scale(1.15);opacity:1}30%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-60px) scale(1);opacity:0}}
 #arrow{position:fixed;left:0;top:0;width:56px;height:56px;margin:-28px 0 0 -28px;pointer-events:none;z-index:40;animation:blink .5s steps(2,end) infinite}
 @keyframes blink{50%{opacity:.35}}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%;image-rendering:pixelated}
@@ -166,6 +171,7 @@ h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);lett
 </div>
 
 <main id="menu"><div id="levels"></div></main>
+<div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
 
 <canvas id="confetti" hidden></canvas>
 <div id="win" hidden>
@@ -527,9 +533,23 @@ const sfx = {
   tap: () => beep(520, .07, 'square', .05, 200),
   gulp: i => { const n = performance.now(); if (n - lastGulp < 60) return; lastGulp = n; beep(720 - i * 30, .13, 'square', .05, -320 + i * 10); },
   bump: () => beep(140, .08, 'triangle', .06),
+  lick: () => beep(900, .07, 'sine', .05, 500),
   grow: () => { beep(523, .08, 'square', .05); beep(784, .1, 'square', .05, 0, .08); },
   win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => beep(f, .16, 'square', .06, 0, i * .12)),
 };
+// Musiquita alegre de fondo (pentatónica, suavecita); se apaga con el botón de sonido
+const SONG = [0, 4, 7, 9, 7, 4, 2, 4, 0, 4, 7, 12, 9, 7, 4, 2], BASS = [0, 0, 5, 5, 7, 7, 5, 5];
+let songStep = 0, songTimer = null;
+function music(on) {
+  clearInterval(songTimer); songTimer = null;
+  if (!on) return;
+  songTimer = setInterval(() => {
+    if (save.muted || !actx || document.hidden) return;
+    const n = SONG[songStep % SONG.length]; beep(523.25 * Math.pow(2, n / 12), .22, 'triangle', .022);
+    if (songStep % 2 === 0) beep(130.8 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .35, 'sine', .03);
+    songStep++;
+  }, 230);
+}
 const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
 const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
 function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
@@ -639,14 +659,16 @@ const THEMES = {
     items: [K('cone'), K('road-sign-stop'), K('kart-oobi'), K('construction-barrier'), K('dumpster'), K('tree-small'), K('hatchback-sports'), K('sedan'), K('taxi'), K('police'), K('ambulance'), K('firetruck'), K('garbage-truck'), K('building-type-a'), K('building-type-c'), K('building-skyscraper-a'), () => dino('trex', 0x3faa3a)] },
 };
 const THEME_KEYS = Object.keys(THEMES);
-// Cargar modelos (se guardan con la app para jugar sin internet)
-$('#title').textContent = 'CARGANDO…';
-await loadModels(['raptor', 'stego', 'trex', 'trice', 'apato', 'para', 'dragon', 'shark', ...['flower_redA', 'mushroom_red', 'grass_leafsLarge', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'plant_bushLarge', 'log_large', 'tree_palmShort',
-  'tree_palmTall', 'tree_oak', 'tree_fat', 'tree_default', 'tree_pineRoundA', 'bottle-large', 'barrel', 'chest', 'boat-row-small', 'cannon', 'palm-bend', 'palm-straight', 'ship-small', 'tower-complete-small', 'ship-pirate-large',
-  'present-a-cube', 'present-b-round', 'sled', 'snowman', 'reindeer', 'tree-snow-c', 'tree-snow-b', 'train-wagon', 'train-locomotive', 'cactus_short', 'cactus_tall', 'tent_detailedClosed', 'mushroom_tanGroup',
-  'rocks-sand-a', 'rock_tallA', 'cone', 'road-sign-stop', 'kart-oobi', 'construction-barrier', 'dumpster', 'tree-small', 'hatchback-sports', 'sedan', 'taxi', 'police', 'ambulance',
-  'firetruck', 'garbage-truck', 'building-type-a', 'building-type-c', 'building-skyscraper-a', 'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'tree-large'].map(n => 'k/' + n)], '../models/');
-$('#title').textContent = 'RANA GLOTONA';
+// Modelos de cada mundo: se descargan solo cuando León entra a un nivel de ese mundo (y luego quedan guardados sin internet)
+const THEME_MODELS = {
+  selva: ['raptor', 'stego', 'trice', 'apato', 'trex', 'para', ...['flower_redA', 'grass_leafsLarge', 'log_large', 'mushroom_red', 'plant_bushLarge', 'stone_largeA', 'tree_default', 'tree_fat', 'tree_oak', 'tree_palmShort', 'tree_palmTall'].map(n => 'k/' + n)],
+  playa: ['para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
+  nieve: ['raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
+  desierto: ['para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
+  volcan: ['para', 'dragon', 'raptor', 'stego', 'trex', 'trice', ...['chest', 'mushroom_tanGroup', 'stone_largeA'].map(n => 'k/' + n)],
+  ciudad: ['trex', ...['ambulance', 'building-skyscraper-a', 'building-type-a', 'building-type-c', 'cone', 'construction-barrier', 'dumpster', 'firetruck', 'garbage-truck', 'hatchback-sports', 'kart-oobi',
+    'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'police', 'road-sign-stop', 'sedan', 'taxi', 'tree-small'].map(n => 'k/' + n)],
+};
 // Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande).
 // Los mundos son islas: su orilla es un círculo deformado por dos ondas (h = [a1, k1, p1, a2, k2, p2]) para que cada uno tenga otra forma
 const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2], [.1, 4, .7, .06, 2, 1.5],
@@ -857,19 +879,36 @@ ringMesh(1.16, 1.24, 0x2a1f3d, .02);
 const lip = new THREE.Mesh(new THREE.TorusGeometry(1.06, .11, 10, 56), M(0x5fc83a)); lip.rotation.x = Math.PI / 2; lip.position.y = .05; rim.add(lip);
 const lip2 = new THREE.Mesh(new THREE.TorusGeometry(.96, .05, 8, 56), M(0xff6f91)); lip2.rotation.x = Math.PI / 2; lip2.position.y = .07; rim.add(lip2);
 addOutlines(lip);
-for (const sx of [-1, 1]) { const ch = ell(.22, .03, .14, M(0xff8fb0)); ch.position.set(sx * .82, .17, .52); ch.rotation.y = sx * .5; ch.userData.noOutline = true; rim.add(ch); }
-const eyeRig = new THREE.Group(); rim.add(eyeRig);
-const tongue = ell(.22, .05, .55, M(0xff5d8f)); tongue.position.set(0, .06, .3); tongue.userData.noOutline = true; rim.add(tongue);
+// Cachetes que se inflan al masticar
+const cheeks = [];
+for (const sx of [-1, 1]) { const ch = ell(.26, .12, .2, M(0xff8fb0)); ch.position.set(sx * .9, .14, .45); ch.rotation.y = sx * .5; rim.add(ch); cheeks.push(ch); }
+// Cabeza de rana: una loma verde detrás de la boca, con manchitas y dos ojos grandes encima
+const headRig = new THREE.Group(); rim.add(headRig);
+const FROG = 0x5fc83a, FROG_D = 0x48a82e;
+const dome = ell(1.18, .62, .78, M(FROG)); dome.position.set(0, -.08, -1.18); headRig.add(dome);
+[[-.55, .3, -1.05, .16], [.6, .25, -1.0, .13], [.1, .42, -1.45, .18], [-.25, .45, -1.6, .1]].forEach(([x, y, z, r]) => { const sp = ell(r, r * .4, r, M(FROG_D)); sp.position.set(x, y, z); headRig.add(sp); });
+const eyeRig = new THREE.Group(); headRig.add(eyeRig);
 const pupils = [], balls = [];
 for (const s of [-1, 1]) {
-  const e = new THREE.Group(); e.position.set(s * .46, 0, -1.04); e.scale.setScalar(1.4); eyeRig.add(e);
-  const bump = ell(.3, .26, .3, M(0x5fc83a)); bump.position.y = .1; e.add(bump);
-  const ball = new THREE.Group(); ball.position.set(0, .38, .04); e.add(ball); balls.push(ball);
-  ball.add(ell(.22, .22, .22, M(0xffffff)));
-  const pu = ell(.11, .13, .06, M(0x1a1420)); pu.position.set(0, 0, .19); pu.userData.noOutline = true; ball.add(pu); pupils.push(pu);
-  const sh = new THREE.Mesh(SPH, SHINE); sh.scale.setScalar(.04); sh.position.set(.04, .05, .25); sh.userData.noOutline = true; ball.add(sh);
-  addOutlines(e);
+  const e = new THREE.Group(); e.position.set(s * .5, .38, -1.22); eyeRig.add(e);
+  const bump = ell(.4, .34, .4, M(FROG)); e.add(bump);
+  const ball = new THREE.Group(); ball.position.set(0, .3, .12); e.add(ball); balls.push(ball);
+  ball.add(ell(.32, .32, .3, M(0xffffff)));
+  const pu = ell(.15, .18, .08, M(0x1a1420)); pu.position.set(0, 0, .27); ball.add(pu); pupils.push(pu);
+  const sh = new THREE.Mesh(SPH, SHINE); sh.scale.setScalar(.06); sh.position.set(.06, .08, .34); ball.add(sh);
 }
+// Corona dorada: aparece cuando la rana ya puede comerse al jefe
+const crown = new THREE.Group(); crown.position.set(0, .95, -1.35); headRig.add(crown); crown.visible = false;
+{ const gold = M(0xffd23a, { emissive: 0xffb000, emissiveIntensity: .25 });
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(.42, .46, .22, 14, 1, true), gold); band.material.side = THREE.DoubleSide; crown.add(band);
+  for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2, sp = new THREE.Mesh(new THREE.ConeGeometry(.1, .3, 6), gold); sp.position.set(Math.cos(a) * .42, .24, Math.sin(a) * .42); crown.add(sp);
+    const gem = ell(.06, .06, .06, M([0xff5d8f, 0x5ac8ff, 0x8fe04a][k % 3])); gem.position.set(Math.cos(a) * .44, .02, Math.sin(a) * .44); crown.add(gem); } }
+// Lengua: sale de la boca hacia lo que quiere atrapar (vive en el grupo del hoyo, sin la escala de la boca)
+const tongueRig = new THREE.Group(); hole.add(tongueRig);
+const tongueGeo = new THREE.CylinderGeometry(1, 1, 1, 10); tongueGeo.rotateX(Math.PI / 2); tongueGeo.translate(0, 0, .5);
+const tongue = new THREE.Mesh(tongueGeo, M(0xff5d8f)); tongueRig.add(tongue);
+const tongueTip = ell(1, .7, 1, M(0xff7aa3)); tongueRig.add(tongueTip);
+tongueRig.visible = false;
 
 /* ---------- Escenario vivo: pasto que se mece, florecitas, mariposas y árboles en la orilla ---------- */
 // Las matas y flores desaparecen dentro del hoyo, igual que el piso
@@ -991,6 +1030,7 @@ function buildMenu() {
   });
 }
 function showMenu() {
+  music(false);
   clearWorld(); game = null; arrowEl.hidden = true; joy = null; joyEl.hidden = true;
   app.hidden = true; $('#win').hidden = true; $('#confetti').hidden = true; $('#hud').hidden = true;
   $('#menu').hidden = false; $('#menuBg').hidden = false; $('#backBtn').hidden = true; $('#title').hidden = false;
@@ -1126,7 +1166,19 @@ function newItem(theme, i, x, z, ry = rand(0, Math.PI * 2)) {
   return it;
 }
 
-function start(n) {
+let loadingLvl = false;
+async function start(n) {
+  if (loadingLvl) return;
+  const T0 = THEMES[LEVELS[n].theme];
+  if (THEME_MODELS[LEVELS[n].theme].some(m => !MODELS[m])) {
+    loadingLvl = true; const ov = $('#lvlLoad'), bar = ov.querySelector('i'); ov.hidden = false; window.LEON_PROGRESS = 0;
+    const iv = setInterval(() => (bar.style.width = Math.max(8, (window.LEON_PROGRESS || 0) * 100) + '%'), 100);
+    await loadModels(THEME_MODELS[LEVELS[n].theme], '../models/');
+    clearInterval(iv); ov.hidden = true; loadingLvl = false;
+  }
+  startNow(n);
+}
+function startNow(n) {
   clearWorld();
   const L = LEVELS[n], T = THEMES[L.theme];
   worldU.value = L.world; altU.value.setHex(T.ground[1]); groundMat.color.setHex(T.ground[0]);
@@ -1153,7 +1205,7 @@ function start(n) {
   $('#lvl').textContent = 'NIVEL ' + (n + 1); $('#score').textContent = '0';
   $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
   app.hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false;
-  resize(); camPos = null; updateMeter();
+  resize(); camPos = null; updateMeter(); music(true);
 }
 
 /* Control tipo joystick: donde se pone el dedo queda el centro; arrastrar desde ahí mueve la rana en esa dirección */
@@ -1217,7 +1269,12 @@ function updateSparks(dt) {
 function grow(it) {
   const g = game, before = sizesFit(g.r);
   g.r = Math.min(Math.sqrt(g.r * g.r + GROW * (g.L.boss >= 15 ? 1.7 : 1) * it.r * it.r) + .004, 30);
-  if (sizesFit(g.r) > before) sfx.grow();
+  if (sizesFit(g.r) > before) { sfx.grow(); sizeUp(); }
+}
+function sizeUp() {
+  const el = document.createElement('div'); el.className = 'sizeup'; el.textContent = fits(game.boss.r, game.r) ? '¡YA PUEDES CON EL JEFE!' : '¡MÁS GRANDE!';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1400);
+  burst(14, 8); game.shake = .35;
 }
 function sizesFit(r) { let n = 0; while (n < 17 && fits(SIZE(n) * .5, r)) n++; return n; }
 
@@ -1237,7 +1294,7 @@ function step(dt) {
   g.show += (g.r - g.show) * Math.min(1, dt * 5);
 
   for (const it of g.items) {
-    if (it.fall) continue;
+    if (it.fall || it.carry) continue;
     // Los dinos caminan despacito por el mundo
     if (it.walk) {
       it.head += rand(-.6, .6) * dt;
@@ -1283,18 +1340,51 @@ function step(dt) {
   wall.scale.set(R, depth, R); wall.position.y = -depth / 2; floor.scale.setScalar(R); floor.position.y = -depth + .01;
   rim.scale.set(R, Math.max(1, R * .9), R);
   holeU.value.set(g.hx, g.hz, R);
-  pupils.forEach(p => { p.position.x = g.look.x * .07; p.position.y = -g.look.y * .05; });
+  pupils.forEach(p => { p.position.x = g.look.x * .09; p.position.y = -g.look.y * .06; });
   g.blink -= dt; if (g.blink < 0) g.blink = rand(2, 5);
-  g.chomp = Math.max(0, (g.chomp || 0) - dt * 3);
-  const bl = g.blink < .12 || g.chomp > .4 ? .25 : 1;   // parpadea, y entrecierra los ojos de gusto al comer
+  g.chomp = Math.max(0, (g.chomp || 0) - dt * 2.5);
+  const bl = g.blink < .12 ? .12 : g.chomp > .3 ? .35 : 1;   // parpadea, y entrecierra los ojos de gusto al comer
   balls.forEach(b => (b.scale.y = bl));
-  rim.scale.x = rim.scale.z = R * (1 + Math.sin(g.chomp * Math.PI) * .1);
-  // De vez en cuando saca la lengua
-  g.lick = (g.lick || 4) - dt; if (g.lick < -.6) g.lick = rand(3, 6);
-  const lk = g.lick < 0 ? Math.sin(-g.lick / .6 * Math.PI) : 0;
-  tongue.position.z = .3 + lk * 1.1; tongue.scale.z = .55 * (1 + lk);
-  eyeRig.position.y = Math.abs(Math.sin(g.t * 8)) * .05 * (g.look.length() > .3 ? 1 : 0);
-  updateCamera(dt);
+  const ch = Math.sin(Math.min(1, g.chomp) * Math.PI);
+  rim.scale.x = rim.scale.z = R * (1 + ch * .1);
+  cheeks.forEach(c => c.scale.set(.26 * (1 + ch * .9), .12 * (1 + ch * 1.4), .2 * (1 + ch * .9)));   // cachetes inflados al masticar
+  headRig.position.y = Math.abs(Math.sin(g.t * 8)) * .06 * (g.look.length() > .3 ? 1 : 0) + ch * .08;
+  crown.visible = fits(g.boss.r, g.r) && !g.over; crown.rotation.y += dt * 1.5;
+  updateTongue(dt);  updateCamera(dt);
+}
+// La lengua atrapa cosas que caben y están cerca (ayuda a León y es divertida de ver)
+function updateTongue(dt) {
+  const g = game, T = g.tongue || (g.tongue = { st: 'idle', cd: 1, t: 0 });
+  if (T.st === 'idle') {
+    T.cd -= dt; tongueRig.visible = false;
+    if (T.cd > 0 || g.over) return;
+    const reach = g.r * 2.2 + 3;
+    let best = null, bd = 1e9;
+    for (const it of g.items) {
+      if (it.fall || it.carry || !fits(it.r, g.r) || it === g.boss) continue;
+      const d = Math.hypot(it.x - g.hx, it.z - g.hz);
+      if (d > g.r * .9 && d < reach && d - it.i * .5 < bd) { bd = d - it.i * .5; best = it; }
+    }
+    if (!best) { T.cd = .4; return; }
+    T.st = 'out'; T.t = 0; T.it = best; best.carry = true; best.walk = 0; sfx.lick();
+  }
+  const it = T.it, dx = it.x - g.hx, dz = it.z - g.hz, d = Math.hypot(dx, dz) || 1;
+  T.t += dt;
+  let len;
+  if (T.st === 'out') { const k = Math.min(1, T.t / .12); len = d * k; if (k >= 1) { T.st = 'back'; T.t = 0; T.d0 = d; } }
+  else {
+    const k = Math.min(1, T.t / .22), e = k * k; len = T.d0 * (1 - e);
+    it.x = g.hx + dx / d * len; it.z = g.hz + dz / d * len;
+    it.obj.position.set(it.x, Math.sin(k * Math.PI) * (1 + g.r * .3), it.z); it.obj.rotation.z += dt * 6;
+    if (!it.solo) poolSync(it);
+    if (k >= 1) {   // lo suelta dentro de la boca y cae
+      it.carry = false; it.fall = 1e-6; it.vy = 0; it.tilt = new THREE.Vector2(dx, dz).normalize(); g.falling.push(it); g.chomp = 1; sfx.gulp(it.i);
+      T.st = 'idle'; T.cd = Math.max(.25, .9 - g.r * .05); T.it = null;
+    }
+  }
+  const w = .14 + g.r * .06;
+  tongueRig.visible = true; tongueRig.rotation.y = Math.atan2(dx, dz);
+  tongue.position.set(0, .25, 0); tongue.scale.set(w, w * .45, Math.max(.01, len)); tongueTip.position.set(0, .25, len); tongueTip.scale.setScalar(w * 1.7);
 }
 function refill() {
   const g = game; let top = 0; while (top < g.L.boss && fits(SIZE(top + 1) * .5, g.r)) top++;
@@ -1320,6 +1410,7 @@ function updateCamera(dt) {
   if (!camPos) camPos = camWant.clone();
   camPos.lerp(camWant, Math.min(1, dt * 4));
   camera.position.copy(camPos);
+  if (g.shake > 0) { g.shake -= dt; const a = g.shake * .6; camera.position.x += rand(-a, a); camera.position.y += rand(-a, a); }
   camLook.set(camPos.x, 0, camPos.z - dist * .62 - 1.5);
   camera.lookAt(camLook);
   const s = dist * .9;

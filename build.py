@@ -96,13 +96,15 @@ def main():
     for d, _, fs in os.walk(SITE):
         for f in fs:
             rel = os.path.relpath(os.path.join(d, f), SITE).replace(os.sep, '/')
-            if rel not in ('sw.js', '_headers', 'version.json') and not f.startswith('.'):
+            # Only the core is stored at install; game files (models, pictures) are stored when a game first needs them
+            on_demand = rel.startswith(('models/', 'img/puzzle/', 'img/hole/', 'img/menus/'))
+            if rel not in ('sw.js', '_headers', 'version.json') and not f.startswith('.') and not on_demand:
                 files.append(rel)
     write(os.path.join(SITE, 'version.json'), json.dumps({'v': version}))  # read by the hub's update button
     sw = read('sw.template.js').replace('__VERSION__', version).replace('__FILES__', ', '.join(f"'{f}'" for f in sorted(files)))
     write(os.path.join(SITE, 'sw.js'), sw)
     write(os.path.join(SITE, '_headers'), ''.join(f'{p}\n  Cache-Control: no-cache\n' for p in ['/sw.js', '/version.json', '/*.html', '/'] + ['/' + d for d in dirs]))
-    print(f'site/ ready (version {version}, {len(files)} cached files)')
+    print(f'site/ ready (version {version}, {len(files)} core files stored at install; game files stored on demand)')
 
 if __name__ == '__main__':
     main()
