@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021000012';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021000209';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -77,6 +77,17 @@ h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);lett
 .wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;display:flex;align-items:center;justify-content:center}
 .wbtn svg{width:30px;height:30px;shape-rendering:crispEdges}
 .wbtn.go{background:var(--grass)}
+/* Pantallas angostas (iPhone parado): botones un poco más chicos y el marcador de puntos debajo del nivel */
+@media (max-width:620px){
+  .bar{gap:8px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  .side{gap:8px}
+  .ibtn{width:44px;height:44px}
+  .ibtn svg{width:22px;height:22px}
+  #score{position:static;font-size:18px;padding:3px 12px 3px 34px}
+  #meterBar{width:min(34vw,140px)}
+  #bossIcon{width:40px;height:40px}
+  #hud{gap:8px}
+}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
 </style>
 <style>@media (display-mode: standalone), (display-mode: fullscreen){html,body{height:var(--fullh,100%)!important}#app,.bg,.world,#menu,#play,#win,#confetti,#leonIntro{bottom:auto!important;height:var(--fullh,100%)!important}}</style>
