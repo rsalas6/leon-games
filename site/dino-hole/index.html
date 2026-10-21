@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261020235455';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021000012';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -600,7 +600,7 @@ const lightOf = c => new THREE.Color(c).lerp(new THREE.Color(0xfff2c8), .55).get
 const darkOf = c => new THREE.Color(c).multiplyScalar(.62).getHex();
 function qdino(name, c) {
   if (!MODELS[name]) return null;
-  const m = recolor(modelClone(name), nm => /black/i.test(nm) ? null : /light|yellow/i.test(nm) ? lightOf(c) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(c) : c);
+  const m = recolor(modelClone(name), nm => /black|eye|claw/i.test(nm) ? null : /light|yellow|belly|wing/i.test(nm) ? lightOf(c) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(c) : c);
   m.rotation.y = Math.PI;   // miran a +Z; en el juego caminan hacia -Z
   const g = new THREE.Group(); g.add(m);
   const mixer = new THREE.AnimationMixer(m), clips = MODELS[name].animations;
@@ -609,7 +609,7 @@ function qdino(name, c) {
   g.userData.anim = t => { const dt = lastT == null ? 0 : Math.max(0, Math.min(.5, t - lastT)); lastT = t; mixer.update(dt / 6); };
   return g;
 }
-const QD = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para' };
+const QD = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para', ptero: 'dragon', mosa: 'shark' };
 function dino(kind, c) {
   if (QD[kind]) { const q = qdino(QD[kind], c); if (q) return q; }
   const d = BUILDERS[kind](c), g = new THREE.Group(); g.add(d.g);
@@ -626,7 +626,7 @@ const THEMES = {
 const THEME_KEYS = Object.keys(THEMES);
 // Cargar modelos (se guardan con la app para jugar sin internet)
 $('#title').textContent = 'CARGANDO…';
-await loadModels(['raptor', 'stego', 'trex', 'trice', 'apato', 'para', ...['flower_redA', 'mushroom_red', 'grass_leafsLarge', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'plant_bushLarge', 'log_large', 'tree_palmShort',
+await loadModels(['raptor', 'stego', 'trex', 'trice', 'apato', 'para', 'dragon', 'shark', ...['flower_redA', 'mushroom_red', 'grass_leafsLarge', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'plant_bushLarge', 'log_large', 'tree_palmShort',
   'tree_palmTall', 'tree_oak', 'tree_fat', 'tree_default', 'tree_pineRoundA', 'bottle-large', 'barrel', 'chest', 'boat-row-small', 'cannon', 'palm-bend', 'palm-straight', 'ship-small', 'tower-complete-small', 'ship-pirate-large',
   'present-a-cube', 'present-b-round', 'sled', 'snowman', 'reindeer', 'tree-snow-c', 'tree-snow-b', 'train-wagon', 'train-locomotive', 'cactus_short', 'cactus_tall', 'tent_detailedClosed', 'mushroom_tanGroup',
   'rocks-sand-a', 'rock_tallA'].map(n => 'k/' + n)], '../models/');

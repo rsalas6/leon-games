@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261020235455';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021000012';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -485,7 +485,7 @@ paintFs();
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 /* ---------- Modelos 3D (dinosaurios de Quaternius y naturaleza de Kenney, CC0) ---------- */
-const DINO_MODELS = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para' };
+const DINO_MODELS = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para', ptero: 'dragon', mosa: 'shark' };
 const KMODELS = ['tree_palmTall', 'tree_palm', 'tree_palmBend', 'tree_palmDetailedTall', 'tree_oak', 'tree_fat', 'tree_default', 'tree_detailed', 'plant_bushDetailed', 'grass_leafsLarge',
   'plant_bushLarge', 'plant_bush', 'plant_bushSmall', 'rock_largeA', 'rock_largeB', 'rock_largeC', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'rock_tallA', 'rock_tallB', 'cactus_tall', 'cactus_short', 'mushroom_redGroup', 'mushroom_red',
   'mushroom_tanGroup', 'grass_large', 'grass_leafs', 'tree-snow-b', 'tree-snow-c', 'snowman', 'snowman-hat', 'reindeer', 'present-a-cube', 'present-b-round', 'snow-pile', 'stump_old', 'log_large',
@@ -776,14 +776,14 @@ function buildMosa(c) {
   } };
 }
 // Dinosaurio con modelo animado: se pinta del color del corredor y usa sus animaciones (quieto, caminar, correr)
-const FORM_SIZE = { raptor: 3.8, stego: 4.8, trex: 5.6, trice: 4.6, brachio: 7.4, compy: 2.8 };
+const FORM_SIZE = { raptor: 3.8, stego: 4.8, trex: 5.6, trice: 4.6, brachio: 7.4, compy: 2.8, ptero: 4.2, mosa: 4.2 };
 const lightOf = c => new THREE.Color(c).lerp(new THREE.Color(0xfff2c8), .55).getHex();
 const darkOf = c => new THREE.Color(c).multiplyScalar(.62).getHex();
 function glbForm(kind, color) {
   const name = DINO_MODELS[kind], src = MODELS[name];
   if (!src) return BUILDERS[kind](color);
   const model = modelClone(name, FORM_SIZE[kind]);
-  recolor(model, nm => /black/i.test(nm) ? null : /light|yellow/i.test(nm) ? lightOf(color) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(color) : color);
+  recolor(model, nm => /black|eye|claw/i.test(nm) ? null : /light|yellow|belly/i.test(nm) ? lightOf(color) : /wing/i.test(nm) ? lightOf(color) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(color) : color);
   model.rotation.y = Math.PI;                        // los modelos miran a +Z; la carrera va hacia -Z
   const box = modelBox(model); model.position.y = -box.min.y;
   const g = new THREE.Group(); g.add(model);
