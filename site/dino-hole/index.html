@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021135318';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021164438';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -540,6 +540,7 @@ const sfx = {
   gulp: i => { const n = performance.now(); if (n - lastGulp < 60) return; lastGulp = n; beep(720 - i * 30, .13, 'square', .05, -320 + i * 10); },
   bump: () => beep(140, .08, 'triangle', .06),
   lick: () => beep(900, .07, 'sine', .05, 500),
+  roar: () => { beep(110, .7, 'sawtooth', .06, -60); beep(82, .9, 'square', .04, -30, .05); },
   grow: () => { beep(523, .08, 'square', .05); beep(784, .1, 'square', .05, 0, .08); },
   win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => beep(f, .16, 'square', .06, 0, i * .12)),
 };
@@ -654,10 +655,10 @@ function dino(kind, c) {
 }
 // Cada mundo: 16 cosas de la más chiquita a la más grande; la última es el jefe del nivel largo
 const THEMES = {
-  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('brachio', 0x6a8ad8)] },
-  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('mosa', 0x2f6fc0)] },
-  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x9ab0e0)] },
-  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
+  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('trex', 0x7a5ad8)] },
+  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('trex', 0x2f8fd0)] },
+  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trex', 0x6a9ad8)] },
+  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('trex', 0xd07a3a)] },
   volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('trex', 0xb8321a)] },
   ciudad: { roads: 1, far: [0x9aa8c0, 0xc8d4e8], farKind: 'peak', pond: 0x3aa8e8, grass: 0x5cae40, grassN: .03, flowers: [0xff5d8f, 0xffd23a], out: 0x7e8798, wave: 0,
     border: () => K(['low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a'][Math.random() * 4 | 0])(), butterflies: false,
@@ -668,9 +669,9 @@ const THEME_KEYS = Object.keys(THEMES);
 // Modelos de cada mundo: se descargan solo cuando León entra a un nivel de ese mundo (y luego quedan guardados sin internet)
 const THEME_MODELS = {
   selva: ['raptor', 'stego', 'trice', 'apato', 'trex', 'para', ...['flower_redA', 'grass_leafsLarge', 'log_large', 'mushroom_red', 'plant_bushLarge', 'stone_largeA', 'tree_default', 'tree_fat', 'tree_oak', 'tree_palmShort', 'tree_palmTall'].map(n => 'k/' + n)],
-  playa: ['para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
-  nieve: ['raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
-  desierto: ['para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
+  playa: ['trex', 'para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
+  nieve: ['trex', 'raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
+  desierto: ['trex', 'para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
   volcan: ['para', 'dragon', 'raptor', 'stego', 'trex', 'trice', ...['chest', 'mushroom_tanGroup', 'stone_largeA'].map(n => 'k/' + n)],
   ciudad: ['trex', ...['ambulance', 'building-skyscraper-a', 'building-type-a', 'building-type-c', 'cone', 'construction-barrier', 'dumpster', 'firetruck', 'garbage-truck', 'hatchback-sports', 'kart-oobi',
     'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'police', 'road-sign-stop', 'sedan', 'taxi', 'tree-small'].map(n => 'k/' + n)],
@@ -680,15 +681,17 @@ const THEME_MODELS = {
 const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2], [.1, 4, .7, .06, 2, 1.5],
                 [.22, 2, 1.4, .1, 4, .3], [.16, 3, 2.2, .12, 6, 1.1], [.2, 5, .4, .08, 2, 2.6], [.26, 2, 2.9, .08, 3, .7], [.15, 4, 1.8, .12, 5, 2.2], [.12, 3, 2.4, .08, 5, .4]];
 const LEVELS = [
-  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 11, R: 52, h: SHAPES[k], total: 340 })),
+  // En TODOS los niveles el jefe es un dinosaurio titán inmenso (22 m en los cortos, 30 m en los largos)
+  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 16, bossSize: 30, long: false, R: 62, h: SHAPES[k], total: 450 })),
   // Niveles largos: el jefe es un dinosaurio TITÁN súper gigante que camina por la isla
-  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 16, R: 72, h: SHAPES[k + THEME_KEYS.length], total: 620 })),
+  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 16, bossSize: 40, long: true, R: 80, h: SHAPES[k + THEME_KEYS.length], total: 750 })),
 ].map(L => Object.assign(L, { world: Math.round(L.R * 2.8) }));
 const shapeR = (L, a) => L.R * (1 + L.h[0] * Math.sin(L.h[1] * a + L.h[2]) + L.h[3] * Math.sin(L.h[4] * a + L.h[5]));
 // ¿El punto (x, z) está dentro de la isla, con un margen m hacia adentro?
 const inside = (L, x, z, m = 0) => { const c = L.world / 2, dx = x - c, dz = z - c; return Math.hypot(dx, dz) < shapeR(L, Math.atan2(dz, dx)) - m; };
 const inPond = (g, x, z, m = 0) => g.ponds.some(p => Math.hypot(x - p.x, z - p.z) < p.r + m);
-const SIZE = i => i === 16 ? 16 : .6 * Math.pow(1.21, i);   // ancho en el piso (metros) del objeto i; el 16 es el titán súper gigante
+let BOSS_SIZE = 22;
+const SIZE = i => i === 16 ? BOSS_SIZE : .6 * Math.pow(1.21, i);   // ancho en el piso (metros) del objeto i; el 16 es el titán inmenso del nivel
 const GROW = .12;                              // cuánto crece el hoyo por cada cosa que se come
 const R0 = 1.25;                               // radio inicial del hoyo
 const fits = (rad, r) => rad < r * .92;
@@ -1054,7 +1057,7 @@ function buildMenu() {
     const b = document.createElement('button');
     b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1));
     b.style.background = '#' + THEMES[L.theme].sky.toString(16).padStart(6, '0');
-    b.innerHTML = `<img alt="" src="../img/hole/${L.boss >= 15 ? 'lvl2' : 'lvl'}-${L.theme}.webp"><b>${n + 1}</b>${save.done[n] ? '<span class="star"></span>' : ''}`;
+    b.innerHTML = `<img alt="" src="../img/hole/${L.long ? 'lvl2' : 'lvl'}-${L.theme}.webp"><b>${n + 1}</b>${save.done[n] ? '<span class="star"></span>' : ''}`;
     b.addEventListener('click', () => { sfx.tap(); start(n); });
     box.appendChild(b);
   });
@@ -1148,10 +1151,11 @@ function generateLayout(L) {
   const ok = (x, z, r) => inside(L, x, z, r + .6) && !inPond(game, x, z, r + .4);
   ringP(0, 10, 6).concat(ringP(1, 8, 8.5, .3), ringP(0, 12, 11, .1)).forEach(p => out.push({ i: p.i, x: c + p.x, z: c + p.z, ry: p.ry }));
   centers.push({ x: c, z: c, r: 12 });
-  for (let t = 0; t < 200; t++) {
-    const a = rand(0, 6.3), d = rand(L.R * .5, L.R * .85), x = c + Math.cos(a) * d, z = c + Math.sin(a) * d;
-    if (!ok(x, z, SIZE(L.boss) * .5 + 1)) continue;
-    out.push({ i: L.boss, x, z, ry: rand(0, 6.3) }); centers.push({ x, z, r: SIZE(L.boss) * .6 + 3 }); break;
+  for (let t = 0; t < 400; t++) {
+    // El titán se para "arriba" en la pantalla, a la vista desde que empieza el nivel (si no cabe ahí, en cualquier lado; al final, a la fuerza)
+    const a = -Math.PI / 2 + rand(-.5, .5) * Math.min(1, t / 40) + (t > 200 ? rand(-3, 3) : 0), d = SIZE(L.boss) * .5 + 12 + (t % 200) * .15, x = c + Math.cos(a) * d, z = c + Math.sin(a) * d;
+    if (t < 399 && !ok(x, z, SIZE(L.boss) * (t > 300 ? .3 : .5) + 1)) continue;
+    out.push({ i: L.boss, x, z, ry: Math.PI + rand(-.3, .3) }); centers.push({ x, z, r: SIZE(L.boss) * .6 + 3 }); break;
   }
   const recipes = TOWNS[L.theme].filter(r => r[2]().every(p => p.i < L.boss)).map(r => ({ r: r[0], max: Math.ceil(r[1] * (L.R / 40) ** 2), make: r[2], used: 0 }));
   for (let tries = 0; tries < 600 && out.length < L.total; tries++) {
@@ -1191,7 +1195,7 @@ function newItem(theme, i, x, z, ry = rand(0, Math.PI * 2)) {
   else { obj = new THREE.Object3D(); slot = poolAdd(i, obj); if (slot < 0) return null; }
   obj.rotation.y = ry;
   obj.position.set(x, 0, z);
-  const it = { i, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? rand(.25, .55) : 0 };
+  const it = { i, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? (game.L.boss === i ? .12 : rand(.25, .55)) : 0 };
   if (!solo) poolSync(it);
   return it;
 }
@@ -1211,11 +1215,12 @@ async function start(n) {
 function startNow(n) {
   clearWorld();
   const L = LEVELS[n], T = THEMES[L.theme];
+  BOSS_SIZE = L.bossSize;
   worldU.value = L.world; altU.value.setHex(T.ground[1]); groundMat.color.setHex(T.ground[0]);
   ground.scale.set(L.world + 400, L.world + 400, 1); ground.position.set(L.world / 2, 0, L.world / 2);
   scene.background = new THREE.Color(T.sky); scene.fog = new THREE.Fog(T.sky, 110, 380);
   hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave; roadsU.value = T.roads ? 1 : 0;
-  game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2, ponds: [] };
+  game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2, ponds: [], intro: 3.6 };
   shapeA.value.set(L.R, L.h[0], L.h[1], L.h[2]); shapeB.value.set(L.h[3], L.h[4], L.h[5]); pondColU.value.setHex(T.pond);
   // 2 o 3 charcos (agua, hielo o lava según el mundo) que no estén en el centro
   for (let k = 0, tries = 0; k < 3 && tries < 200; tries++) {
@@ -1230,6 +1235,7 @@ function startNow(n) {
   layout.forEach(p => (counts[p.i] = (counts[p.i] || 0) + 1));
   makePools(L, counts);
   game.items = placeItems(L, layout);
+  game.growK = L.long ? 2.1 : 2.5;   // calibrado con un bot: ~400 cosas (nivel corto) y ~600 (largo) antes de poder con el titán
   game.boss = game.items.find(it => it.i === L.boss);
   $('#bossIcon').src = thumb(L.theme, L.boss);
   $('#lvl').textContent = 'NIVEL ' + (n + 1); $('#score').textContent = '0';
@@ -1298,7 +1304,7 @@ function updateSparks(dt) {
 
 function grow(it) {
   const g = game, before = sizesFit(g.r);
-  g.r = Math.min(Math.sqrt(g.r * g.r + GROW * (g.L.boss >= 15 ? 1.7 : 1) * it.r * it.r) + .004, 30);
+  g.r = Math.min(Math.sqrt(g.r * g.r + GROW * (g.growK || 1) * it.r * it.r) + .004, 30);
   if (sizesFit(g.r) > before) { sfx.grow(); sizeUp(); }
 }
 function sizeUp() {
@@ -1326,7 +1332,15 @@ function step(dt) {
   for (const it of g.items) {
     if (it.fall || it.carry) continue;
     // Los dinos caminan despacito por el mundo
-    if (it.walk) {
+    if (it.walk && it.i === g.L.boss && !fits(it.r, g.r)) {
+      // El titán acecha: se queda siempre arriba en la pantalla, mirando a la rana, y la sigue con pasos lentos y pesados
+      const tx = g.hx, tz = g.hz - (it.r * .7 + g.r + 3), ddx = tx - it.x, ddz = tz - it.z, dd = Math.hypot(ddx, ddz);
+      const want = Math.atan2(-(g.hx - it.x), -(g.hz - it.z)); let dh = want - it.head; dh = Math.atan2(Math.sin(dh), Math.cos(dh)); it.head += dh * Math.min(1, dt * 2);
+      const moving = dd > 2 && g.intro <= 0;
+      if (moving) { const v = Math.min(dd, dt * Math.min(5, .5 + dd * .25)), nx = it.x + ddx / dd * v, nz = it.z + ddz / dd * v; if (inside(g.L, nx, nz, it.r * .6)) { it.x = nx; it.z = nz; } }
+      it.obj.rotation.y = it.head;
+      if (it.anim) it.anim(g.t * (moving ? 4 : 1.5) + it.seed, moving ? 3 : 1);
+    } else if (it.walk) {
       it.head += rand(-.6, .6) * dt;
       const fdx = it.x - g.hx, fdz = it.z - g.hz, fd = Math.hypot(fdx, fdz);
       it.scared = fits(it.r, g.r) && fd < g.r + 5 && fd > .01;
@@ -1388,7 +1402,9 @@ function step(dt) {
   if (g.over) { headRig.position.y += Math.abs(Math.sin(g.t * 9)) * .5; headRig.rotation.z = Math.sin(g.t * 9) * .25; } else headRig.rotation.z = 0;
   updateRipples(dt);
   crown.visible = fits(g.boss.r, g.r) && !g.over; crown.rotation.y += dt * 1.5;
-  updateTongue(dt);  updateCamera(dt);
+  updateTongue(dt);
+  // El titán ruge de vez en cuando y tiembla el piso
+  if (!g.over && g.boss && !g.boss.fall) { g.roarT = (g.roarT == null ? 4 : g.roarT) - dt; if (g.roarT < 0) { g.roarT = rand(9, 13); sfx.roar(); g.shake = Math.max(g.shake || 0, .25); g.boss.shake = .6; if (!fits(g.boss.r, g.r)) g.intro = 2.4; } }  updateCamera(dt);
 }
 // La lengua atrapa cosas que caben y están cerca (ayuda a León y es divertida de ver)
 function updateTongue(dt) {
@@ -1443,8 +1459,16 @@ let camPos = null;
 const camLook = new THREE.Vector3(), camWant = new THREE.Vector3(), proj = new THREE.Vector3();
 function updateCamera(dt) {
   const g = game, port = innerHeight > innerWidth;
-  const dist = (port ? 19 : 15) + g.show * 6.5;
-  camWant.set(g.hx, dist * .78, g.hz + dist * .62);
+  let dist = (port ? 19 : 15) + g.show * 6.5, cx = g.hx, cz = g.hz;
+  // Mientras el titán todavía es más grande, la cámara se queda un poco más alta para que siempre se vea en pantalla
+  if (g.boss && !g.boss.fall && !g.over) dist = Math.max(dist, g.boss.r * (port ? 1.9 : 1.55));
+  // Al empezar, la cámara se aleja para presentar al titán gigante y luego baja hasta la rana
+  if (g.intro > 0 && g.boss) {
+    g.intro -= dt; const k = Math.min(1, Math.max(0, g.intro / 1.4)), e = k * k * (3 - 2 * k);
+    dist += (Math.max(dist, g.boss.r * (port ? 5.4 : 4.2)) - dist) * e;
+    cx += (g.boss.x - g.hx) * .5 * e; cz += (g.boss.z - g.hz) * .7 * e;
+  }
+  camWant.set(cx, dist * .78, cz + dist * .62);
   if (!camPos) camPos = camWant.clone();
   camPos.lerp(camWant, Math.min(1, dt * 4));
   camera.position.copy(camPos);
@@ -1470,7 +1494,8 @@ function updateCamera(dt) {
 function winLevel() {
   const g = game; g.over = true; save.done[g.n] = true; persist();
   $('#finalScore').textContent = '★ ' + (g.score || 0);
-  sfx.win(); confetti(); arrowEl.hidden = true;
+  sfx.win(); confetti(); arrowEl.hidden = true; burst(40, 16); g.shake = 1.2;
+  setTimeout(() => { if (game === g) { burst(30, 16); sfx.grow(); } }, 450);
   setTimeout(() => { if (game === g) $('#win').hidden = false; }, 900);
 }
 function confetti() {
