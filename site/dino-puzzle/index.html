@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261020234920';</script>
+<script>window.LEON_VERSION='20261020235455';</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
 <title>Dino Puzzle</title>
 <style>
 /* Layout: menú con cuadrícula de dibujos pixel art y selector de piezas; al jugar, tablero cuadrado con la imagen fantasma y piezas de rompecabezas regadas alrededor. Un solo look: pixel art brillante. */
-@font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
 :root{
   --ink:#2a1f3d;
   --sun:#ffd23a;
@@ -24,7 +24,7 @@
   --grass:#6cc63a;
   --paper:#fff6e0;
   --berry:#ff5d8f;
-  --pix:'Press Start 2P',ui-monospace,monospace;
+  --pix:'Lilita One','Arial Rounded MT Bold',sans-serif;
   color-scheme:light;
 }
 [hidden]{display:none!important}
@@ -39,8 +39,8 @@ img{-webkit-user-drag:none}
 #probe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 
 /* Botón pixel: borde con esquinas recortadas y bisel */
-.px{border:0;background:var(--sun);box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset -4px -4px 0 0 rgba(0,0,0,.18),inset 4px 4px 0 0 rgba(255,255,255,.55),0 10px 0 0 rgba(42,31,61,.35)}
-.px:active{transform:translateY(4px);box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),inset 4px 4px 0 0 rgba(0,0,0,.18),0 6px 0 0 rgba(42,31,61,.35)}
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
 .px:focus-visible{outline:4px solid #fff;outline-offset:6px}
 .ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
 .ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
@@ -48,19 +48,19 @@ img{-webkit-user-drag:none}
 .bar>*{pointer-events:auto}
 .side{display:flex;gap:16px}
 .side.end{justify-content:flex-end}
-h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);letter-spacing:.06em;text-align:center;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 6px 0 var(--ink)}
+h1{margin:0;font-weight:400;font-size:clamp(26px,5vw,46px);color:var(--sun);letter-spacing:.04em;text-align:center;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
 
 
 /* Menú */
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 92px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box;gap:18px}
 #grid{flex:1;min-height:0;width:100%;max-width:1260px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(96px,14vw,170px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
 .card{position:relative;aspect-ratio:1;padding:0;background:#fff}
-.card img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:cover;image-rendering:pixelated;pointer-events:none}
+.card img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;object-fit:cover;image-rendering:pixelated;pointer-events:none}
 .card .star{position:absolute;right:-12px;top:-12px;width:34px;height:34px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
-#sizes{display:flex;align-items:center;gap:clamp(10px,2.4vw,20px);flex-wrap:wrap;justify-content:center;background:rgba(42,31,61,.72);padding:12px 18px;box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink)}
-#sizes span{color:#fff;font-size:12px;letter-spacing:.1em}
+#sizes{display:flex;align-items:center;gap:clamp(10px,2.4vw,20px);flex-wrap:wrap;justify-content:center;background:rgba(42,31,61,.72);padding:12px 20px;border-radius:24px}
+#sizes span{color:#fff;font-size:20px;letter-spacing:.06em}
 .sz{width:clamp(48px,11vw,64px);height:clamp(48px,11vw,64px);padding:7px;background:#fff;display:grid;gap:3px}
-.sz b{background:#c9c0d6}
+.sz b{background:#c9c0d6;border-radius:3px}
 .sz.on{background:var(--sun)}
 .sz.on b{background:var(--ink)}
 
@@ -79,7 +79,7 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%;image-rendering:pixelated}
 #win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:22px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);pointer-events:none}
-#win .big{font-size:clamp(28px,8vw,72px);color:var(--sun);text-shadow:4px 0 0 var(--ink),-4px 0 0 var(--ink),0 4px 0 var(--ink),0 -4px 0 var(--ink),4px 9px 0 var(--ink);animation:pop .6s steps(6,end) both}
+#win .big{font-size:clamp(28px,8vw,72px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s steps(6,end) both}
 @keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
 #win .row{display:flex;gap:28px;pointer-events:auto}
 .wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;font-size:clamp(14px,2.6vw,20px);display:flex;align-items:center;justify-content:center;gap:12px}
@@ -94,49 +94,54 @@ h1{margin:0;font-weight:400;font-size:clamp(14px,3.6vw,30px);color:var(--sun);le
 <div id="leonIntro" aria-hidden="true">
   <div class="li-scene"></div>
   <div class="li-top">
-    <div class="li-title"><span>L</span><span>E</span><span class="li-o">O</span><span>N</span></div>
+    <div class="li-title"><span>L</span><span>E</span><span>Ó</span><span>N</span></div>
     <div class="li-sub">GAMES</div>
   </div>
   <div class="li-load">
     <div class="li-bar"><i></i></div>
-    <div class="li-label">CARGANDO...</div>
   </div>
 </div>
 <style>
-@font-face{font-family:'Press Start 2P';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/press-start-2p-latin.woff2) format('woff2')}
-#leonIntro{--li-ink:#2a1f3d;--li-sun:#ffd23a;--li-sky:#8fd8ff;position:fixed;inset:0;z-index:9999;overflow:hidden;background:var(--li-sky);font-family:'Press Start 2P',ui-monospace,monospace;color:#fff;transition:opacity .45s;-webkit-user-select:none;user-select:none;touch-action:none}
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+#leonIntro{--li-ink:#2a1f3d;--li-sun:#ffd23a;position:fixed;inset:0;z-index:9999;overflow:hidden;background:#bfe8ff;font-family:'Lilita One','Arial Rounded MT Bold',sans-serif;color:#fff;transition:opacity .5s;-webkit-user-select:none;user-select:none;touch-action:none}
 #leonIntro.out{opacity:0}
-.li-scene{position:absolute;inset:-2%;background:url(../img/leon-loading.webp) 56% 100%/cover no-repeat;image-rendering:pixelated;animation:li-zoom 3.4s ease-out both}
-.li-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(42,31,61,.38),rgba(42,31,61,0) 42%)}
-.li-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + max(5vh,18px));display:flex;flex-direction:column;align-items:center;gap:min(2.4vw,16px)}
-.li-title{display:flex;gap:.08em;font-size:min(15vw,13vh,112px);padding-top:.3em;line-height:1;color:var(--li-sun);text-shadow:.07em 0 0 var(--li-ink),-.07em 0 0 var(--li-ink),0 .07em 0 var(--li-ink),0 -.07em 0 var(--li-ink),.07em .14em 0 var(--li-ink),0 .2em 0 rgba(0,0,0,.25)}
-.li-title span{display:inline-block;position:relative;opacity:0;transform:translateY(-140%);animation:li-drop .5s steps(5,end) forwards}
-.li-o::before{content:'';position:absolute;left:44%;top:-.3em;width:.16em;height:.16em;background:var(--li-sun);box-shadow:.16em -.16em 0 var(--li-sun);filter:drop-shadow(.05em 0 0 var(--li-ink)) drop-shadow(-.05em 0 0 var(--li-ink)) drop-shadow(0 .05em 0 var(--li-ink)) drop-shadow(0 -.05em 0 var(--li-ink))}
-.li-title span:nth-child(1){animation-delay:.25s}
-.li-title span:nth-child(2){animation-delay:.4s}
-.li-title span:nth-child(3){animation-delay:.55s}
-.li-title span:nth-child(4){animation-delay:.7s}
-.li-sub{font-size:min(5.2vw,5.2vh,44px);letter-spacing:.35em;padding-left:.35em;text-shadow:.12em 0 0 var(--li-ink),-.12em 0 0 var(--li-ink),0 .12em 0 var(--li-ink),0 -.12em 0 var(--li-ink),.12em .24em 0 var(--li-ink);opacity:0;animation:li-blink .6s steps(2,end) 1s forwards}
-.li-load{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + max(3vh,14px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;width:min(60vw,380px)}
-.li-bar{width:100%;height:min(4.4vw,22px);box-sizing:border-box;padding:4px;background:var(--li-ink);box-shadow:0 0 0 4px #fff,0 0 0 8px var(--li-ink)}
-.li-bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--li-sun) 0 calc(10% - 4px),transparent calc(10% - 4px) 10%);animation:li-fill 2.6s steps(10,end) .2s forwards}
-.li-label{font-size:min(3.2vw,18px);letter-spacing:.12em;text-shadow:2px 0 0 var(--li-ink),-2px 0 0 var(--li-ink),0 2px 0 var(--li-ink),0 -2px 0 var(--li-ink);animation:li-pulse .8s steps(2,end) infinite}
+.li-scene{position:absolute;inset:-2%;background:url(../img/splash-wide.webp) 50% 70%/cover no-repeat;animation:li-zoom 4s ease-out both}
+@media (orientation:portrait){.li-scene{background-image:url(../img/splash-tall.webp)}}
+.li-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(42,31,61,.35),rgba(42,31,61,0) 40%,rgba(42,31,61,0) 75%,rgba(42,31,61,.35))}
+.li-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + max(4vh,16px));display:flex;flex-direction:column;align-items:center}
+.li-title{display:flex;gap:.02em;font-size:min(22vw,17vh,150px);line-height:.95;color:var(--li-sun);-webkit-text-stroke:.05em var(--li-ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--li-ink),0 .16em .1em rgba(0,0,0,.25)}
+.li-title span{display:inline-block;opacity:0;transform:translateY(-120%) scale(.6);animation:li-drop .6s cubic-bezier(.3,1.6,.5,1) forwards}
+.li-title span:nth-child(1){animation-delay:.2s}
+.li-title span:nth-child(2){animation-delay:.33s}
+.li-title span:nth-child(3){animation-delay:.46s}
+.li-title span:nth-child(4){animation-delay:.59s}
+.li-sub{margin-top:-.1em;font-size:min(9vw,7vh,62px);letter-spacing:.3em;padding-left:.3em;-webkit-text-stroke:.07em var(--li-ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--li-ink);opacity:0;transform:scale(.4);animation:li-pop .5s cubic-bezier(.3,1.8,.5,1) .9s forwards}
+.li-load{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + max(4vh,16px));transform:translateX(-50%);width:min(62vw,420px)}
+.li-bar{height:min(5vw,26px);box-sizing:border-box;padding:4px;border-radius:99px;background:rgba(42,31,61,.75);box-shadow:0 0 0 4px #fff,0 6px 0 4px rgba(42,31,61,.3)}
+.li-bar i{display:block;height:100%;width:6%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);transition:width .25s}
 @keyframes li-zoom{from{transform:scale(1.08)}to{transform:none}}
 @keyframes li-drop{to{opacity:1;transform:none}}
-@keyframes li-blink{to{opacity:1}}
-@keyframes li-fill{to{width:100%}}
-@keyframes li-pulse{50%{opacity:.35}}
+@keyframes li-pop{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#leonIntro *{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 <script>
-// Pantalla de carga de LEÓN GAMES (pixel art): dura ~3.1 s; tocar la pantalla la salta
+// Pantalla de carga de LEÓN GAMES: dura al menos ~2.6 s; en los juegos 3D espera a que terminen de cargar los modelos
+// (la barra muestra el avance real). Tocar la pantalla la salta solo cuando ya no hay nada cargando.
 (() => {
-  const el = document.getElementById('leonIntro');
+  const el = document.getElementById('leonIntro'), bar = el.querySelector('.li-bar i'), t0 = performance.now();
+  const MIN = matchMedia('(prefers-reduced-motion: reduce)').matches ? 800 : 2600;
   let gone = false;
-  const done = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 500); };
-  setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 900 : 3100);
-  // El toque que salta la intro no debe llegar a los botones de atrás: la capa sigue atrapando toques mientras se desvanece
-  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); done(); });
+  const ready = () => !window.LEON_WAIT || window.LEON_READY;
+  const done = () => { if (gone) return; gone = true; bar.style.width = '100%'; setTimeout(() => el.classList.add('out'), 150); setTimeout(() => el.remove(), 700); };
+  (function tick() {
+    if (gone) return;
+    const t = performance.now() - t0, timeP = Math.min(1, t / MIN);
+    const p = window.LEON_WAIT ? Math.min(timeP, .1 + .9 * (window.LEON_READY ? 1 : (window.LEON_PROGRESS || 0) * .95)) : timeP;
+    bar.style.width = Math.max(6, p * 100) + '%';
+    if ((t >= MIN && ready()) || t > 25000) done(); else setTimeout(tick, 100);
+  })();
+  // El toque que salta la intro no debe llegar a los botones de atrás
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (ready()) done(); });
   ['click', 'pointerup', 'touchend'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
 })();
 </script>

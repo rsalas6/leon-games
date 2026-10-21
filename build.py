@@ -34,6 +34,7 @@ def write(p, s):
 def build_page(src, out, up, version):
     s = read(src).replace('/*__DINO_KIT__*/', KIT).replace('/*__MODELS__*/', MODELS_JS)
     write(os.path.join(PREVIEW, os.path.basename(src)), s)  # fragment for artifact preview (CDN links kept)
+    wait = 'window.LEON_WAIT=true;' if '/*__MODELS__*/' in read(src) else ''  # 3D games: the intro waits until the models are loaded
     head, body = s.split('</style>\n', 1)
     head = '\n'.join(l for l in (head + '</style>').split('\n') if 'claude:viewport-fit-sides' not in l and 'rel="preconnect"' not in l)
     head = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^"]*">', f'<link rel="stylesheet" href="{up}vendor/fonts.css">', head)
@@ -50,7 +51,7 @@ def build_page(src, out, up, version):
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="{APP_NAME}">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='{version}';</script>
+<script>window.LEON_VERSION='{version}';{wait}</script>
 <link rel="manifest" href="{up}manifest.webmanifest">
 <link rel="apple-touch-icon" href="{up}icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="{up}icons/icon-192.png">

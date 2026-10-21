@@ -2,8 +2,9 @@
 const MODELS = {};
 function loadModels(names, base) {
   const loader = new THREE.GLTFLoader();
-  return Promise.all(names.map(n => MODELS[n] ? Promise.resolve() : new Promise(res => {
-    loader.load(base + n + '.glb', g => {
+  let done = 0; const tick = () => { done++; window.LEON_PROGRESS = done / names.length; };
+  return Promise.all(names.map(n => MODELS[n] ? (tick(), Promise.resolve()) : new Promise(res => {
+    loader.load(base + n + '.glb', g => { tick();
       // Los juegos usan colores "tal cual" (sin conversión de color), así que las texturas también se leen tal cual,
       // y los materiales pasan a Lambert: luz suave, barata para el iPad y pareja con el resto del mundo
       g.scene.traverse(o => {
@@ -20,7 +21,7 @@ function loadModels(names, base) {
         o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
       });
       MODELS[n] = g; res();
-    }, undefined, () => { console.warn('modelo no encontrado', n); res(); });
+    }, undefined, () => { tick(); console.warn('modelo no encontrado', n); res(); });
   })));
 }
 // Clona un modelo (con esqueleto si es animado) y lo escala para que su lado más largo mida `size`
