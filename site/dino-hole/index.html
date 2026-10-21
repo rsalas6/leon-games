@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021000209';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021000627';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -633,6 +633,10 @@ const THEMES = {
   nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x9ab0e0)] },
   desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
   volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('trex', 0xb8321a)] },
+  ciudad: { roads: 1, far: [0x9aa8c0, 0xc8d4e8], farKind: 'peak', pond: 0x3aa8e8, grass: 0x5cae40, grassN: .03, flowers: [0xff5d8f, 0xffd23a], out: 0x7e8798, wave: 0,
+    border: () => K(['low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a'][Math.random() * 4 | 0])(), butterflies: false,
+    ground: [0x9aa4b4, 0x8e98a8], sky: 0xbfe4ff,
+    items: [K('cone'), K('road-sign-stop'), K('kart-oobi'), K('construction-barrier'), K('dumpster'), K('tree-small'), K('hatchback-sports'), K('sedan'), K('taxi'), K('police'), K('ambulance'), K('firetruck'), K('garbage-truck'), K('building-type-a'), K('building-type-c'), K('building-skyscraper-a'), () => dino('trex', 0x3faa3a)] },
 };
 const THEME_KEYS = Object.keys(THEMES);
 // Cargar modelos (se guardan con la app para jugar sin internet)
@@ -640,16 +644,17 @@ $('#title').textContent = 'CARGANDO…';
 await loadModels(['raptor', 'stego', 'trex', 'trice', 'apato', 'para', 'dragon', 'shark', ...['flower_redA', 'mushroom_red', 'grass_leafsLarge', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'plant_bushLarge', 'log_large', 'tree_palmShort',
   'tree_palmTall', 'tree_oak', 'tree_fat', 'tree_default', 'tree_pineRoundA', 'bottle-large', 'barrel', 'chest', 'boat-row-small', 'cannon', 'palm-bend', 'palm-straight', 'ship-small', 'tower-complete-small', 'ship-pirate-large',
   'present-a-cube', 'present-b-round', 'sled', 'snowman', 'reindeer', 'tree-snow-c', 'tree-snow-b', 'train-wagon', 'train-locomotive', 'cactus_short', 'cactus_tall', 'tent_detailedClosed', 'mushroom_tanGroup',
-  'rocks-sand-a', 'rock_tallA'].map(n => 'k/' + n)], '../models/');
+  'rocks-sand-a', 'rock_tallA', 'cone', 'road-sign-stop', 'kart-oobi', 'construction-barrier', 'dumpster', 'tree-small', 'hatchback-sports', 'sedan', 'taxi', 'police', 'ambulance',
+  'firetruck', 'garbage-truck', 'building-type-a', 'building-type-c', 'building-skyscraper-a', 'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'tree-large'].map(n => 'k/' + n)], '../models/');
 $('#title').textContent = 'RANA GLOTONA';
 // Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande).
 // Los mundos son islas: su orilla es un círculo deformado por dos ondas (h = [a1, k1, p1, a2, k2, p2]) para que cada uno tenga otra forma
-const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2],
-                [.22, 2, 1.4, .1, 4, .3], [.16, 3, 2.2, .12, 6, 1.1], [.2, 5, .4, .08, 2, 2.6], [.26, 2, 2.9, .08, 3, .7], [.15, 4, 1.8, .12, 5, 2.2]];
+const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2], [.1, 4, .7, .06, 2, 1.5],
+                [.22, 2, 1.4, .1, 4, .3], [.16, 3, 2.2, .12, 6, 1.1], [.2, 5, .4, .08, 2, 2.6], [.26, 2, 2.9, .08, 3, .7], [.15, 4, 1.8, .12, 5, 2.2], [.12, 3, 2.4, .08, 5, .4]];
 const LEVELS = [
   ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 11, R: 52, h: SHAPES[k], total: 340 })),
   // Niveles largos: el jefe es un dinosaurio TITÁN súper gigante que camina por la isla
-  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 16, R: 72, h: SHAPES[k + 5], total: 620 })),
+  ...THEME_KEYS.map((t, k) => ({ theme: t, boss: 16, R: 72, h: SHAPES[k + THEME_KEYS.length], total: 620 })),
 ].map(L => Object.assign(L, { world: Math.round(L.R * 2.8) }));
 const shapeR = (L, a) => L.R * (1 + L.h[0] * Math.sin(L.h[1] * a + L.h[2]) + L.h[3] * Math.sin(L.h[4] * a + L.h[5]));
 // ¿El punto (x, z) está dentro de la isla, con un margen m hacia adentro?
@@ -792,7 +797,7 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize);
 
 // Piso con un agujero de verdad: el sombreador descarta los píxeles dentro del hoyo
-const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 },
+const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 }, roadsU = { value: 0 },
   shapeA = { value: new THREE.Vector4() }, shapeB = { value: new THREE.Vector3() }, pondsU = { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] }, pondColU = { value: new THREE.Color() };
 const groundTex = (() => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d');
@@ -802,10 +807,10 @@ const groundTex = (() => {
 })();
 const groundMat = new THREE.MeshLambertMaterial({ color: 0x7bd63a, map: groundTex });
 groundMat.onBeforeCompile = sh => {
-  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
+  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uRoads = roadsU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
     .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;\nuniform vec4 uShapeA;\nuniform vec3 uShapeB;\nuniform vec3 uPonds[3];\nuniform vec3 uPondCol;')
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;\nuniform vec4 uShapeA;\nuniform vec3 uShapeB;\nuniform vec3 uPonds[3];\nuniform vec3 uPondCol;\nuniform float uRoads;')
     .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
       if (distance(vWPos.xz, uHole.xy) < uHole.z) discard;`)
     .replace('vec4 diffuseColor = vec4( diffuse, opacity );', `vec4 diffuseColor = vec4( diffuse, opacity );
@@ -815,6 +820,19 @@ groundMat.onBeforeCompile = sh => {
       float ang = atan(dv.y, dv.x);
       float edge = length(dv) - uShapeA.x * (1.0 + uShapeA.y * sin(uShapeA.z * ang + uShapeA.w) + uShapeB.x * sin(uShapeB.y * ang + uShapeB.z));
       float w = sin(vWPos.x * .35 + uTime * 1.5) * sin(vWPos.z * .3 - uTime * 1.2);
+      if (uRoads > .5 && edge < -1.6) {
+        // Ciudad: cuadras de 26 m con calles de 7 m, banqueta clarita y línea punteada amarilla al centro
+        vec2 m = mod(vWPos.xz, 26.0);
+        float rx = step(m.x, 7.0), rz = step(m.y, 7.0), road = max(rx, rz);
+        vec2 sw = step(m, vec2(8.2)) - step(m, vec2(7.0));
+        diffuseColor.rgb = mix(vec3(.40, .72, .30), vec3(.80, .80, .84), max(sw.x, sw.y));
+        if (road > .5) {
+          diffuseColor.rgb = vec3(.30, .32, .38);
+          float dash = step(.5, fract((rx > .5 ? vWPos.z : vWPos.x) / 4.0));
+          if (rx > .5 && abs(m.x - 3.5) < .18 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
+          if (rz > .5 && rx < .5 && abs(m.y - 3.5) < .18 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
+        }
+      }
       if (edge > 0.0) diffuseColor.rgb = mix(uOut, uOut * 1.25, uWave * smoothstep(.3, .9, w));
       else if (edge > -1.6) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, .96, .82), .45);
       for (int i = 0; i < 3; i++) {
@@ -1033,6 +1051,16 @@ const TOWNS = {
     [8, 3, () => [...patchP(11, 2, 5), ...one(12, 0, 0)]],                             // oasis con estegos
     [9, 2, () => [...one(14), ...patchP(6, 4, 6)]],                                    // roca gigante
   ],
+  ciudad: [
+    [9, 4, () => [...gridP(7, 2, 4, 3.4), ...gridP(6, 1, 4, 3.4, 0, 5), ...one(4, 7, 0)]],                    // estacionamiento
+    [10, 3, () => [...gridP(13, 2, 2, 8), ...rowP(5, 4, 4, 6.5), ...patchP(2, 3, 6)]],                         // vecindario de casitas
+    [11, 2, () => [...gridP(15, 2, 2, 10), ...rowP(1, 4, 5, 8)]],                                              // centro con rascacielos
+    [9, 2, () => [...gridP(14, 1, 3, 8), ...rowP(5, 5, 3.5, 6)]],                                              // calle con casas
+    [8, 4, () => [...rowP(8, 3, 4), ...rowP(9, 2, 5, 3), ...rowP(10, 2, 5, -3)]],                               // tráfico (taxis, patrullas y ambulancias)
+    [6, 5, () => [...ringP(0, 8, 3), ...rowP(3, 3, 2.2, 0), ...one(4, 0, 4)]],                                 // obra en construcción
+    [7, 3, () => [...rowP(11, 2, 5), ...rowP(12, 2, 5, 4)]],                                                   // estación de bomberos y basura
+    [6, 6, () => [...ringP(5, 6, 4), ...patchP(2, 3, 3), ...patchP(0, 4, 3)]],                                 // parquecito
+  ],
   volcan: [
     [4, 7, () => [...patchP(3, 10, 3.2), ...one(8)]],                                  // cueva de cristales con tesoro
     [7, 5, () => [...patchP(5, 7, 6), ...patchP(4, 4, 6)]],                            // bosque seco
@@ -1104,7 +1132,7 @@ function start(n) {
   worldU.value = L.world; altU.value.setHex(T.ground[1]); groundMat.color.setHex(T.ground[0]);
   ground.scale.set(L.world + 400, L.world + 400, 1); ground.position.set(L.world / 2, 0, L.world / 2);
   scene.background = new THREE.Color(T.sky); scene.fog = new THREE.Fog(T.sky, 110, 380);
-  hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave;
+  hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave; roadsU.value = T.roads ? 1 : 0;
   game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2, ponds: [] };
   shapeA.value.set(L.R, L.h[0], L.h[1], L.h[2]); shapeB.value.set(L.h[3], L.h[4], L.h[5]); pondColU.value.setHex(T.pond);
   // 2 o 3 charcos (agua, hielo o lava según el mundo) que no estén en el centro
