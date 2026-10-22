@@ -18,6 +18,7 @@ PAGES = [
     ('games/dino-puzzle.html', 'dino-puzzle/index.html', '../'),
     ('games/dino-hole.html', 'dino-hole/index.html', '../'),
     ('games/dino-hide.html', 'dino-hide/index.html', '../'),
+    ('games/zombito.html', 'zombito/index.html', '../'),
 ]
 APP_NAME = 'Juegos de León'
 # iOS home-screen apps (black-translucent status bar) report a viewport shorter than the screen by the status bar height,
@@ -98,7 +99,7 @@ def main():
         for f in fs:
             rel = os.path.relpath(os.path.join(d, f), SITE).replace(os.sep, '/')
             # Only the core is stored at install; game files (models, pictures) are stored when a game first needs them
-            on_demand = rel.startswith(('models/', 'img/puzzle/', 'img/hole/', 'img/menus/'))
+            on_demand = rel.startswith(('models/', 'img/puzzle/', 'img/hole/', 'img/menus/', 'img/zomb/'))
             if rel not in ('sw.js', '_headers', 'version.json') and not f.startswith('.') and not on_demand:
                 files.append(rel)
     write(os.path.join(SITE, 'version.json'), json.dumps({'v': version}))  # read by the hub's update button

@@ -1,0 +1,535 @@
+<title>Zombito</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: juego de plataformas 2D (sprites) a pantalla completa; el zombito corre solo y brinca con un toque. Arriba: casita, nivel, dulces y avance hasta la meta, sonido. Menú: tarjetas de mundos sobre una noche tierna de Halloween. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{
+  --ink:#2a1f3d;
+  --sun:#ffd23a;
+  --plum:#7a4ad8;
+  --grass:#6cc63a;
+  --pix:'Lilita One','Arial Rounded MT Bold',sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#3a2a6a;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;image-rendering:auto}
+.bg{position:fixed;inset:0;background:url(__UP__img/zomb/bg-zomb-wide.webp) 50% 50%/cover no-repeat #4a3a8a}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/zomb/bg-zomb-tall.webp)}}
+.bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.25),rgba(255,255,255,0) 70%)}
+
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.px:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:16px;align-items:center}
+.side.end{justify-content:flex-end}
+h1{margin:0;font-weight:400;font-size:clamp(30px,6vw,56px);color:#9bf06a;letter-spacing:.04em;text-align:center;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
+#hud{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#lvl{font-size:clamp(15px,2.6vw,20px);color:#fff;background:var(--ink);padding:5px 16px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#prog{width:clamp(150px,34vw,340px);height:18px;box-sizing:border-box;padding:3px;border-radius:99px;background:var(--ink);box-shadow:0 0 0 3px #fff;position:relative}
+#prog i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(#b8f58a,#5db82a)}
+#prog img{position:absolute;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink))}
+#candies{display:flex;align-items:center;gap:6px;font-size:clamp(20px,3.4vw,28px);color:#fff;background:var(--ink);padding:3px 14px 3px 6px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#candies img{width:34px;height:34px;object-fit:contain}
+#candies.bump{animation:sbump .25s ease-out}
+@keyframes sbump{50%{transform:scale(1.25)}}
+
+#menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 96px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(130px,20vw,220px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
+.lv{position:relative;aspect-ratio:16/10;padding:0;background:#fff}
+.lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;object-fit:cover;pointer-events:none}
+.lv b{position:absolute;left:10px;top:8px;font-weight:400;font-size:clamp(20px,2.8vw,28px);color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),0 4px 0 var(--ink)}
+.lv .star{position:absolute;right:-12px;top:-12px;width:36px;height:36px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+
+#lvlLoad{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(42,31,61,.6);color:#fff;font-size:clamp(28px,6vw,44px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+#lvlLoad span{width:min(60vw,360px);height:22px;padding:4px;box-sizing:border-box;border-radius:99px;background:var(--ink);box-shadow:0 0 0 4px #fff}
+#lvlLoad i{display:block;height:100%;width:8%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);transition:width .2s}
+#tapHint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 9vh);z-index:30;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;font-size:clamp(20px,4vw,34px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink)}
+#tapHint svg{width:64px;height:64px;animation:tap .8s ease-in-out infinite}
+@keyframes tap{50%{transform:translateY(10px) scale(.9)}}
+
+#win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:18px;padding-top:calc(env(safe-area-inset-top,0px) + 13vh);pointer-events:none}
+#win .big{font-size:clamp(36px,8vw,80px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+#win .final{display:flex;align-items:center;gap:10px;font-size:clamp(26px,5vw,44px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+#win .final img{width:56px;height:56px;object-fit:contain}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+#win .row{display:flex;gap:28px;pointer-events:auto}
+.wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;display:flex;align-items:center;justify-content:center}
+.wbtn svg{width:30px;height:30px;shape-rendering:crispEdges}
+.wbtn.go{background:var(--grass)}
+@media (max-width:620px){
+  .bar{gap:8px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  .side{gap:8px}
+  .ibtn{width:44px;height:44px}
+  .ibtn svg{width:22px;height:22px}
+  #candies{font-size:18px}
+  #candies img{width:26px;height:26px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" id="menuBg" aria-hidden="true"></div>
+<canvas id="game" hidden></canvas>
+
+<div class="bar">
+  <div class="side">
+    <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
+    <button class="px ibtn" id="backBtn" aria-label="Elegir otro nivel" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+    <div id="candies" hidden><img alt="" src="__UP__img/zomb/candy.webp"><span id="candyN">0</span></div>
+  </div>
+  <h1 id="title">ZOMBITO</h1>
+  <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="prog"><i></i><img alt="" src="__UP__img/zomb/hero-0.webp"></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<main id="menu"><div id="levels"></div></main>
+<div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
+<div id="tapHint" hidden><svg viewBox="0 0 32 32"><path d="M12 30c-3 0-5-2-6-4l-3-7c-.6-1.4 1.4-2.4 2.3-1.2L8 21V6a2 2 0 0 1 4 0v9-3a2 2 0 0 1 4 0v3-2a2 2 0 0 1 4 0v3-1a2 2 0 0 1 4 0v7c0 5-3 9-8 9z" fill="#fff" stroke="#2a1f3d" stroke-width="2.4" stroke-linejoin="round"/></svg><span>¡TOCA PARA BRINCAR!</span></div>
+
+<div id="win" hidden>
+  <div class="big">¡LLEGASTE!</div>
+  <div class="final"><img alt="" src="__UP__img/zomb/candy.webp"><span id="finalN">0</span></div>
+  <div class="row">
+    <button class="px wbtn" id="menuBtn" aria-label="Elegir otro nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+    <button class="px wbtn" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
+    <button class="px wbtn go" id="nextBtn" aria-label="Siguiente nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M2 6h7V2h2l4 6-4 6H9v-4H2z"/></svg></button>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+
+let save = { done: {}, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('zombito')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('zombito', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0); }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+let lastCandy = 0;
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  jump: () => beep(330, .16, 'square', .045, 420),
+  jump2: () => beep(520, .14, 'square', .04, 520),
+  candy: () => { const n = performance.now(), hi = n - lastCandy < 400; lastCandy = n; beep(hi ? 1320 : 988, .07, 'square', .045); beep(hi ? 1760 : 1319, .12, 'square', .045, 0, .06); },
+  bump: () => beep(160, .1, 'triangle', .08, -40),
+  block: () => { beep(523, .06, 'square', .05); beep(784, .1, 'square', .05, 0, .06); },
+  stomp: () => { beep(240, .12, 'square', .06, -160); beep(500, .1, 'triangle', .05, 300, .08); },
+  ouch: () => beep(300, .25, 'sawtooth', .04, -200),
+  star: () => [0, 4, 7, 12, 16].forEach((s, i) => beep(523.25 * Math.pow(2, s / 12), .09, 'square', .05, 0, i * .06)),
+  flag: () => [784, 698, 659, 587, 523, 494, 440].forEach((f, i) => beep(f, .09, 'square', .05, 0, i * .07)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => beep(f, .16, 'square', .06, 0, .5 + i * .12)),
+};
+// Musiquita de Halloween tierna (menor, saltarina)
+const SONG = [0, 3, 7, 3, 8, 7, 3, 0, 5, 3, 2, 3, 7, 5, 3, 2], BASS = [0, 0, -4, -4, -2, -2, -5, -5];
+let songStep = 0, songTimer = null, starMusic = false;
+function music(on) {
+  clearInterval(songTimer); songTimer = null;
+  if (!on) return;
+  songTimer = setInterval(() => {
+    if (save.muted || !actx || document.hidden) return;
+    const n = SONG[songStep % SONG.length] + (starMusic ? 12 : 0); beep(392 * Math.pow(2, n / 12), .16, 'square', starMusic ? .03 : .022);
+    if (songStep % 2 === 0) beep(98 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .26, 'triangle', .05);
+    songStep++;
+  }, starMusic ? 120 : 190);
+}
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', e => { e.stopPropagation(); save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Sprites ---------- */
+const UP = '__UP__img/zomb/';
+const SPRITES = ['hero-0', 'hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5', 'ghost-0', 'ghost-1', 'bat-0', 'bat-1', 'pumpkin-0', 'pumpkin-1', 'skel-0', 'skel-1',
+  'candy', 'lolly', 'star', 'gpumpkin', 'flag', 'tomb', 'chest', 'balloon', 'house'];
+const IMG = {};
+function loadImages(names, onProgress) {
+  let done = 0;
+  return Promise.all(names.map(n => IMG[n] ? (onProgress(++done / names.length), 0) : new Promise(res => {
+    const im = new Image(); im.onload = im.onerror = () => { IMG[n] = im; onProgress(++done / names.length); res(); }; im.src = UP + n + '.webp';
+  })));
+}
+
+/* ---------- Mundos y niveles ---------- */
+// Colores del piso de cada mundo: pasto/betún arriba y tierra/galleta abajo
+const WORLDS = {
+  cementerio: { bg: 'bg-cementerio', top: '#7bd04f', top2: '#4fa83a', dirt: '#6a4a8a', dirt2: '#58397a', brick: '#8a5ac0', name: 'Cementerio' },
+  calabazas: { bg: 'bg-calabazas', top: '#a8d84a', top2: '#78a83a', dirt: '#b0683a', dirt2: '#94522c', brick: '#d07a3a', name: 'Calabazas' },
+  hongos: { bg: 'bg-hongos', top: '#5ae0c0', top2: '#38b098', dirt: '#4a5a9a', dirt2: '#3a4a84', brick: '#c04a9a', name: 'Hongos' },
+  dulces: { bg: 'bg-dulces', top: '#ffb3d9', top2: '#ff8fc4', dirt: '#c8844a', dirt2: '#b0703a', brick: '#ff6fa8', name: 'Dulces' },
+  castillo: { bg: 'bg-castillo', top: '#a8b0c8', top2: '#8890a8', dirt: '#5a5a7a', dirt2: '#4a4a6a', brick: '#6a6a90', name: 'Castillo' },
+};
+// len: largo en cuadros; pits: hoyos; enemies: qué tantos bichitos; kinds: cuáles
+const LEVELS = [
+  { world: 'cementerio', len: 153, pits: 0, enemies: .5, kinds: ['pumpkin'] },
+  { world: 'calabazas', len: 178, pits: 0, enemies: .7, kinds: ['pumpkin', 'ghost'] },
+  { world: 'hongos', len: 195, pits: .4, enemies: .8, kinds: ['pumpkin', 'skel'] },
+  { world: 'dulces', len: 212, pits: .5, enemies: .9, kinds: ['ghost', 'pumpkin', 'bat'] },
+  { world: 'cementerio', len: 229, pits: .6, enemies: 1, kinds: ['skel', 'bat', 'ghost'] },
+  { world: 'calabazas', len: 246, pits: .7, enemies: 1.1, kinds: ['pumpkin', 'bat', 'skel'] },
+  { world: 'castillo', len: 263, pits: .8, enemies: 1.2, kinds: ['skel', 'bat', 'ghost'] },
+  { world: 'dulces', len: 289, pits: .9, enemies: 1.3, kinds: ['ghost', 'pumpkin', 'bat', 'skel'] },
+];
+
+/* ---------- Armado del nivel ---------- */
+// Mapa de cuadros: solid[x][y] (y = 0 es abajo). Tipos: 1 piso, 2 ladrillo, 3 bloque "?", 4 bloque usado, 5 lápida, 6 escalón
+let L = null, solid = null, W = 0, H = 14;
+const T_GROUND = 1, T_BRICK = 2, T_Q = 3, T_USED = 4, T_TOMB = 5, T_STEP = 6;
+function genLevel(def) {
+  W = def.len + 30; solid = Array.from({ length: W }, () => new Uint8Array(H));
+  const items = [], enemies = [], qcontent = {}, ground = new Int8Array(W).fill(3);
+  const setG = (x, h) => { ground[x] = h; for (let y = 0; y < h; y++) solid[x][y] = T_GROUND; };
+  const candyArc = (x0, n, y0, hgt) => { for (let i = 0; i < n; i++) items.push({ kind: 'candy', x: x0 + i + .5, y: y0 + Math.sin(i / (n - 1 || 1) * Math.PI) * hgt + .5 }); };
+  let x = 0, gh = 3;
+  for (; x < 12; x++) setG(x, gh);
+  candyArc(5, 4, gh + .3, 0);
+  const segs = ['flat', 'qrow', 'tomb', 'pit', 'plat', 'hill', 'enemy', 'flat', 'qrow', 'tomb', 'enemy', 'stairsUp'];
+  while (x < def.len) {
+    let seg = pick(segs);
+    if (seg === 'pit' && Math.random() > def.pits) seg = 'flat';
+    if (seg === 'flat') { const n = 6 + (Math.random() * 5 | 0); for (let i = 0; i < n; i++) setG(x + i, gh); candyArc(x + 1, Math.min(5, n - 2), gh + .4, Math.random() < .5 ? 0 : 1.5); x += n; }
+    else if (seg === 'qrow') {
+      const n = 7; for (let i = 0; i < n; i++) setG(x + i, gh);
+      const by = gh + 3; for (let i = 2; i < 5; i++) { const t = i === 3 ? T_Q : (Math.random() < .5 ? T_Q : T_BRICK); solid[x + i][by] = t; if (t === T_Q) qcontent[(x + i) + ',' + by] = Math.random() < .12 ? 'star' : 'candy'; }
+      x += n;
+    } else if (seg === 'tomb') {
+      const n = 6, th = Math.random() < .5 ? 1 : 2; for (let i = 0; i < n; i++) setG(x + i, gh);
+      for (let y = 0; y < th; y++) solid[x + 3][gh + y] = T_TOMB; items.push({ kind: 'candy', x: x + 3.5, y: gh + th + 1.6 });
+      x += n;
+    } else if (seg === 'pit') {
+      setG(x, gh); setG(x + 1, gh); const w = 2 + (Math.random() < .4 ? 1 : 0); for (let i = 0; i < w; i++) ground[x + 2 + i] = 0;
+      candyArc(x + 2, w, gh + 1.2, 1.4); x += 2 + w; for (let i = 0; i < 3; i++) setG(x + i, gh); x += 3;
+    } else if (seg === 'plat') {
+      const n = 10; for (let i = 0; i < n; i++) setG(x + i, gh);
+      const py = gh + 3 + (Math.random() < .5 ? 1 : 0); for (let i = 3; i < 7; i++) solid[x + i][py] = T_BRICK;
+      candyArc(x + 3, 4, py + 1.3, 0); x += n;
+    } else if (seg === 'hill') {
+      const nh = Math.max(2, Math.min(6, gh + (Math.random() < .5 ? 1 : -1))); gh = nh; const n = 6; for (let i = 0; i < n; i++) setG(x + i, gh); candyArc(x + 1, 3, gh + .4, 1); x += n;
+    } else if (seg === 'enemy') {
+      const n = 9; for (let i = 0; i < n; i++) setG(x + i, gh);
+      if (Math.random() < def.enemies) { const k = pick(def.kinds); enemies.push({ kind: k, x: x + 5, y: k === 'bat' || k === 'ghost' ? gh + 1.6 : gh, home: x + 5 }); }
+      if (def.enemies > .9 && Math.random() < def.enemies - .9) { const k = pick(def.kinds); enemies.push({ kind: k, x: x + 7.5, y: k === 'bat' || k === 'ghost' ? gh + 1.6 : gh, home: x + 7.5 }); }
+      x += n;
+    } else if (seg === 'stairsUp') {
+      const n = 8; for (let i = 0; i < n; i++) setG(x + i, gh);
+      for (let s = 0; s < 3; s++) for (let y = 0; y <= s; y++) solid[x + 2 + s][gh + y] = T_STEP;
+      items.push({ kind: 'lolly', x: x + 4.5, y: gh + 4.5 }); x += n;
+    }
+  }
+  // Escalera final y la meta (bandera y casita)
+  for (let i = 0; i < 30 && x + i < W; i++) setG(x + i, gh);
+  for (let s = 0; s < 4; s++) for (let y = 0; y <= s; y++) solid[x + 2 + s][gh + y] = T_STEP;
+  for (let y = 0; y < 4; y++) solid[x + 6][gh + y] = T_STEP;
+  const flagX = x + 10, houseX = x + 15;
+  return { def, items, enemies, qcontent, ground, flagX, houseX, groundY: gh, end: x };
+}
+const isSolid = (x, y) => { if (x < 0) return true; if (x >= W || y < 0 || y >= H) return false; return solid[x][y] > 0; };
+
+/* ---------- Pintado de cuadros (pixel art hecho con canvas, tono de cada mundo) ---------- */
+const TILE = 32, tiles = {};
+function makeTiles(w) {
+  const mk = draw => { const c = document.createElement('canvas'); c.width = c.height = TILE; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; draw(x); return c; };
+  const px = (x, c, a, b, cw = 1, ch = 1) => { x.fillStyle = c; x.fillRect(a, b, cw, ch); };
+  const seed = (i) => { let s = i * 9301 + 49297; return () => (s = (s * 9301 + 49297) % 233280) / 233280; };
+  tiles.top = mk(x => { px(x, w.dirt, 0, 0, 32, 32); const r = seed(1); for (let i = 0; i < 26; i++) px(x, w.dirt2, r() * 30 | 0, 12 + r() * 18 | 0, 3, 2);
+    px(x, w.top, 0, 0, 32, 10); px(x, w.top2, 0, 9, 32, 3); for (let i = 0; i < 8; i++) px(x, w.top, i * 4 + 1, 10, 2, 3); px(x, 'rgba(255,255,255,.35)', 0, 1, 32, 2); });
+  tiles.dirt = mk(x => { px(x, w.dirt, 0, 0, 32, 32); const r = seed(2); for (let i = 0; i < 30; i++) px(x, w.dirt2, r() * 30 | 0, r() * 30 | 0, 3, 2); });
+  tiles.brick = mk(x => { px(x, '#2a1f3d', 0, 0, 32, 32); px(x, w.brick, 1, 1, 30, 30); x.fillStyle = 'rgba(0,0,0,.22)';
+    for (let r = 0; r < 4; r++) { x.fillRect(0, r * 8 + 7, 32, 2); const o = r % 2 ? 0 : 8; x.fillRect(o + 7, r * 8, 2, 8); x.fillRect(o + 23, r * 8, 2, 8); } px(x, 'rgba(255,255,255,.3)', 2, 2, 28, 2); });
+  tiles.q = mk(x => { px(x, '#2a1f3d', 0, 0, 32, 32); px(x, '#ffc21a', 1, 1, 30, 30); px(x, '#ffe680', 2, 2, 28, 3); px(x, '#d89a10', 2, 27, 28, 3);
+    [[2, 2], [27, 2], [2, 27], [27, 27]].forEach(([a, b]) => px(x, '#8a5a10', a + 1, b + 1, 2, 2));
+    x.fillStyle = '#fff'; x.font = 'bold 22px Arial Rounded MT Bold, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeStyle = '#8a5a10'; x.lineWidth = 3; x.strokeText('?', 16, 17); x.fillText('?', 16, 17); });
+  tiles.used = mk(x => { px(x, '#2a1f3d', 0, 0, 32, 32); px(x, '#a07850', 1, 1, 30, 30); px(x, '#b8906a', 2, 2, 28, 3); [[2, 2], [27, 2], [2, 27], [27, 27]].forEach(([a, b]) => px(x, '#6a4a30', a + 1, b + 1, 2, 2)); });
+  tiles.step = mk(x => { px(x, '#2a1f3d', 0, 0, 32, 32); px(x, w.dirt, 1, 1, 30, 30); px(x, 'rgba(255,255,255,.25)', 2, 2, 28, 4); px(x, 'rgba(0,0,0,.2)', 2, 26, 28, 4); px(x, 'rgba(0,0,0,.2)', 26, 2, 4, 28); });
+}
+
+/* ---------- Estado del juego ---------- */
+const cv = $('#game'), cx = cv.getContext('2d');
+let game = null, tileP = 48, viewW = 0, viewH = 0;
+function resize() {
+  const dpr = Math.min(2, devicePixelRatio || 1); cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.imageSmoothingEnabled = true;
+  viewW = innerWidth; viewH = innerHeight; tileP = Math.max(34, Math.min(viewH / 10.5, viewW / 9.5));
+}
+addEventListener('resize', resize);
+
+const HERO = { w: .72, h: 1.35 }, RUN = 5.4, GRAV = 40, JUMP = 15.8, JUMP2 = 13;
+let loading = false;
+async function start(n) {
+  if (loading) return;
+  const def = LEVELS[n], need = [...SPRITES, WORLDS[def.world].bg];
+  if (need.some(s => !IMG[s])) {
+    loading = true; const ov = $('#lvlLoad'), bar = ov.querySelector('i'); ov.hidden = false;
+    await loadImages(need, p => (bar.style.width = Math.max(8, p * 100) + '%'));
+    ov.hidden = true; loading = false;
+  }
+  makeTiles(WORLDS[def.world]);
+  const lv = genLevel(def); L = lv;
+  game = { n, def, lv, t: 0, hero: { x: 2, y: lv.ground[2], vx: 0, vy: 0, onGround: true, jumps: 0, face: 1, blink: 0, star: 0, safeX: 2, holding: false },
+    cam: 0, candies: 0, items: lv.items.map(i => ({ ...i, got: false, t: rand(0, 6) })), enemies: lv.enemies.map(e => ({ ...e, vx: -1.2, dead: 0, t: rand(0, 6) })),
+    pops: [], parts: [], bumps: {}, phase: 'run', flagY: 0, end: 0, started: false };
+  $('#candyN').textContent = '0'; $('#lvl').textContent = 'NIVEL ' + (n + 1);
+  $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
+  cv.hidden = false; $('#hud').hidden = false; $('#candies').hidden = false; $('#backBtn').hidden = false; $('#tapHint').hidden = n > 1;
+  resize(); music(true);
+}
+
+/* ---------- Física ---------- */
+function collideX(h, dx) {
+  h.x += dx; const top = h.y + HERO.h - .02, bot = h.y + .02;
+  const edge = dx > 0 ? h.x + HERO.w / 2 : h.x - HERO.w / 2, tx = Math.floor(edge);
+  for (let ty = Math.floor(bot); ty <= Math.floor(top); ty++) if (isSolid(tx, ty)) { h.x = dx > 0 ? tx - HERO.w / 2 - .001 : tx + 1 + HERO.w / 2 + .001; return true; }
+  return false;
+}
+function collideY(h, dy) {
+  h.y += dy; const l = Math.floor(h.x - HERO.w / 2 + .03), r = Math.floor(h.x + HERO.w / 2 - .03);
+  if (dy < 0) { const ty = Math.floor(h.y); for (let tx = l; tx <= r; tx++) if (isSolid(tx, ty)) { h.y = ty + 1; return 'floor'; } }
+  else { const ty = Math.floor(h.y + HERO.h); for (let tx = l; tx <= r; tx++) if (isSolid(tx, ty)) { h.y = ty - HERO.h - .001; headBump(tx, ty, l, r); return 'ceil'; } }
+  return null;
+}
+// Cabezazo a un bloque: el "?" suelta un dulce (o una estrella) y se vuelve bloque usado
+function headBump(tx, ty, l, r) {
+  const g = game, t = solid[tx][ty]; g.bumps[tx + ',' + ty] = .25;
+  if (t === T_Q) {
+    solid[tx][ty] = T_USED; const what = g.lv.qcontent[tx + ',' + ty] || 'candy';
+    if (what === 'star') { g.items.push({ kind: 'star', x: tx + .5, y: ty + 1.4, got: false, t: 0, vy: 6, vx: 2.2, move: true }); sfx.block(); }
+    else { g.pops.push({ x: tx + .5, y: ty + 1, t: 0 }); addCandy(1); sfx.block(); }
+    burst(tx + .5, ty + 1, 8, ['#ffd23a', '#fff', '#ff8fc4']);
+  } else sfx.bump();
+  for (const e of g.enemies) if (!e.dead && Math.abs(e.x - (tx + .5)) < .9 && Math.abs(e.y - (ty + 1)) < .6) stomp(e);
+}
+function addCandy(n) { const g = game; g.candies += n; $('#candyN').textContent = g.candies; const c = $('#candies'); c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump'); }
+function burst(x, y, n, cols, sp = 5) { for (let i = 0; i < n; i++) { const a = rand(0, 6.3), s = rand(.4, 1) * sp; game.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s + 3, t: 0, life: rand(.5, .9), c: pick(cols), r: rand(.06, .14) }); } }
+function stomp(e) { e.dead = 1; sfx.stomp(); burst(e.x, e.y + .5, 12, ['#fff', '#d8d0ff', '#ffd23a']); addCandy(1); game.pops.push({ x: e.x, y: e.y + 1, t: 0 }); }
+
+function jump() {
+  const g = game; if (!g || g.phase !== 'run') return;
+  const h = g.hero; g.started = true; $('#tapHint').hidden = true;
+  if (h.onGround || h.coyote > 0) { h.vy = JUMP; h.onGround = false; h.coyote = 0; h.jumps = 1; sfx.jump(); }
+  else if (h.jumps < 2) { h.vy = JUMP2; h.jumps = 2; sfx.jump2(); burst(h.x, h.y, 6, ['#fff', '#c8f0ff']); }
+}
+
+function update(dt) {
+  const g = game; if (!g) return; g.t += dt;
+  const h = g.hero;
+  if (g.phase === 'run') {
+    // Corre solito (al principio espera el primer toque); con estrella corre más rápido
+    const want = g.started ? RUN * (h.star > 0 ? 1.35 : 1) : 0;
+    h.vx += (want - h.vx) * Math.min(1, dt * 4);
+    const blocked = collideX(h, h.vx * dt); h.blocked = blocked;
+    // Salto: mientras se mantiene el dedo, sube más alto
+    h.vy -= GRAV * (h.holding && h.vy > 0 ? .55 : 1) * dt; h.vy = Math.max(h.vy, -22);
+    const was = h.onGround, hit = collideY(h, h.vy * dt);
+    if (hit === 'floor') { h.vy = 0; h.onGround = true; h.jumps = 0; if (!was) burst(h.x, h.y, 4, ['#fff', '#e8e0ff'], 2); }
+    else { if (hit === 'ceil') h.vy = Math.min(0, h.vy); if (h.onGround) h.coyote = .1; h.onGround = false; h.coyote = Math.max(0, (h.coyote || 0) - dt); }
+    if (h.onGround && isSolid(Math.floor(h.x), Math.floor(h.y - .1))) h.safeX = h.x;
+    // Se cayó a un hoyo: regresa flotando al último piso seguro, sin perder nada
+    if (h.y < -3) { sfx.ouch(); h.x = Math.max(2, Math.floor(h.safeX) - 1.5) + .5; h.y = g.lv.ground[Math.floor(h.x)] + 3; for (let k = 0; k < 4 && !g.lv.ground[Math.floor(h.x)]; k++) h.x -= 1; h.y = g.lv.ground[Math.floor(h.x)] + 2.5; h.vy = 0; h.blink = 1.6; }
+    h.blink = Math.max(0, h.blink - dt); h.star = Math.max(0, h.star - dt);
+    if (starMusic && h.star <= 0) { starMusic = false; music(true); }
+    // Meta: al tocar la bandera se desliza y luego camina a la casita
+    if (h.x >= g.lv.flagX - .2) { g.phase = 'flag'; h.x = g.lv.flagX - .2; h.vx = 0; g.flagH = h.y; sfx.flag(); addCandy(Math.max(1, Math.round(h.y - g.lv.groundY))); }
+  } else if (g.phase === 'flag') {
+    h.y = Math.max(g.lv.groundY, h.y - dt * 6); g.flagY = h.y - g.lv.groundY;
+    if (h.y <= g.lv.groundY) { g.phase = 'walk'; h.vx = 3; }
+  } else if (g.phase === 'walk') {
+    h.x += h.vx * dt; h.y = g.lv.groundY; h.onGround = true;
+    if (h.x >= g.lv.houseX) { g.phase = 'won'; win(); }
+  } else if (g.phase === 'won') { g.fw = (g.fw || 0) - dt; if (g.fw < 0) { g.fw = .35; burst(g.lv.houseX + rand(-4, 4), g.lv.groundY + rand(5, 8), 18, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a', '#fff'], 6); } }
+
+  // Dulces y estrellas
+  for (const it of g.items) {
+    if (it.got) continue; it.t += dt;
+    if (it.move) { it.vy -= 20 * dt; it.x += it.vx * dt; it.y += it.vy * dt; if (isSolid(Math.floor(it.x), Math.floor(it.y - .4))) { it.y = Math.floor(it.y - .4) + 1.4; it.vy = 7; } if (isSolid(Math.floor(it.x + .4 * Math.sign(it.vx)), Math.floor(it.y))) it.vx *= -1; if (it.y < -3) it.got = true; }
+    if (Math.abs(it.x - h.x) < .75 && it.y > h.y - .3 && it.y < h.y + HERO.h + .5) {
+      it.got = true;
+      if (it.kind === 'star') { h.star = 9; sfx.star(); starMusic = true; music(true); burst(it.x, it.y, 20, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a']); }
+      else { addCandy(it.kind === 'lolly' ? 5 : 1); sfx.candy(); burst(it.x, it.y, 6, ['#ffd23a', '#fff', '#ff8fc4'], 3); }
+    }
+  }
+  // Bichitos: caminan de un lado a otro; se les brinca encima
+  for (const e of g.enemies) {
+    if (e.dead) { e.dead += dt; continue; }
+    e.t += dt;
+    if (Math.abs(e.x - h.x) > 18) continue;
+    if (e.kind === 'bat') { e.x = e.home + Math.sin(e.t * .9) * 2.2; e.yy = e.y + Math.sin(e.t * 3) * .5; }
+    else if (e.kind === 'ghost') { e.x = e.home + Math.sin(e.t * .6) * 2.5; e.yy = e.y + Math.sin(e.t * 2) * .35; }
+    else {
+      const nx = e.x + e.vx * dt, ahead = Math.floor(nx + Math.sign(e.vx) * .45);
+      if (isSolid(ahead, Math.floor(e.y + .3)) || !isSolid(ahead, Math.floor(e.y - .5)) || Math.abs(nx - e.home) > 3.5) e.vx *= -1; else e.x = nx;
+      e.yy = e.y;
+    }
+    const ey = e.yy, dx = h.x - e.x, dy = h.y - ey;
+    if (Math.abs(dx) < .8 && dy > -1.2 && dy < .9) {
+      if (h.star > 0) stomp(e);
+      else if (h.vy < 0 && dy > .25) { stomp(e); h.vy = 12; h.jumps = 1; }
+      else if (h.blink <= 0) { h.blink = 1.4; sfx.ouch(); h.vy = 8; collideX(h, -1.2); }
+    }
+  }
+  g.enemies = g.enemies.filter(e => !e.dead || e.dead < .6);
+  // Dulces que saltan de los bloques, partículas y cabezazos
+  g.pops = g.pops.filter(p => (p.t += dt) < .6);
+  g.parts = g.parts.filter(p => { p.t += dt; p.vy -= 14 * dt; p.x += p.vx * dt; p.y += p.vy * dt; return p.t < p.life; });
+  for (const k in g.bumps) { g.bumps[k] -= dt; if (g.bumps[k] <= 0) delete g.bumps[k]; }
+  // Cámara: un poco adelante del zombito
+  const target = Math.max(0, Math.min(W - viewW / tileP, h.x - viewW / tileP * .32));
+  g.cam += (target - g.cam) * Math.min(1, dt * 6);
+  const p = Math.min(1, h.x / g.lv.flagX); $('#prog i').style.width = p * 100 + '%'; $('#prog img').style.left = (6 + p * 88) + '%';
+}
+
+function win() {
+  const g = game; save.done[g.n] = true; persist(); sfx.win(); music(false); starMusic = false;
+  $('#finalN').textContent = g.candies;
+  setTimeout(() => { if (game === g) $('#win').hidden = false; }, 1100);
+}
+
+/* ---------- Dibujo ---------- */
+function drawImg(name, x, y, w, h, flip = false, alpha = 1) {
+  const im = IMG[name]; if (!im || !im.width) return;
+  cx.save(); cx.globalAlpha = alpha; cx.translate(x + w / 2, y);
+  if (flip) cx.scale(-1, 1); cx.drawImage(im, -w / 2, 0, w, h); cx.restore();
+}
+// Sprite apoyado en el piso: (wx, wy) = centro de los pies en coordenadas del mundo
+function sprite(name, wx, wy, hTiles, flip = false, alpha = 1) {
+  const im = IMG[name]; if (!im || !im.width) return; const hp = hTiles * tileP, wp = hp * im.width / im.height;
+  drawImg(name, sx(wx) - wp / 2, sy(wy) - hp, wp, hp, flip, alpha);
+}
+const sx = wx => (wx - game.cam) * tileP, sy = wy => viewH - (wy + groundPad()) * tileP;
+const groundPad = () => Math.max(0, (viewH / tileP - 10.5) * .5) - .6;
+function render() {
+  const g = game; if (!g) return; const W0 = viewW, H0 = viewH;
+  // Fondo con paralaje (la imagen se repite en espejo para que no se note la unión)
+  const bg = IMG[WORLDS[g.def.world].bg];
+  if (bg && bg.width) {
+    const bh = H0, bw = bh * bg.width / bg.height, off = -(g.cam * tileP * .25) % (bw * 2);
+    for (let k = -1; k < Math.ceil(W0 / bw) + 2; k++) { const x = off + k * bw; cx.save(); if (k % 2) { cx.translate(x + bw, 0); cx.scale(-1, 1); cx.drawImage(bg, 0, 0, bw, bh); } else cx.drawImage(bg, x, 0, bw, bh); cx.restore(); }
+  } else { cx.fillStyle = '#4a3a8a'; cx.fillRect(0, 0, W0, H0); }
+  // Cuadros
+  const x0 = Math.max(0, Math.floor(g.cam) - 1), x1 = Math.min(W - 1, Math.ceil(g.cam + W0 / tileP) + 1), tp = tileP + .6;
+  cx.imageSmoothingEnabled = false;
+  for (let x = x0; x <= x1; x++) for (let y = 0; y < H; y++) {
+    const t = solid[x][y]; if (!t) continue;
+    const bump = g.bumps[x + ',' + y] || 0, oy = Math.sin(bump / .25 * Math.PI) * tileP * .25, X = sx(x), Y = sy(y + 1) - oy;
+    if (t === T_GROUND) cx.drawImage(isSolid(x, y + 1) && solid[x][y + 1] === T_GROUND ? tiles.dirt : tiles.top, X, Y, tp, tp);
+    else if (t === T_BRICK) cx.drawImage(tiles.brick, X, Y, tp, tp);
+    else if (t === T_Q) cx.drawImage(tiles.q, X, Y - Math.abs(Math.sin(g.t * 3)) * 2, tp, tp);
+    else if (t === T_USED) cx.drawImage(tiles.used, X, Y, tp, tp);
+    else if (t === T_STEP) cx.drawImage(tiles.step, X, Y, tp, tp);
+  }
+  // Tierra debajo del piso hasta la orilla de la pantalla (en el teléfono parado sobra espacio abajo)
+  for (let x = x0; x <= x1; x++) if (g.lv.ground[x]) for (let y = -1; sy(y + 1) < H0; y--) cx.drawImage(tiles.dirt, sx(x), sy(y + 1), tp, tp);
+  cx.imageSmoothingEnabled = true;
+  // Lápidas (obstáculos): un sprite por columna de lápida
+  for (let x = x0; x <= x1; x++) { let y0 = -1, n = 0; for (let y = 0; y < H; y++) if (solid[x][y] === T_TOMB) { if (y0 < 0) y0 = y; n++; } if (n) sprite('tomb', x + .5, y0, n + .15); }
+  // Meta: bandera y casita
+  const fx = g.lv.flagX, gy = g.lv.groundY;
+  cx.fillStyle = '#2a1f3d'; cx.fillRect(sx(fx) - 4, sy(gy + 8.5), 8, 8.5 * tileP);
+  cx.fillStyle = '#e8e0ff'; cx.fillRect(sx(fx) - 2, sy(gy + 8.5), 4, 8.5 * tileP);
+  cx.beginPath(); cx.arc(sx(fx), sy(gy + 8.6), tileP * .22, 0, 7); cx.fillStyle = '#ffd23a'; cx.fill(); cx.strokeStyle = '#2a1f3d'; cx.lineWidth = 3; cx.stroke();
+  sprite('flag', fx + .35, gy + 7.6 - (g.phase === 'run' ? 0 : Math.max(0, 7 - (g.flagY || 0)) * .0) , 1.4);
+  sprite('house', g.lv.houseX + 1, gy, 5.2);
+  // Dulces y estrellas
+  for (const it of g.items) {
+    if (it.got || it.x < g.cam - 2 || it.x > g.cam + W0 / tileP + 2) continue;
+    const bob = it.move ? 0 : Math.sin(it.t * 3) * .12, s = it.kind === 'lolly' ? 1 : it.kind === 'star' ? .95 : .72;
+    sprite(it.kind, it.x, it.y - s / 2 + bob, s);
+  }
+  for (const p of g.pops) sprite('candy', p.x, p.y + p.t * 3, .7, false, 1 - p.t / .6);
+  // Bichitos
+  for (const e of g.enemies) {
+    if (e.x < g.cam - 3 || e.x > g.cam + W0 / tileP + 3) continue;
+    const f = (e.t * (e.kind === 'bat' ? 8 : 5) | 0) % 2, name = e.kind + '-' + f, hT = e.kind === 'skel' ? 1.3 : e.kind === 'bat' ? .9 : 1.05;
+    const sq = e.dead ? Math.max(.1, 1 - e.dead * 2) : 1;
+    const im = IMG[name]; if (!im || !im.width) continue; const hp = hT * tileP * sq, wp = hT * tileP * im.width / im.height * (e.dead ? 1 + e.dead : 1);
+    const flip = e.kind === 'bat' || e.kind === 'ghost' ? Math.cos(e.t * (e.kind === 'bat' ? .9 : .6)) > 0 : e.vx > 0;
+    drawImg(name, sx(e.x) - wp / 2, sy(e.yy != null ? e.yy : e.y) - hp, wp, hp, flip, e.dead ? 1 - e.dead / .6 : 1);
+  }
+  // Zombito
+  const h = g.hero;
+  if (g.phase !== 'won' && !(h.blink > 0 && Math.floor(g.t * 14) % 2)) {
+    let fr = 0;
+    if (!h.onGround && g.phase === 'run') fr = 5;
+    else if ((g.started && Math.abs(h.vx) > .5 && !h.blocked) || g.phase === 'walk') fr = 1 + ((g.t * 11) | 0) % 4;
+    if (h.star > 0) { cx.save(); cx.filter = `hue-rotate(${(g.t * 720) % 360}deg) saturate(1.6)`; }
+    sprite('hero-' + fr, h.x, h.y, 1.95);
+    if (h.star > 0) { cx.restore(); if (Math.random() < .5) burst(h.x + rand(-.4, .4), h.y + rand(0, 1.5), 1, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a'], 1.5); }
+  }
+  // Partículas
+  for (const p of g.parts) { cx.globalAlpha = 1 - p.t / p.life; cx.fillStyle = p.c; cx.beginPath(); cx.arc(sx(p.x), sy(p.y), p.r * tileP, 0, 7); cx.fill(); }
+  cx.globalAlpha = 1;
+}
+
+/* ---------- Dedo: tocar = brincar (mantener = más alto) ---------- */
+cv.addEventListener('pointerdown', e => { e.preventDefault(); if (game) { game.hero.holding = true; jump(); } });
+['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { if (game) game.hero.holding = false; }));
+addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'ArrowUp') && game && !e.repeat) { game.hero.holding = true; jump(); } });
+addEventListener('keyup', e => { if ((e.key === ' ' || e.key === 'ArrowUp') && game) game.hero.holding = false; });
+
+/* ---------- Menú ---------- */
+function buildMenu() {
+  const box = $('#levels'); box.innerHTML = '';
+  LEVELS.forEach((d, n) => {
+    const b = document.createElement('button'); b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1) + ' ' + WORLDS[d.world].name);
+    b.innerHTML = `<img alt="" src="${UP}card-${d.world}.webp"><b>${n + 1}</b>` + (save.done[n] ? '<span class="star"></span>' : '');
+    b.addEventListener('click', () => { sfx.tap(); start(n); });
+    box.appendChild(b);
+  });
+}
+function showMenu() {
+  music(false); starMusic = false; game = null;
+  cv.hidden = true; $('#win').hidden = true; $('#hud').hidden = true; $('#candies').hidden = true; $('#tapHint').hidden = true;
+  $('#menu').hidden = false; $('#menuBg').hidden = false; $('#backBtn').hidden = true; $('#title').hidden = false;
+  buildMenu();
+}
+$('#backBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#menuBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#againBtn').addEventListener('click', () => { sfx.tap(); start(game.n); });
+$('#nextBtn').addEventListener('click', () => { sfx.tap(); start((game.n + 1) % LEVELS.length); });
+
+let last = performance.now();
+(function loop(t) {
+  const dt = Math.min(.04, (t - last) / 1000); last = t;
+  if (game && !cv.hidden) { update(dt); render(); }
+  requestAnimationFrame(loop);
+})(last);
+resize();
+showMenu();
+{ const m = /^#nivel(\d+)(diag)?$/.exec(location.hash); if (m) (async () => {
+  await start(Math.min(LEVELS.length, +m[1]) - 1);
+  if (!m[2]) return;
+  // Diagnóstico (solo pruebas): juega solito un ratito y manda fotos a un servidor local
+  const shot = tag => { render(); fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag, img: cv.toDataURL('image/png'), info: { ua: navigator.userAgent, x: game.hero.x, candies: game.candies } }) }); };
+  jump(); for (let i = 0; i < 60 * 12; i++) { const h = game.hero; if (h.onGround && (h.blocked || !game.lv.ground[Math.floor(h.x + 1)] || game.enemies.some(e => !e.dead && e.x > h.x && e.x - h.x < 2.4))) jump(); update(1 / 60); }
+  shot('zomb-a'); for (let i = 0; i < 60 * 8; i++) { const h = game.hero; if (h.onGround && (h.blocked || !game.lv.ground[Math.floor(h.x + 1)] || game.enemies.some(e => !e.dead && e.x > h.x && e.x - h.x < 2.4))) jump(); update(1 / 60); } shot('zomb-b');
+})(); }
+window.__zomb = { start, update, render, jump, get game() { return game; }, set holding(v) { if (game) game.hero.holding = v; } };
+window.LEON_READY = true;
+})();
+</script>
