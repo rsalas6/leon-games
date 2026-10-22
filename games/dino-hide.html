@@ -746,7 +746,17 @@ let last = performance.now();
 resize();
 showMenu();
 // Para pruebas: #nivel3 abre directo ese nivel
-{ const m = /^#nivel(\d+)$/.exec(location.hash); if (m) start(Math.min(LEVELS.length, +m[1]) - 1); }
+{ const m = /^#nivel(\d+)(diag)?$/.exec(location.hash); if (m) (async () => {
+  await start(Math.min(LEVELS.length, +m[1]) - 1);
+  if (!m[2]) return;
+  // Diagnóstico (solo pruebas): manda fotos del juego (contando y buscando) a un servidor local
+  const shot = tag => { renderer.render(scene, camera); fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag, img: renderer.domElement.toDataURL('image/png'), info: { ua: navigator.userAgent, phase: game.phase } }) }); };
+  const run = async (sec) => { for (let i = 0; i < sec * 30; i++) update(1 / 30); };
+  await run(2.2); shot('hide-count');
+  await run(1.6); game.dinos.forEach(d => { if (d.state !== 'hidden') { d.obj.position.copy(spotHidePos(d.spot, d.peek)); d.state = 'hidden'; hideIn(d); } }); game.phase = 'search'; $('#count').hidden = true; await run(2); shot('hide-search');
+  const sp = game.spots.find(s => s.dino); camera.updateMatrixWorld(); const v = new THREE.Vector3(sp.x, sp.h * .5, sp.z).project(camera);
+  onTap((v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight); await run(.6); shot('hide-found');
+})(); }
 window.__hide = { start, update, render: () => renderer.render(scene, camera), get game() { return game; }, onTap, camera, scene };
 window.LEON_READY = true;
 })();
