@@ -40,7 +40,8 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 96px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
 #levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,18vw,200px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
 .lv{position:relative;aspect-ratio:1;padding:0;overflow:visible;background:#fff}
-.lv svg{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;pointer-events:none}
+.lv svg,.lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;pointer-events:none;object-fit:cover}
+.lv .moon{position:absolute;right:10px;bottom:10px;width:30px;height:30px;border-radius:50%;background:#fff6c8;box-shadow:inset -8px -4px 0 #14204e,0 0 0 3px var(--ink)}
 .lv b{position:absolute;left:10px;top:8px;font-weight:400;font-size:clamp(18px,2.6vw,24px);color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),0 4px 0 var(--ink)}
 .lv .star{position:absolute;right:-12px;top:-12px;width:36px;height:36px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
 
@@ -50,7 +51,7 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 
 /* La cuenta: carita que se tapa los ojos y números 1-2-3 */
 #count{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;background:rgba(42,31,61,var(--veil,.5));transition:background .4s}
-#count svg{width:clamp(130px,26vmin,230px);height:auto;filter:drop-shadow(0 8px 0 rgba(42,31,61,.35));animation:peek 1.2s ease-in-out infinite}
+#count img{width:clamp(140px,30vmin,260px);aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 12px 0 10px rgba(42,31,61,.3);animation:peek 1.2s ease-in-out infinite}
 @keyframes peek{50%{transform:translateY(-8px) rotate(-3deg)}}
 #count b{font-weight:400;font-size:clamp(70px,16vmin,150px);line-height:1;color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink)}
 #count b.pop{animation:numpop .5s cubic-bezier(.3,1.8,.5,1)}
@@ -95,13 +96,7 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 <main id="menu"><div id="levels"></div></main>
 <div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
 <div id="count" hidden>
-  <svg viewBox="0 0 120 120" aria-hidden="true">
-    <circle cx="60" cy="62" r="46" fill="#6cc63a" stroke="#2a1f3d" stroke-width="6"/>
-    <ellipse cx="60" cy="84" rx="20" ry="9" fill="#ff8fb0"/>
-    <path d="M44 88q16 12 32 0" fill="none" stroke="#2a1f3d" stroke-width="5" stroke-linecap="round"/>
-    <g fill="#ffd9a8" stroke="#2a1f3d" stroke-width="5"><ellipse cx="38" cy="54" rx="22" ry="17"/><ellipse cx="82" cy="54" rx="22" ry="17"/></g>
-    <g stroke="#2a1f3d" stroke-width="4" stroke-linecap="round"><path d="M26 46v12M34 42v16M42 42v16M94 46v12M86 42v16M78 42v16"/></g>
-  </svg>
+  <img id="countImg" alt="" src="__UP__img/hide/count-dino.webp">
   <b id="countN">1</b>
 </div>
 
@@ -197,30 +192,30 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 // Cada mundo: colores del cielo y del piso, modelos que sirven de escondite, adornos y árboles de la orilla
 const THEMES = {
   jardin: { name: 'Jardín', sky: ['#8fd8ff', '#effcff'], ground: 0x7fd14f, ground2: 0x6cc045, side: 0x9a6a3a, grass: 0x5cb83c, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0xa98bff],
-    spots: ['plant_bushLarge', 'plant_bushDetailed', 'tree_oak', 'log_large', 'rock_largeA', 'mushroom_redGroup', 'stump_old', 'plant_bushLarge'], decor: ['flower_redA', 'flower_yellowA', 'grass_large', 'flower_purpleA'], border: ['tree_default', 'tree_oak', 'tree_fat', 'tree_detailed'] },
+    spots: ['BUSH', 'BERRYBUSH', 'ROCKS', 'HOLLOWLOG', 'BIGMUSH', 'BUSH', 'BERRYBUSH', 'ROCKS'], decor: ['flower_redA', 'flower_yellowA', 'grass_large', 'flower_purpleA'], border: ['tree_default', 'tree_oak', 'tree_fat', 'tree_detailed'] },
   playa: { name: 'Playa', sky: ['#7fd3ff', '#fff4d8'], ground: 0xf6dc9a, ground2: 0xeccf88, side: 0xd8a860, grass: null, flowers: [0xffb3c6, 0xffffff], water: 0x3ab0e8,
-    spots: ['rocks-sand-a', 'chest', 'ship-wreck', 'tower-complete-small', 'rocks-sand-b', 'barrel', 'rocks-large', 'crate'], decor: ['palm-bend'], border: ['palm-straight', 'palm-bend'] },
+    spots: ['rocks-sand-a', 'chest', 'ROCKS', 'tower-complete-small', 'rocks-sand-b', 'crate', 'rocks-large', 'BUSH'], decor: ['palm-bend'], border: ['palm-straight', 'palm-bend'] },
   nieve: { name: 'Nieve', sky: ['#b8dcff', '#f6fbff'], ground: 0xf2f8ff, ground2: 0xe0eefb, side: 0x9ab0c8, grass: null, flowers: [0xffffff, 0xbfe6ff],
-    spots: ['snowman', 'tree-snow-b', 'IGLOO', 'present-a-cube', 'snow-pile', 'tree-decorated-snow', 'tree-snow-c', 'sled'], decor: ['snowman-hat'], border: ['tree-snow-b', 'tree-snow-c'] },
+    spots: ['snowman', 'tree-snow-b', 'IGLOO', 'present-a-cube', 'SNOWBUSH', 'tree-decorated-snow', 'tree-snow-c', 'IGLOO'], decor: ['snowman-hat'], border: ['tree-snow-b', 'tree-snow-c'] },
   ciudad: { name: 'Ciudad', sky: ['#9fdcff', '#eef8ff'], ground: 0x84d457, ground2: 0x74c64c, side: 0x8a8f9c, grass: 0x5cb83c, flowers: [0xff5d8f, 0xffd23a], road: true,
-    spots: ['sedan', 'van', 'truck', 'dumpster', 'tree-large', 'building-type-a', 'delivery', 'planter', 'suv'], decor: ['light-square', 'tree-small', 'bench'], border: ['building-type-c', 'building-type-f', 'building-type-k', 'building-type-b'] },
+    spots: ['sedan', 'van', 'truck', 'dumpster', 'BUSH', 'building-type-a', 'delivery', 'BERRYBUSH', 'suv'], decor: ['light-square', 'tree-small', 'bench'], border: ['building-type-c', 'building-type-f', 'building-type-k', 'building-type-b'] },
   desierto: { name: 'Desierto', sky: ['#ffcf8a', '#fff4e0'], ground: 0xf3c477, ground2: 0xe8b468, side: 0xc0804a, grass: null, flowers: [0xff5d8f, 0xffd23a],
-    spots: ['tent_detailedClosed', 'cactus_tall', 'rock_tallA', 'crate', 'barrel', 'stone_tallA', 'tent_smallClosed', 'cactus_tall'], decor: ['cactus_short'], border: ['cactus_tall', 'rock_tallA', 'rock_tallB'] },
+    spots: ['tent_detailedClosed', 'REDROCKS', 'rock_tallA', 'crate', 'DRYBUSH', 'stone_tallA', 'tent_smallClosed', 'REDROCKS'], decor: ['cactus_short'], border: ['cactus_tall', 'rock_tallA', 'rock_tallB'] },
   volcan: { name: 'Volcán', sky: ['#ffa77a', '#ffe2c4'], ground: 0x7a6866, ground2: 0x6a5a5a, side: 0x4a3a3a, grass: null, flowers: [0xff6a1a, 0xffd23a], lava: true,
-    spots: ['rock_largeB', 'stone_tallA', 'rock_tallB', 'chest', 'stump_round', 'DEADTREE', 'rock_largeC', 'rock_tallA'], decor: ['rock_smallA'], border: ['rock_tallA', 'rock_tallB'] },
+    spots: ['rock_largeB', 'stone_tallA', 'DARKROCKS', 'chest', 'DARKROCKS', 'rock_largeC', 'rock_tallA', 'rock_tallB'], decor: ['rock_smallA'], border: ['rock_tallA', 'rock_tallB'] },
 };
 // watch: qué tanto se alcanza a ver mientras se esconden (1 = todo); peek: qué tanto se asoman; sneak: se cambian de escondite; wide: mundo panorámico
 const LEVELS = [
-  { theme: 'jardin', dinos: 3, spots: 5, peek: .95, watch: 1 },
-  { theme: 'playa', dinos: 3, spots: 6, peek: .8, watch: .9 },
-  { theme: 'nieve', dinos: 4, spots: 6, peek: .7, watch: .7 },
-  { theme: 'jardin', night: 1, dinos: 3, spots: 6, peek: .6, watch: .6 },
-  { theme: 'ciudad', dinos: 4, spots: 7, peek: .55, watch: .45 },
-  { theme: 'desierto', dinos: 4, spots: 7, peek: .45, watch: .35, sneak: 1 },
-  { theme: 'volcan', dinos: 5, spots: 8, peek: .4, watch: .25, sneak: 1 },
-  { theme: 'playa', night: 1, dinos: 4, spots: 7, peek: .4, watch: .2 },
-  { theme: 'ciudad', night: 1, dinos: 5, spots: 9, peek: .35, watch: .1, sneak: 1, wide: 1 },
-  { theme: 'jardin', dinos: 6, spots: 11, peek: .3, watch: 0, sneak: 1, wide: 1 },
+  { theme: 'jardin', dinos: 3, spots: 5, peek: 0.35, watch: 1 },
+  { theme: 'playa', dinos: 3, spots: 6, peek: 0.3, watch: .9 },
+  { theme: 'nieve', dinos: 4, spots: 6, peek: 0.28, watch: .7 },
+  { theme: 'jardin', night: 1, dinos: 3, spots: 6, peek: 0.25, watch: .6 },
+  { theme: 'ciudad', dinos: 4, spots: 7, peek: 0.22, watch: .45 },
+  { theme: 'desierto', dinos: 4, spots: 7, peek: 0.2, watch: .35, sneak: 1 },
+  { theme: 'volcan', dinos: 5, spots: 8, peek: 0.18, watch: .25, sneak: 1 },
+  { theme: 'playa', night: 1, dinos: 4, spots: 7, peek: 0.18, watch: .2 },
+  { theme: 'ciudad', night: 1, dinos: 5, spots: 9, peek: 0.15, watch: .1, sneak: 1, wide: 1 },
+  { theme: 'jardin', dinos: 6, spots: 11, peek: 0.15, watch: 0, sneak: 1, wide: 1 },
 ];
 const DINOS = [
   { m: 'raptor', c: 0x3fae4a }, { m: 'trice', c: 0x3f86c8 }, { m: 'stego', c: 0xff8a2a },
@@ -264,7 +259,36 @@ const SPH = new THREE.SphereGeometry(1, 16, 12);
 const M = (c, o) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, o || {}));
 function ell(rx, ry, rz, m) { const o = new THREE.Mesh(SPH, m); o.scale.set(rx, ry, rz); o.castShadow = true; return o; }
 
+// Escondites hechos a mano: tupidos y redondos, para que un dino quepa completito detrás
+const ICO = new THREE.IcosahedronGeometry(1, 1), DOD = new THREE.DodecahedronGeometry(1, 0);
+function blob(geo, c, x, y, z, sx, sy, sz) { const m = new THREE.Mesh(geo, M(c)); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.set(rand(0, 3), rand(0, 3), rand(0, 3)); m.castShadow = true; m.receiveShadow = true; return m; }
+const BUSHES = { BUSH: [0x4fb83a, 0x3f9e30, 0x62c84a], SNOWBUSH: [0xf4faff, 0xdcebfa, 0xffffff], DRYBUSH: [0x9aa84a, 0x7f8f3a, 0xb0b860] };
+const ROCKS = { ROCKS: [0xa8aec4, 0x8e94a8], REDROCKS: [0xd07a4a, 0xb0603a], DARKROCKS: [0x5a5058, 0x46404a] };
+function handmade(name) {
+  const g = new THREE.Group();
+  if (BUSHES[name] || name === 'BERRYBUSH') {
+    const cols = BUSHES[name] || BUSHES.BUSH;
+    [[0, .75, 0, 1.05, .8, .95], [-.85, .5, .15, .7, .55, .7], [.85, .5, .1, .72, .58, .72], [-.35, 1.25, -.1, .7, .6, .7], [.4, 1.2, .05, .68, .58, .66], [0, .45, .55, .8, .5, .6], [0, .5, -.5, .8, .5, .6]]
+      .forEach(([x, y, z, a, b, c], i) => g.add(blob(ICO, cols[i % cols.length], x, y, z, a, b, c)));
+    if (name === 'BERRYBUSH') for (let i = 0; i < 9; i++) { const a = rand(0, 6.3), r = rand(.7, 1); g.add(blob(new THREE.SphereGeometry(1, 8, 6), pick([0xe8423a, 0x5a6ad8, 0xff8fb0]), Math.cos(a) * r, rand(.5, 1.5), Math.sin(a) * r * .8 + .2, .1, .1, .1)); }
+  } else if (ROCKS[name]) {
+    const [c1, c2] = ROCKS[name];
+    g.add(blob(DOD, c1, 0, .8, 0, 1.1, .95, .9), blob(DOD, c2, -.95, .5, .2, .65, .55, .6), blob(DOD, c1, .9, .45, .15, .6, .5, .6), blob(DOD, c2, .3, 1.55, -.1, .55, .45, .5));
+  } else if (name === 'HOLLOWLOG') {
+    const wood = M(0x9c6234), cut = M(0xe8c88a);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(.8, .85, 2.6, 14, 1, true), wood); body.material.side = THREE.DoubleSide; body.rotation.z = Math.PI / 2; body.position.y = .82; body.castShadow = true; g.add(body);
+    for (const sx of [-1, 1]) { const r = new THREE.Mesh(new THREE.RingGeometry(.5, .85, 14), cut); r.rotation.y = sx * Math.PI / 2; r.position.set(sx * 1.3, .82, 0); g.add(r); const d = new THREE.Mesh(new THREE.CircleGeometry(.5, 14), M(0x2a1a10)); d.rotation.y = sx * Math.PI / 2; d.position.set(sx * 1.28, .82, 0); g.add(d); }
+    g.add(blob(ICO, 0x4fb83a, -.5, 1.55, .1, .45, .3, .4), blob(ICO, 0x62c84a, .4, 1.6, -.1, .35, .25, .35));
+  } else if (name === 'BIGMUSH') {
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.45, .6, 1.3, 12), M(0xf4e8c8)); stem.position.y = .65; stem.castShadow = true; g.add(stem);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(1.25, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), M(0xe8423a)); cap.position.y = 1.15; cap.scale.y = .85; cap.castShadow = true; g.add(cap);
+    for (let i = 0; i < 7; i++) { const a = i / 7 * 6.3, r = i ? .75 : 0; const d = new THREE.Mesh(new THREE.SphereGeometry(.17, 8, 6), M(0xffffff)); d.position.set(Math.cos(a) * r, 1.15 + (i ? .78 : 1.06), Math.sin(a) * r); d.scale.y = .5; g.add(d); }
+    g.add(blob(ICO, 0x4fb83a, .9, .3, .3, .45, .3, .4), blob(ICO, 0x62c84a, -.8, .3, .3, .4, .3, .4));
+  } else return null;
+  return g;
+}
 function kenney(name) {
+  const hm = handmade(name); if (hm) return hm;
   if (name === 'IGLOO') {
     const g = new THREE.Group(), w = M(0xf8fbff), b = M(0xd8e8f8);
     const dome = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), w); dome.castShadow = true; g.add(dome);
@@ -363,6 +387,11 @@ function buildWorld(L) {
     const a = Math.PI + (k / ((L.wide ? 26 : 16) - 1)) * Math.PI, o = kenney(pick(T.border));
     fit(o, rand(3, 4.2), rand(3.4, 5)); o.position.x = Math.cos(a) * (W + 2.5) + rand(-.6, .6); o.position.z = Math.sin(a) * (D + 2.5) + rand(-.6, .6); o.rotation.y = rand(0, 6.3); world.add(o);
   }
+  // Adornos chiquitos en las orillas (no son escondites)
+  for (let k = 0; k < (L.wide ? 10 : 6); k++) {
+    const o = kenney(pick(T.decor)); fit(o, rand(1.2, 1.9), rand(1.2, 2)); const sx = k % 2 ? 1 : -1;
+    o.position.x = sx * rand(W - 1.5, W + 1.8); o.position.z = rand(-3, 6.5); o.rotation.y = rand(0, 6.3); world.add(o);
+  }
   // Pastito y florecitas
   if (T.grass) {
     const tuft = new THREE.ConeGeometry(.08, .45, 3); const n = L.wide ? 700 : 420, gm = new THREE.InstancedMesh(tuft, M(T.grass, { emissive: T.grass, emissiveIntensity: night ? .05 : .35 }), n), m4 = new THREE.Matrix4();
@@ -393,9 +422,9 @@ function placeSpots(L, W, D) {
 }
 
 function makeSpot(s) {
-  const o = kenney(s.name); fit(o, rand(3.4, 4), rand(3.1, 3.7));
+  const o = kenney(s.name); fit(o, rand(3.2, 3.7), rand(2.6, 3.2));
   // Los escondites bajitos (rocas, troncos) se estiran hacia arriba para que de veras tapen a un dino
-  { const hh = modelBox(o).getSize(new THREE.Vector3()).y; if (hh < 2.7) { o.scale.y *= Math.min(1.9, 2.7 / hh); o.position.y *= Math.min(1.9, 2.7 / hh); } }
+  { const hh = modelBox(o).getSize(new THREE.Vector3()).y; if (hh < 2.4) { o.scale.y *= Math.min(1.9, 2.4 / hh); o.position.y *= Math.min(1.9, 2.4 / hh); } }
   const pivot = new THREE.Group(); pivot.position.set(s.x, 0, s.z); pivot.add(o); world.add(pivot);
   o.rotation.y = rand(-.4, .4) + (/sedan|van|truck|delivery|suv|boat|canoe|log/.test(s.name) ? Math.PI / 2 * (Math.random() < .5 ? 1 : -1) + rand(-.3, .3) : 0);
   o.updateMatrixWorld(true);
@@ -408,11 +437,11 @@ function makeSpot(s) {
 }
 
 function makeDino(def, k) {
-  const g = makeAnimal(def.m, def.c); fit(g.userData.model, 2.9, 2.0);
+  const g = makeAnimal(def.m, def.c); fit(g.userData.model, 2.8, 1.9);
   world.add(g);
   // Ojitos que brillan en la oscuridad (solo de noche, mientras está escondido)
   const eyes = new THREE.Group(), em = new THREE.MeshBasicMaterial({ color: 0xfff27a });
-  for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(.11, 10, 8), em); e.position.x = sx * .17; e.scale.y = 1.3; eyes.add(e); }
+  for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(.15, 10, 8), em); e.position.x = sx * .22; e.scale.y = 1.3; eyes.add(e); }
   eyes.visible = false; world.add(eyes);
   const proxy = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 6), PROXY_MAT); proxy.position.y = .8; g.add(proxy);
   const d = { def, k, obj: g, eyes, proxy, state: 'play', spot: null, peek: 0, t: 0, from: new THREE.Vector3(), to: new THREE.Vector3(), slot: -1 };
@@ -434,8 +463,8 @@ function spotHidePos(sp, peek) {
   // Detrás del escondite (visto desde la cámara) y un poco hacia un lado: con `peek` alto se le ve la cola o la cabeza
   const back = tmpV.set(sp.x - camera.position.x, 0, sp.z - camera.position.z).normalize();
   const side = new THREE.Vector3(-back.z, 0, back.x).multiplyScalar(sp.side || 1);
-  const depth = Math.max(sp.d, sp.w) * .38 + .5;
-  return new THREE.Vector3(sp.x, 0, sp.z).addScaledVector(back, depth).addScaledVector(side, (Math.max(sp.w, sp.d) * .5 + .4) * peek * .9);
+  const depth = Math.max(sp.d, sp.w) * .3 + .4;
+  return new THREE.Vector3(sp.x, 0, sp.z).addScaledVector(back, depth).addScaledVector(side, (Math.max(sp.w, sp.d) * .5 + .6) * peek);
 }
 
 let loadingLvl = false;
@@ -503,7 +532,7 @@ function countdown() {
     if (game !== g) return; el.hidden = true; g.phase = 'search'; sfx.go();
     const go = document.createElement('div'); go.id = 'go'; go.textContent = '¿DÓNDE ESTÁN?'; document.body.appendChild(go); setTimeout(() => go.remove(), 1400);
     // Por si alguno no llegó todavía
-    g.dinos.forEach(d => { if (d.state === 'run') { d.obj.position.copy(d.to); d.state = 'hidden'; play(d.obj, 'idle'); } });
+    g.dinos.forEach(d => { if (d.state === 'run') { d.obj.position.copy(d.to); d.state = 'hidden'; play(d.obj, 'idle'); hideIn(d); } });
   }, 2900);
 }
 
@@ -525,15 +554,14 @@ function onTap(cx, cy) {
   if (sp.dino && sp.dino.state === 'hidden') reveal(sp.dino);
   else if (!sp.busy) surprise(sp);
 }
-function shakeSpot(sp) {
-  sp.anim = 1; rustle(); const T = THEMES[game.L.theme];
-  const cols = game.L.theme === 'nieve' ? [0xffffff, 0xdff0ff] : game.L.theme === 'playa' || game.L.theme === 'desierto' ? [0xf6dc9a, 0xe8c070, 0xffffff] : game.L.theme === 'volcan' ? [0xff8a2a, 0xffd23a, 0x5a4a4a] : game.L.theme === 'ciudad' ? [0xffd23a, 0xffffff, 0x5ac8ff] : [0x5cc241, 0x2f9e44, 0x9be05a];
-  burst(sp.x, sp.h * .6, sp.z, 12, cols, 4, .26, 5);
-}
+function leafCols() { const t = game.L.theme; return t === 'nieve' ? [0xffffff, 0xdff0ff] : t === 'playa' || t === 'desierto' ? [0xf6dc9a, 0xe8c070, 0xffffff] : t === 'volcan' ? [0xff8a2a, 0xffd23a, 0x5a4a4a] : t === 'ciudad' ? [0xffd23a, 0xffffff, 0x5ac8ff] : [0x5cc241, 0x2f9e44, 0x9be05a]; }
+function shakeSpot(sp) { sp.anim = 1; rustle(); burst(sp.x, sp.h * .6, sp.z, 12, leafCols(), 4, .26, 5); }
+// El dino se mete al escondite: ¡puf! hojitas y desaparece
+function hideIn(d) { d.obj.visible = false; d.spot.anim = 1; rustle(.08, .3); burst(d.spot.x, d.spot.h * .6, d.spot.z, 8, leafCols(), 3, .24, 4); }
 function reveal(d) {
   const g = game; if (d.state === 'out' || d.state === 'found') return;
-  if (d.spot) { d.spot.dino = null; shakeSpot(d.spot); }
-  d.state = 'out'; d.t = 0; d.from.copy(d.obj.position); d.eyes.visible = false;
+  if (d.spot) { d.spot.dino = null; shakeSpot(d.spot); if (d.state === 'hidden') d.obj.position.set(d.spot.x, 0, d.spot.z); }
+  d.obj.visible = true; d.state = 'out'; d.t = 0; d.from.copy(d.obj.position); d.eyes.visible = false;
   d.slot = g.found++;
   const n = g.L.dinos, x = (d.slot - (n - 1) / 2) * Math.min(3.1, 18 / n) + g.pan;
   d.to.set(x, 0, THEMES[g.L.theme].road ? 7.2 : 7);
@@ -579,15 +607,20 @@ function update(dt) {
       const dur = d.state === 'sneak' ? 2.4 : 1.5, k = Math.min(1, d.t / dur), e = k * k * (3 - 2 * k);
       d.obj.position.lerpVectors(d.from, d.to, e); d.obj.position.y = Math.abs(Math.sin(k * Math.PI * 4)) * .25;
       d.obj.rotation.y = Math.atan2(d.to.x - d.from.x, d.to.z - d.from.z);
-      if (k >= 1) { d.state = 'hidden'; d.obj.position.copy(d.to); play(d.obj, 'idle'); }
+      if (k >= 1) { d.state = 'hidden'; d.obj.position.copy(d.to); play(d.obj, 'idle'); hideIn(d); }
     } else if (d.state === 'hidden') {
+      // Adentro del escondite no se ve: el escondite se mueve solito de vez en cuando (más seguido en los primeros niveles)
+      d.obj.visible = false; d.wig = (d.wig == null ? rand(1, 3) : d.wig) - dt;
+      if (d.wig < 0 && g.phase === 'search') { d.wig = rand(2.2, 3.4) + g.n * .45; d.spot.anim = Math.max(d.spot.anim, .55); rustle(.05, .25); burst(d.spot.x, d.spot.h * .7, d.spot.z, 4, leafCols(), 2.5, .22, 3.5); }
       // Escondido: mira hacia la cámara, de vez en cuando se asoma un poquito más
-      const target = spotHidePos(d.spot, d.peek); d.obj.position.lerp(target, Math.min(1, dt * 3)); d.obj.position.y = 0;
+      const sneakPeek = Math.pow(Math.max(0, Math.sin(g.t * .55 + d.k * 2.1)), 10) * .35;   // de vez en cuando se asoma tantito y se vuelve a esconder
+      const target = spotHidePos(d.spot, d.peek + sneakPeek); d.obj.position.lerp(target, Math.min(1, dt * 3)); d.obj.position.y = 0;
       const face = Math.atan2(camera.position.x - d.obj.position.x, camera.position.z - d.obj.position.z) + (d.spot.side || 1) * .6;
       d.obj.rotation.y += (face - d.obj.rotation.y) * Math.min(1, dt * 4);
       if (g.L.night) {
-        d.eyes.visible = true; const hp = d.obj.position.clone(); const sideV = new THREE.Vector3().subVectors(hp, new THREE.Vector3(d.spot.x, 0, d.spot.z)).setY(0).normalize();
-        d.eyes.position.set(hp.x - sideV.x * .2, 1.25, hp.z - sideV.z * .2 + .3); d.eyes.lookAt(camera.position);
+        // Ojitos que brillan asomándose por un ladito del escondite, del lado de la cámara
+        d.eyes.visible = true; const sp = d.spot, toCam = new THREE.Vector3(camera.position.x - sp.x, 0, camera.position.z - sp.z).normalize();
+        d.eyes.position.set(sp.x + toCam.x * Math.max(sp.w, sp.d) * .42 + toCam.z * (sp.side || 1) * .6, sp.h * .62, sp.z + toCam.z * Math.max(sp.w, sp.d) * .42 - toCam.x * (sp.side || 1) * .6); d.eyes.lookAt(camera.position);
         const blink = (g.t + d.k * 1.7) % 3.4 < .14; d.eyes.scale.set(1, blink ? .15 : 1, 1);
       }
     } else if (d.state === 'out') {
@@ -624,7 +657,7 @@ function update(dt) {
     // Pista: si tarda, el escondite de un dino se sacude solito y el dino se asoma más
     if (g.idle > 7) {
       g.idle = 3.5; const hid = g.dinos.filter(d => d.state === 'hidden');
-      if (hid.length) { const d = pick(hid); shakeSpot(d.spot); sfx.giggle(); d.peek = Math.min(1.1, d.peek + .2); showHand(d.spot); }
+      if (hid.length) { const d = pick(hid); shakeSpot(d.spot); sfx.giggle(); d.peek = Math.min(.9, d.peek + .18); showHand(d.spot); }
     }
     // Dinos traviesos: uno se cambia de escondite corriendo a la vista
     if (g.L.sneak) {
@@ -632,8 +665,8 @@ function update(dt) {
       if (g.sneakT < 0) {
         g.sneakT = rand(9, 14); const hid = g.dinos.filter(d => d.state === 'hidden'), empty = g.spots.filter(s => !s.dino && !s.busy);
         if (hid.length && empty.length) {
-          const d = pick(hid), ns = pick(empty); shakeSpot(d.spot); d.spot.dino = null; d.spot = ns; ns.dino = d; ns.side = Math.random() < .5 ? -1 : 1;
-          d.state = 'sneak'; d.t = 0; d.from.copy(d.obj.position); d.to.copy(spotHidePos(ns, d.peek)); d.eyes.visible = false; play(d.obj, 'run'); sfx.giggle();
+          const d = pick(hid), ns = pick(empty); shakeSpot(d.spot); d.obj.position.set(d.spot.x, 0, d.spot.z); d.spot.dino = null; d.spot = ns; ns.dino = d; ns.side = Math.random() < .5 ? -1 : 1;
+          d.state = 'sneak'; d.t = 0; d.obj.visible = true; d.from.copy(d.obj.position); d.to.copy(spotHidePos(ns, d.peek)); d.eyes.visible = false; play(d.obj, 'run'); sfx.giggle();
         }
       }
     }
@@ -669,25 +702,11 @@ function moveTorch(e) {
 }
 
 /* ---------- Menú ---------- */
-const CARD = {
-  jardin: ['#9be3ff', '#7fd14f', '#3f9a2e'], playa: ['#8fdcff', '#f6dc9a', '#2f9ad8'], nieve: ['#c4e2ff', '#f2f8ff', '#8fb0d8'],
-  ciudad: ['#a8e0ff', '#84d457', '#4e5260'], desierto: ['#ffd090', '#f3c477', '#c0804a'], volcan: ['#ffb08a', '#7a6866', '#ff5a1a'],
-};
-function cardSVG(L, n) {
-  const [sky, ground, accent] = CARD[L.theme], night = L.night, d = DINOS[n % DINOS.length].c.toString(16).padStart(6, '0');
-  return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="${night ? '#14204e' : sky}"/>` +
-    (night ? '<circle cx="78" cy="20" r="9" fill="#fff6c8"/><circle cx="20" cy="18" r="1.5" fill="#fff"/><circle cx="40" cy="10" r="1.2" fill="#fff"/><circle cx="58" cy="26" r="1.4" fill="#fff"/>' : '<circle cx="80" cy="18" r="10" fill="#ffe36a"/>') +
-    `<ellipse cx="50" cy="92" rx="70" ry="34" fill="${night ? '#2c3f5a' : ground}"/>` +
-    `<path d="M14 66 q4-8 12-6 q2-10 14-8 q10-6 16 4 q10 0 10 10z" fill="#${d}"/><circle cx="22" cy="62" r="2.4" fill="#fff"/><circle cx="22.6" cy="62" r="1.2" fill="#2a1f3d"/>` +
-    `<path d="M34 80 q-4-22 16-26 q18-6 26 8 q14 2 12 18z" fill="${night ? '#24482e' : (L.theme === 'nieve' ? '#e8f2ff' : L.theme === 'playa' || L.theme === 'desierto' ? '#c88a4a' : L.theme === 'volcan' ? '#5a4a4a' : L.theme === 'ciudad' ? '#ff6a5a' : '#3faa3a')}" stroke="#2a1f3d" stroke-width="2.5"/>` +
-    `<circle cx="58" cy="62" r="4.2" fill="${night ? '#fff27a' : '#fff'}"/><circle cx="68" cy="62" r="4.2" fill="${night ? '#fff27a' : '#fff'}"/>` +
-    (night ? '' : '<circle cx="59" cy="62.5" r="2" fill="#2a1f3d"/><circle cx="69" cy="62.5" r="2" fill="#2a1f3d"/>') + '</svg>';
-}
 function buildMenu() {
   const box = $('#levels'); box.innerHTML = '';
   LEVELS.forEach((L, n) => {
     const b = document.createElement('button'); b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1) + ' ' + THEMES[L.theme].name + (L.night ? ' de noche' : ''));
-    b.innerHTML = cardSVG(L, n) + `<b>${n + 1}</b>` + (save.done[n] ? '<span class="star"></span>' : '');
+    b.innerHTML = `<img alt="" src="__UP__img/hide/card-${L.night ? 'noche' : L.theme}.webp">` + `<b>${n + 1}</b>` + (L.night ? '<span class="moon"></span>' : '') + (save.done[n] ? '<span class="star"></span>' : '');
     b.addEventListener('click', () => { sfx.tap(); start(n); });
     box.appendChild(b);
   });
