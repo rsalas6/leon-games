@@ -370,6 +370,14 @@ function tick(t) {
   const bar = $('#loading i'); let done = 0;
   await Promise.all(NEED.map(n => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => { bar.style.width = Math.max(8, ++done / NEED.length * 100) + '%'; res(); }; im.src = src(n); })));
   $('#loading').hidden = true; layout(); setFriendState('idle'); requestAnimationFrame(tick);
+  // Diagnóstico (solo pruebas): #diag cocina de todo y manda el resultado a un servidor local
+  if (location.hash === '#diag') {
+    const errs = []; addEventListener('error', e => errs.push(e.message));
+    const put = (k, t) => { const it = makeItem(k); moveTo(it, toolSpot(t), false); drop(it); return it; };
+    const a = put('fish', 'pan'), b = put('carrot', 'pot'), c = put('banana', 'blender'), d = put('tomato', 'board'); blend(); chop(d); chop(d); chop(d);
+    const f = makeItem('broccoli'); moveTo(f, mouthPos(), false); drop(f);
+    setTimeout(() => fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag: 'cook', info: { ua: navigator.userAgent, states: [a.state, b.state, c.state, d.state], face: fState, friend: friend.id, mask: CSS.supports('mask', 'linear-gradient(#000,#000)') || CSS.supports('-webkit-mask', 'linear-gradient(#000,#000)'), errs } }) }), 3200);
+  }
   addEventListener('resize', () => setTimeout(layout, 50));
   window.LEON_READY = true;
 })();
