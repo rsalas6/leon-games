@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021202223';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261021203536';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -632,7 +632,7 @@ const F = {
 const NAT = { grass: 0x7ed957, leafsGreen: 0x5cc241, leafsDark: 0x2f9e44, leafsFall: 0xff9a2e, woodBark: 0x9c6234, woodBarkDark: 0x7a4a2a, woodInner: 0xf0d5a8, wood: 0xc8844a,
   woodDark: 0x8a5a34, woodBirch: 0xf5ead5, stone: 0xb9bdd0, stoneDark: 0x8e94a8, _defaultMat: 0xb9bdd0, dirt: 0xa5683a, colorRed: 0xe8423a, colorRedDark: 0xb02a30,
   colorTan: 0xf2c48a, colorYellow: 0xffc83a, colorPurple: 0xa98bff };
-const K = (name, over) => () => recolor(modelClone('k/' + name), nm => (over && over[nm] != null) ? over[nm] : NAT[nm] != null ? NAT[nm] : null);
+const K = (name, over) => Object.assign(() => recolor(modelClone('k/' + name), nm => (over && over[nm] != null) ? over[nm] : NAT[nm] != null ? NAT[nm] : null), { k: name });
 // Dinosaurio de Quaternius pintado de un color; si camina, usa su animación de caminar
 const lightOf = c => new THREE.Color(c).lerp(new THREE.Color(0xfff2c8), .55).getHex();
 const darkOf = c => new THREE.Color(c).multiplyScalar(.62).getHex();
@@ -648,34 +648,44 @@ function qdino(name, c) {
   return g;
 }
 const QD = { raptor: 'raptor', stego: 'stego', trex: 'trex', trice: 'trice', brachio: 'apato', compy: 'para', ptero: 'dragon', mosa: 'shark' };
+// Fábrica de dino con su modelo anotado (para saber qué descargar en cada mundo)
+const D = (kind, c) => Object.assign(() => dino(kind, c), { m: QD[kind] });
 function dino(kind, c) {
   if (QD[kind]) { const q = qdino(QD[kind], c); if (q) return q; }
   const d = BUILDERS[kind](c), g = new THREE.Group(); g.add(d.g);
   g.userData.anim = d.anim; return g;
 }
-// Cada mundo: 16 cosas de la más chiquita a la más grande; la última es el jefe del nivel largo
+// Variedad: varios modelos para el mismo tamaño (muchas casas, coches y edificios distintos)
+const CARS = ['sedan', 'suv', 'hatchback-sports', 'taxi', 'van', 'sedan-sports', 'suv-luxury', 'police'].map(n => K(n));
+const TRUCKS = ['truck', 'delivery', 'garbage-truck', 'firetruck', 'ambulance'].map(n => K(n));
+const HOUSES = 'a b c d e f g h k l'.split(' ').map(n => K('building-type-' + n));
+const BUILDINGS = ['building-a', 'building-b', 'building-c', 'building-d', 'building-e', 'building-f', 'building-g', 'building-h', 'building-skyscraper-a', 'building-skyscraper-b', 'building-skyscraper-c', 'building-skyscraper-d', 'building-skyscraper-e'].map(n => K(n));
+const LIGHTS = [K('light-square'), K('light-curved')];
+// Cada mundo es un pueblo con calles: 16 cosas de la más chiquita a la más grande (8 = poste de luz, 10 = coches, 14 = casas) y el jefe al final
 const THEMES = {
-  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('raptor', 0x7a4ad8)] },
-  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('compy', 0xff7a3a)] },
-  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x6a9ad8)] },
-  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
-  volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('ptero', 0xd8421a)] },
-  ciudad: { roads: 1, far: [0x9aa8c0, 0xc8d4e8], farKind: 'peak', pond: 0x3aa8e8, grass: 0x5cae40, grassN: .03, flowers: [0xff5d8f, 0xffd23a], out: 0x7e8798, wave: 0,
+  selva: { road: 0x5a5e68, walk: 0xd8d8de, far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('plant_bushSmall'), K('bench'), D('compy', 0xff9a2e), K('planter'), D('raptor', 0x3fae4a), LIGHTS, [K('tree-small'), K('plant_bushLarge')], CARS, D('trice', 0x3f86c8), [K('tree-large'), K('tree_oak')], D('stego', 0xff8a2a), HOUSES, D('trex', 0x3faa3a), D('raptor', 0x7a4ad8)] },
+  playa: { road: 0x6a6e78, walk: 0xf4ecd8, far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), LIGHTS, D('compy', 0x5ac8ff), [K('hatchback-sports'), K('van'), K('suv'), K('taxi'), K('sedan')], K('boat-row-small'), [K('palm-bend'), K('palm-straight')], K('ship-small'), HOUSES, K('ship-pirate-large'), D('compy', 0xff7a3a)] },
+  nieve: { road: 0x8890a0, walk: 0xeef4fa, far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), LIGHTS, D('raptor', 0x5ab0e0), K('tree-snow-c'), [K('suv'), K('suv-luxury'), K('sedan'), K('van')], D('trice', 0x8a96c8), [K('tree-snow-b'), K('tree-decorated-snow')], [K('train-locomotive'), () => F.igloo()], HOUSES, BUILDINGS, D('trice', 0x6a9ad8)] },
+  desierto: { road: 0x6a6058, walk: 0xe8c898, far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), D('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), LIGHTS, () => F.camel(), [() => F.jeep(), K('suv'), K('van'), K('truck')], D('stego', 0xd8a060), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.hut(false), HOUSES, () => F.pyramid(), D('stego', 0xd07a3a)] },
+  volcan: { road: 0x3a3438, walk: 0x8a7a78, far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), D('compy', 0xe8423a), () => F.lavaPool(), LIGHTS, D('stego', 0x8a5a3a), [K('suv'), K('truck'), K('tractor')], D('ptero', 0xff8a2a), [K('firetruck'), K('ambulance')], D('trice', 0xc0603a), HOUSES, D('trex', 0xd04a2a), D('ptero', 0xd8421a)] },
+  ciudad: { road: 0x4e5260, walk: 0xcfd0d8, far: [0x9aa8c0, 0xc8d4e8], farKind: 'peak', pond: 0x3aa8e8, grass: 0x5cae40, grassN: .03, flowers: [0xff5d8f, 0xffd23a], out: 0x7e8798, wave: 0,
     border: () => K(['low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a'][Math.random() * 4 | 0])(), butterflies: false,
-    ground: [0x9aa4b4, 0x8e98a8], sky: 0xbfe4ff,
-    items: [K('cone'), K('road-sign-stop'), K('kart-oobi'), K('construction-barrier'), K('dumpster'), K('tree-small'), K('hatchback-sports'), K('sedan'), K('taxi'), K('police'), K('ambulance'), K('firetruck'), K('garbage-truck'), K('building-type-a'), K('building-type-c'), K('building-skyscraper-a'), () => dino('trex', 0x3faa3a)] },
+    ground: [0x74c450, 0x68b846], sky: 0xbfe4ff,
+    items: [K('cone'), K('road-sign-stop'), K('construction-cone'), K('construction-barrier'), K('bench'), K('dumpster'), D('compy', 0x8fe04a), K('tree-small'), LIGHTS, D('raptor', 0xff8a2a), CARS, D('trice', 0x5ab0ff), TRUCKS, D('stego', 0xffc83a), HOUSES, BUILDINGS, D('trex', 0x3faa3a)] },
 };
 const THEME_KEYS = Object.keys(THEMES);
 // Modelos de cada mundo: se descargan solo cuando León entra a un nivel de ese mundo (y luego quedan guardados sin internet)
-const THEME_MODELS = {
-  selva: ['raptor', 'stego', 'trice', 'apato', 'trex', 'para', ...['flower_redA', 'grass_leafsLarge', 'log_large', 'mushroom_red', 'plant_bushLarge', 'stone_largeA', 'tree_default', 'tree_fat', 'tree_oak', 'tree_palmShort', 'tree_palmTall'].map(n => 'k/' + n)],
-  playa: ['para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
-  nieve: ['raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
-  desierto: ['para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
-  volcan: ['para', 'dragon', 'raptor', 'stego', 'trex', 'trice', ...['chest', 'mushroom_tanGroup', 'stone_largeA'].map(n => 'k/' + n)],
-  ciudad: ['trex', ...['ambulance', 'building-skyscraper-a', 'building-type-a', 'building-type-c', 'cone', 'construction-barrier', 'dumpster', 'firetruck', 'garbage-truck', 'hatchback-sports', 'kart-oobi',
-    'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'police', 'road-sign-stop', 'sedan', 'taxi', 'tree-small'].map(n => 'k/' + n)],
+const BORDER_MODELS = {
+  selva: ['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'], playa: ['rocks-sand-a'], nieve: ['tree-snow-b', 'tree-snow-c'],
+  desierto: ['cactus_tall', 'rock_tallA'], volcan: [], ciudad: ['low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a'],
 };
+const VARS = (theme, i) => { const f = THEMES[theme].items[i]; return Array.isArray(f) ? f : [f]; };
+const THEME_MODELS = {};
+for (const t of THEME_KEYS) {
+  const need = new Set(BORDER_MODELS[t].map(n => 'k/' + n));
+  THEMES[t].items.flat().forEach(f => { if (f.k) need.add('k/' + f.k); if (f.m) need.add(f.m); });
+  THEME_MODELS[t] = [...need];
+}
 // Cada mundo tiene un nivel corto (el jefe es el objeto 12) y uno largo (el jefe es el más grande).
 // Los mundos son islas: su orilla es un círculo deformado por dos ondas (h = [a1, k1, p1, a2, k2, p2]) para que cada uno tenga otra forma
 const SHAPES = [[.18, 3, 0, .08, 5, 1], [.24, 2, .5, .1, 5, 2], [.14, 4, 1, .09, 7, 0], [.2, 3, 2, .12, 2, 1], [.12, 5, 0, .1, 3, 2], [.1, 4, .7, .06, 2, 1.5],
@@ -697,8 +707,8 @@ const R0 = 1.25;                               // radio inicial del hoyo
 const fits = (rad, r) => rad < r * .92;
 
 // Crea el objeto i del mundo, lo escala a su tamaño y le pone contorno
-function makeItem(theme, i) {
-  const g = THEMES[theme].items[i]();
+function makeItem(theme, i, v = 0) {
+  const g = VARS(theme, i)[v]();
   const s = modelBox(g).getSize(new THREE.Vector3());
   // Los jefes delgados (cuello largo) se agrandan para que se vean igual de inmensos que los demás
   g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7) * (i === 16 && s.x < s.z * .3 ? 1.6 : 1));
@@ -739,9 +749,9 @@ function bakeSkinned(m) {
   for (let k = 0; k < p.count; k++) { v.fromBufferAttribute(m.geometry.attributes.position, k); m.boneTransform(k, v); p.setXYZ(k, v.x, v.y, v.z); }
   g.deleteAttribute('skinIndex'); g.deleteAttribute('skinWeight'); g.computeVertexNormals(); return g;
 }
-function proto(theme, i) {
-  const key = theme + i; if (protos[key]) return protos[key];
-  const g = THEMES[theme].items[i]();
+function proto(theme, i, v = 0) {
+  const key = theme + i + ':' + v; if (protos[key]) return protos[key];
+  const g = VARS(theme, i)[v]();
   const anim = g.userData.anim;
   // Los modelos con esqueleto se congelan en su pose natural, ANTES de animar (la animación reinicia el giro del esqueleto)
   // y antes de escalar; el tamaño se reajusta al final
@@ -792,22 +802,22 @@ const instMat = new THREE.MeshLambertMaterial({ vertexColors: true });
 let pools = {};
 function makePools(L, counts) {
   Object.values(pools).forEach(p => { scene.remove(p.body); p.out && scene.remove(p.out); }); pools = {};
-  counts.forEach((n, i) => {
-    if (!n) return;
-    const pr = proto(L.theme, i), cap = n + 40;
+  Object.entries(counts).forEach(([pk, n]) => {
+    const [i, v] = pk.split(':').map(Number);
+    const pr = proto(L.theme, i, v), cap = n + 40;
     const body = new THREE.InstancedMesh(pr.body, instMat, cap); body.castShadow = true; body.count = 0; body.frustumCulled = false; scene.add(body);
     let out = null; if (pr.out) { out = new THREE.InstancedMesh(pr.out, OUT_MAT, cap); out.count = 0; out.frustumCulled = false; scene.add(out); }
-    pools[i] = { body, out, cap };
+    pools[pk] = { body, out, cap };
   });
 }
 const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
-function poolAdd(i, obj) {
-  const p = pools[i]; if (!p || p.body.count >= p.cap) return -1;
+function poolAdd(pk, obj) {
+  const p = pools[pk]; if (!p || p.body.count >= p.cap) return -1;
   const k = p.body.count++; if (p.out) p.out.count = p.body.count;
   return k;
 }
 function poolSync(it) {
-  const p = pools[it.i]; it.obj.updateMatrix();
+  const p = pools[it.pk]; it.obj.updateMatrix();
   const m = it.gone ? ZERO : it.obj.matrix;
   p.body.setMatrixAt(it.slot, m); p.body.instanceMatrix.needsUpdate = true;
   if (p.out) { p.out.setMatrixAt(it.slot, m); p.out.instanceMatrix.needsUpdate = true; }
@@ -829,7 +839,7 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize);
 
 // Piso con un agujero de verdad: el sombreador descarta los píxeles dentro del hoyo
-const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 }, roadsU = { value: 0 },
+const holeU = { value: new THREE.Vector3(0, 0, 1) }, worldU = { value: 56 }, altU = { value: new THREE.Color() }, outU = { value: new THREE.Color() }, waveU = { value: 0 }, timeU = { value: 0 }, roadsU = { value: 0 }, roadU = { value: new THREE.Color() }, walkU = { value: new THREE.Color() },
   shapeA = { value: new THREE.Vector4() }, shapeB = { value: new THREE.Vector3() }, pondsU = { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] }, pondColU = { value: new THREE.Color() };
 const groundTex = (() => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d');
@@ -839,10 +849,10 @@ const groundTex = (() => {
 })();
 const groundMat = new THREE.MeshLambertMaterial({ color: 0x7bd63a, map: groundTex });
 groundMat.onBeforeCompile = sh => {
-  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uRoads = roadsU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
+  sh.uniforms.uHole = holeU; sh.uniforms.uWorld = worldU; sh.uniforms.uAlt = altU; sh.uniforms.uOut = outU; sh.uniforms.uWave = waveU; sh.uniforms.uTime = timeU; sh.uniforms.uRoads = roadsU; sh.uniforms.uRoad = roadU; sh.uniforms.uWalk = walkU; sh.uniforms.uShapeA = shapeA; sh.uniforms.uShapeB = shapeB; sh.uniforms.uPonds = pondsU; sh.uniforms.uPondCol = pondColU;
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
     .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;\nuniform vec4 uShapeA;\nuniform vec3 uShapeB;\nuniform vec3 uPonds[3];\nuniform vec3 uPondCol;\nuniform float uRoads;')
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nuniform vec3 uHole;\nuniform float uWorld;\nuniform vec3 uAlt;\nuniform vec3 uOut;\nuniform float uWave;\nuniform float uTime;\nuniform vec4 uShapeA;\nuniform vec3 uShapeB;\nuniform vec3 uPonds[3];\nuniform vec3 uPondCol;\nuniform float uRoads;\nuniform vec3 uRoad;\nuniform vec3 uWalk;')
     .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
       if (distance(vWPos.xz, uHole.xy) < uHole.z) discard;`)
     .replace('vec4 diffuseColor = vec4( diffuse, opacity );', `vec4 diffuseColor = vec4( diffuse, opacity );
@@ -853,16 +863,21 @@ groundMat.onBeforeCompile = sh => {
       float edge = length(dv) - uShapeA.x * (1.0 + uShapeA.y * sin(uShapeA.z * ang + uShapeA.w) + uShapeB.x * sin(uShapeB.y * ang + uShapeB.z));
       float w = sin(vWPos.x * .35 + uTime * 1.5) * sin(vWPos.z * .3 - uTime * 1.2);
       if (uRoads > .5 && edge < -1.6) {
-        // Ciudad: cuadras de 26 m con calles de 7 m, banqueta clarita y línea punteada amarilla al centro
+        // Pueblo: cuadras de 26 m con calles de 7 m, banqueta en las dos orillas de cada calle, línea punteada al centro y cruces de cebra
         vec2 m = mod(vWPos.xz, 26.0);
         float rx = step(m.x, 7.0), rz = step(m.y, 7.0), road = max(rx, rz);
-        vec2 sw = step(m, vec2(8.2)) - step(m, vec2(7.0));
-        diffuseColor.rgb = mix(vec3(.40, .72, .30), vec3(.80, .80, .84), max(sw.x, sw.y));
+        float swx = max(step(m.x, 8.2), step(24.8, m.x)), swz = max(step(m.y, 8.2), step(24.8, m.y));
+        if (max(swx, swz) > .5) diffuseColor.rgb = uWalk * (.94 + .06 * step(.5, fract((swx > .5 ? vWPos.z : vWPos.x) / 1.6)));
         if (road > .5) {
-          diffuseColor.rgb = vec3(.30, .32, .38);
+          diffuseColor.rgb = uRoad * (.96 + .08 * fract(sin(dot(floor(vWPos.xz * 3.0), vec2(12.9898, 78.233))) * 43758.5453));
           float dash = step(.5, fract((rx > .5 ? vWPos.z : vWPos.x) / 4.0));
-          if (rx > .5 && abs(m.x - 3.5) < .18 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
-          if (rz > .5 && rx < .5 && abs(m.y - 3.5) < .18 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
+          bool cross = rx > .5 && rz > .5;
+          if (!cross && rx > .5 && abs(m.x - 3.5) < .14 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
+          if (!cross && rz > .5 && abs(m.y - 3.5) < .14 && dash > .5) diffuseColor.rgb = vec3(1.0, .82, .2);
+          // Cebras a la entrada de cada cruce
+          float zx = rx > .5 && rz < .5 && (m.y < 9.6 || m.y > 23.4) ? step(.5, fract(vWPos.x / 1.0)) : 0.0;
+          float zz = rz > .5 && rx < .5 && (m.x < 9.6 || m.x > 23.4) ? step(.5, fract(vWPos.z / 1.0)) : 0.0;
+          if (max(zx, zz) > .5 && (m.x > .4 && m.x < 6.6 || m.y > .4 && m.y < 6.6)) diffuseColor.rgb = vec3(.95);
         }
       }
       if (edge > 0.0) diffuseColor.rgb = mix(uOut, uOut * 1.25, uWave * smoothstep(.3, .9, w));
@@ -976,7 +991,7 @@ let decor = [], butterflies = [];
 function buildScenery(L) {
   decor.forEach(o => { scene.remove(o); o.geometry && o.geometry.dispose(); }); decor = []; butterflies = [];
   const T = THEMES[L.theme], W = L.world, m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
-  const spot = () => { for (let k = 0; k < 40; k++) { const x = rand(0, W), z = rand(0, W); if (inside(L, x, z, .5) && !inPond(game, x, z, .3)) return v.set(x, 0, z); } return v.set(W / 2, 0, W / 2); };
+  const spot = () => { for (let k = 0; k < 40; k++) { const x = rand(0, W), z = rand(0, W); if (inside(L, x, z, .5) && !inPond(game, x, z, .3) && !onRoad(x, z)) return v.set(x, 0, z); } return v.set(W / 2, 0, W / 2); };
   const area = Math.PI * L.R * L.R, nT = Math.round(area * T.grassN);
   const grass = new THREE.InstancedMesh(tuftGeo, decoMat(new THREE.MeshLambertMaterial({ color: T.grass, emissive: T.grass, emissiveIntensity: .55, side: THREE.DoubleSide }), true), nT);
   for (let i = 0; i < nT; i++) { q.setFromAxisAngle(v.set(0, 1, 0), Math.random() * 6.3); const k = rand(.7, 1.5); m4.compose(spot(), q, sc.set(k, k, k)); grass.setMatrixAt(i, m4); }
@@ -1073,95 +1088,72 @@ const gridP = (i, rows, cols, sp, dx = 0, dz = 0) => { const o = []; for (let r 
 const rowP = (i, n, sp, dz = 0) => Array.from({ length: n }, (_, k) => ({ i, x: (k - (n - 1) / 2) * sp, z: dz, ry: Math.PI / 2 }));
 const patchP = (i, n, R) => Array.from({ length: n }, () => { const a = rand(0, 6.3), d = R * Math.sqrt(Math.random()); return { i, x: Math.cos(a) * d, z: Math.sin(a) * d, ry: rand(0, 6.3) }; });
 const one = (i, x = 0, z = 0, ry = 0) => [{ i, x, z, ry }];
-// Recetas por mundo: [radio del grupo, cuántas veces puede salir, función que arma el grupo]
-const TOWNS = {
-  selva: [
-    [6, 9, () => [...patchP(0, 14, 5), ...patchP(3, 4, 4.5)]],                       // prado de flores
-    [3.5, 6, () => [...ringP(1, 8, 2.4), ...one(4)]],                                  // anillo de hongos
-    [3, 6, () => [...ringP(2, 5, 1.1), ...patchP(6, 3, 3)]],                           // nido de huevos con compys
-    [5, 5, () => [...patchP(4, 5, 4), ...patchP(3, 4, 4.5), ...patchP(5, 3, 4)]],      // jardín de rocas
-    [8, 5, () => [...patchP(9, 4, 6), ...patchP(13, 2, 6), ...patchP(5, 5, 7), ...rowP(7, 2, 2.6, 3)]], // arboleda
-    [7, 4, () => [...patchP(8, 3, 4), ...patchP(10, 2, 5)]],                           // manada de raptors y estegos
-    [8, 3, () => [...patchP(11, 2, 5), ...patchP(12, 3, 7)]],                          // triceratops entre palmeras
-    [10, 2, () => [...one(14), ...patchP(13, 2, 8)]],                                  // braquiosaurio en el bosque
-  ],
-  playa: [
-    [9, 4, () => [...gridP(8, 2, 4, 3.4), ...gridP(11, 2, 4, 3.4, 0, 1.6), ...patchP(4, 3, 7), ...patchP(3, 3, 6)]], // club de playa
-    [5, 6, () => [...ringP(5, 5, 3), ...one(3), ...patchP(0, 6, 4.5)]],                // reino de castillos de arena
-    [5, 5, () => [...rowP(6, 6, 1.4), ...patchP(1, 4, 4)]],                            // tienda de surf
-    [4, 6, () => [...patchP(7, 3, 3), ...patchP(0, 6, 4), ...patchP(2, 3, 3.5)]],      // nido de tortugas
-    [7, 4, () => [...patchP(12, 4, 6), ...patchP(9, 3, 5)]],                           // palmar con dinos
-    [8, 3, () => [...rowP(10, 3, 4), ...one(14, 0, -5)]],                              // puerto con botes y faro
-    [6, 7, () => [...patchP(0, 8, 5), ...patchP(1, 6, 5), ...patchP(2, 3, 4)]],        // conchas y cangrejos
-    [10, 2, () => [...one(13), ...patchP(10, 2, 7)]],                                  // mosasaurio
-  ],
-  nieve: [
-    [9, 3, () => [...ringP(13, 5, 7), ...ringP(5, 5, 3.5, .6), ...patchP(2, 8, 6), ...patchP(4, 2, 5)]], // aldea de iglús
-    [9, 3, () => [...gridP(10, 2, 3, 5.5), ...rowP(3, 6, 2.2, 6), ...patchP(4, 3, 7)]], // pueblo de cabañas
-    [5, 6, () => [...patchP(2, 12, 4.5), ...patchP(1, 4, 3)]],                         // colonia de pingüinos
-    [4, 6, () => [...patchP(6, 4, 3.5), ...patchP(7, 3, 4), ...patchP(0, 5, 4)]],      // playa de focas
-    [7, 6, () => [...patchP(3, 10, 6), ...patchP(0, 6, 6)]],                           // bosque de pinos
-    [8, 3, () => [...patchP(12, 3, 7), ...patchP(9, 2, 6)]],                           // manada de mamuts y osos
-    [7, 3, () => [...patchP(8, 3, 5), ...patchP(11, 2, 6)]],                           // dinos del frío
-    [10, 2, () => [...one(14), ...patchP(7, 4, 6)]],                                   // iceberg
-  ],
-  desierto: [
-    [8, 4, () => [...ringP(8, 5, 5), ...one(10), ...patchP(5, 3, 3.5), ...patchP(9, 2, 7)]], // campamento
-    [7, 4, () => [...gridP(7, 3, 4, 3), ...patchP(3, 6, 6)]],                          // sembradío de cactus
-    [8, 3, () => [...rowP(9, 5, 3.2)]],                                                 // caravana de camellos
-    [9, 3, () => [...gridP(13, 2, 3, 6), ...patchP(4, 4, 7)]],                         // pueblito
-    [5, 7, () => [...patchP(1, 6, 4), ...patchP(4, 3, 3), ...patchP(6, 3, 4), ...patchP(0, 6, 4)]], // excavación de fósiles
-    [5, 5, () => [...patchP(2, 4, 4), ...patchP(3, 4, 4), ...patchP(0, 5, 4)]],        // lagartijas y cactus
-    [8, 3, () => [...patchP(11, 2, 5), ...one(12, 0, 0)]],                             // oasis con estegos
-    [9, 2, () => [...one(14), ...patchP(6, 4, 6)]],                                    // roca gigante
-  ],
-  ciudad: [
-    [9, 4, () => [...gridP(7, 2, 4, 3.4), ...gridP(6, 1, 4, 3.4, 0, 5), ...one(4, 7, 0)]],                    // estacionamiento
-    [10, 3, () => [...gridP(13, 2, 2, 8), ...rowP(5, 4, 4, 6.5), ...patchP(2, 3, 6)]],                         // vecindario de casitas
-    [11, 2, () => [...gridP(15, 2, 2, 10), ...rowP(1, 4, 5, 8)]],                                              // centro con rascacielos
-    [9, 2, () => [...gridP(14, 1, 3, 8), ...rowP(5, 5, 3.5, 6)]],                                              // calle con casas
-    [8, 4, () => [...rowP(8, 3, 4), ...rowP(9, 2, 5, 3), ...rowP(10, 2, 5, -3)]],                               // tráfico (taxis, patrullas y ambulancias)
-    [6, 5, () => [...ringP(0, 8, 3), ...rowP(3, 3, 2.2, 0), ...one(4, 0, 4)]],                                 // obra en construcción
-    [7, 3, () => [...rowP(11, 2, 5), ...rowP(12, 2, 5, 4)]],                                                   // estación de bomberos y basura
-    [6, 6, () => [...ringP(5, 6, 4), ...patchP(2, 3, 3), ...patchP(0, 4, 3)]],                                 // parquecito
-  ],
-  volcan: [
-    [4, 7, () => [...patchP(3, 10, 3.2), ...one(8)]],                                  // cueva de cristales con tesoro
-    [7, 5, () => [...patchP(5, 7, 6), ...patchP(4, 4, 6)]],                            // bosque seco
-    [3.5, 6, () => [...ringP(1, 5, 1.3), ...patchP(6, 3, 3), ...patchP(2, 4, 3.5)]],   // nido de dinos rojos
-    [7, 4, () => [...gridP(7, 2, 3, 4.5), ...patchP(0, 8, 6)]],                        // campo de lava
-    [7, 4, () => [...patchP(9, 2, 5), ...patchP(10, 3, 5)]],                           // manada
-    [8, 3, () => [...patchP(11, 2, 6), ...patchP(12, 3, 7)]],                          // nido de pterodáctilos entre rocas
-    [9, 2, () => [...patchP(13, 2, 6), ...one(14)]],                                   // T-rex y triceratops
-    [5, 6, () => [...patchP(0, 8, 4), ...patchP(4, 4, 4), ...patchP(2, 3, 3)]],        // piedritas
-  ],
+// Cuadras del pueblo: la calle es de 7 m y la cuadra va de 8.2 a 24.8 dentro de cada celda de 26 m (centro en 16.5)
+const CELL = 26, BC = 16.5, BH = 8.3;
+const onRoad = (x, z, m = 0) => { const a = ((x % CELL) + CELL) % CELL, b = ((z % CELL) + CELL) % CELL; return a < 8.2 + m || a > 24.8 - m || b < 8.2 + m || b > 24.8 - m; };
+// Qué hay en cada mundo además de casas y coches: árboles, cositas de jardín, dinos y su cuadra especial
+const ROLES = {
+  selva: { tree: [9, 12], yard: [0, 1, 2, 3, 4, 6], dinos: [5, 7, 11, 13], special: () => [...ringP(2, 6, 1.4), ...patchP(5, 3, 3), ...ringP(12, 6, 6.5), ...patchP(0, 8, 5)], w: { yard2: 4, houses4: 3, park: 2, special: 2, parking: 1 } },
+  playa: { tree: [12], yard: [0, 1, 2, 3, 4, 6], dinos: [9, 7], special: () => [...ringP(5, 6, 4.5), ...one(13), ...patchP(1, 6, 7), ...patchP(0, 6, 7), ...rowP(11, 2, 5, 6)], w: { yard2: 4, houses4: 2, park: 2, special: 3, parking: 1 } },
+  nieve: { tree: [9, 12], yard: [0, 1, 2, 3, 4, 5], dinos: [6, 8, 11], special: () => [...gridP(13, 2, 2, 8.2), ...patchP(2, 8, 6), ...patchP(0, 6, 6)], w: { yard2: 3, houses4: 3, park: 2, special: 2, downtown: 1, parking: 1 } },
+  desierto: { tree: [7, 3], yard: [0, 1, 4, 5, 6], dinos: [2, 9, 11], special: () => [...one(15), ...rowP(9, 3, 4, 6.5), ...patchP(1, 5, 7), ...ringP(12, 3, 6, 2)], w: { yard2: 3, houses4: 2, park: 1, special: 3, parking: 1, huts: 2 } },
+  volcan: { tree: [5], yard: [0, 1, 2, 3, 4], dinos: [6, 9, 11, 13], special: () => [...one(7, 0, 0), ...one(7, 4, 4), ...one(7, -4, -3), ...patchP(3, 8, 7), ...patchP(13, 1, 5), ...patchP(6, 3, 6)], w: { yard2: 3, houses4: 2, park: 1, special: 3, parking: 1 } },
+  ciudad: { tree: [7], yard: [0, 1, 2, 3, 4, 5], dinos: [6, 9, 11, 13], special: () => [...ringP(0, 8, 3), ...rowP(3, 3, 2.4, 0), ...rowP(2, 4, 2, 5), ...one(12, 0, -5, Math.PI / 2)], w: { downtown: 4, houses4: 2, parking: 2, park: 2, special: 1, yard2: 1 } },
 };
-// Arma el mapa: primero un jardincito de cosas chiquitas alrededor de la rana, luego el jefe lejos y luego los pueblos por toda la isla
+const pick = a => a[Math.random() * a.length | 0];
+// Recetas de cuadra (coordenadas dentro de la cuadra; el frente de las casas mira a la calle)
+const BLOCKS = {
+  houses4: R => [-1, 1].flatMap(sx => [-1, 1].map(sz => ({ i: 14, x: sx * 4.2, z: sz * 4.2, ry: sz > 0 ? 0 : Math.PI }))),
+  yard2: R => [...[-1, 1].map(sx => ({ i: 14, x: sx * 4.2, z: 4.2, ry: 0 })), ...one(pick(R.tree), -5, -4.5), ...one(pick(R.tree), 5, -5), ...patchP(pick(R.yard), 4, 3).map(p => ({ ...p, z: p.z - 4 })), ...patchP(pick(R.yard), 3, 3).map(p => ({ ...p, z: p.z - 4 })), ...one(pick(R.dinos), 0, -4)],
+  park: R => [...ringP(pick(R.tree), 8, 6.6), ...patchP(pick(R.yard), 6, 4), ...patchP(pick(R.yard), 5, 4), ...one(pick(R.dinos), 1.5, 0), ...one(pick(R.dinos), -2, 1)],
+  parking: R => [...gridP(10, 2, 3, 4.6, 0, -2.6).map(p => ({ ...p, ry: Math.PI / 2 * (Math.random() < .5 ? 1 : 3) })), ...rowP(10, 3, 4.6, 4.4), ...patchP(pick(R.yard), 3, 6)],
+  downtown: R => [{ i: 15, x: -4.2, z: 0, ry: Math.PI / 2 * (Math.random() * 4 | 0) }, { i: 15, x: 4.2, z: 0, ry: Math.PI / 2 * (Math.random() * 4 | 0) }, ...patchP(pick(R.yard), 3, 7)],
+  huts: R => [...gridP(13, 2, 2, 7.6), ...patchP(pick(R.yard), 6, 7), ...one(pick(R.dinos))],
+  special: R => R.special(),
+};
+// Arma el mapa: un jardincito de cosas chiquitas alrededor de la rana, el jefe enfrente y el resto es un pueblo de cuadras y calles
 function generateLayout(L) {
-  const W = L.world, c = W / 2, out = [], centers = [];
+  const W = L.world, c = W / 2, out = [], R = ROLES[L.theme];
   const ok = (x, z, r) => inside(L, x, z, r + .6) && !inPond(game, x, z, r + .4);
   ringP(0, 10, 6).concat(ringP(1, 8, 8.5, .3), ringP(0, 12, 11, .1)).forEach(p => out.push({ i: p.i, x: c + p.x, z: c + p.z, ry: p.ry }));
-  centers.push({ x: c, z: c, r: 12 });
   for (let t = 0; t < 400; t++) {
     // El titán se para "arriba" en la pantalla, a la vista desde que empieza el nivel (si no cabe ahí, en cualquier lado; al final, a la fuerza)
     const a = -Math.PI / 2 + rand(-.5, .5) * Math.min(1, t / 40) + (t > 200 ? rand(-3, 3) : 0), d = SIZE(L.boss) * .5 + 12 + (t % 200) * .15, x = c + Math.cos(a) * d, z = c + Math.sin(a) * d;
     if (t < 399 && !ok(x, z, SIZE(L.boss) * (t > 300 ? .3 : .5) + 1)) continue;
-    out.push({ i: L.boss, x, z, ry: Math.PI + rand(-.3, .3) }); centers.push({ x, z, r: SIZE(L.boss) * .6 + 3 }); break;
+    out.push({ i: L.boss, x, z, ry: Math.PI + rand(-.3, .3) }); break;
   }
-  const recipes = TOWNS[L.theme].filter(r => r[2]().every(p => p.i < L.boss)).map(r => ({ r: r[0], max: Math.ceil(r[1] * (L.R / 40) ** 2), make: r[2], used: 0 }));
-  for (let tries = 0; tries < 600 && out.length < L.total; tries++) {
-    const opts = recipes.filter(r => r.used < r.max); if (!opts.length) break;
-    const rc = opts[Math.random() * opts.length | 0];
-    const x = rand(0, W), z = rand(0, W);
-    if (!inside(L, x, z, rc.r * .7) || centers.some(q => Math.hypot(q.x - x, q.z - z) < (q.r + rc.r) * .85)) continue;
-    rc.used++; centers.push({ x, z, r: rc.r });
-    const rot = rand(0, 6.3), cs = Math.cos(rot), sn = Math.sin(rot);
-    rc.make().forEach(p => out.push({ i: p.i, x: x + p.x * cs - p.z * sn, z: z + p.x * sn + p.z * cs, ry: p.ry - rot }));
+  // Cuadras: completas dentro de la isla llevan casas, edificios, parques...; las de la orilla, jardín con árboles
+  const recipes = Object.entries(R.w).flatMap(([k, n]) => Array(n).fill(k));
+  const n0 = Math.floor((c - L.R * 1.5) / CELL), n1 = Math.ceil((c + L.R * 1.5) / CELL);
+  for (let gx = n0; gx <= n1; gx++) for (let gz = n0; gz <= n1; gz++) {
+    const bx = gx * CELL + BC, bz = gz * CELL + BC;
+    if (Math.hypot(bx - c, bz - c) < 9) continue;   // la cuadra de la rana se queda con su jardincito
+    const corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]].filter(([a, b]) => inside(L, bx + a * BH, bz + b * BH, 0)).length;
+    if (!corners && !inside(L, bx, bz, 0)) continue;
+    if (game.ponds.some(p => Math.hypot(p.x - bx, p.z - bz) < 2)) { ringP(pick(R.tree), 9, 7.3).forEach(p => out.push({ ...p, x: bx + p.x, z: bz + p.z })); continue; }
+    const list = corners === 4 ? BLOCKS[pick(recipes)](R) : [...patchP(pick(R.tree), 3, 7), ...patchP(pick(R.yard), 8, 7), ...patchP(pick(R.yard), 6, 7), ...(Math.random() < .5 ? one(pick(R.dinos)) : [])];
+    const rot = (Math.random() * 4 | 0) * Math.PI / 2, cs = Math.cos(rot), sn = Math.sin(rot);
+    list.filter(p => p.i < L.boss).forEach(p => out.push({ i: p.i, x: bx + p.x * cs - p.z * sn, z: bz + p.x * sn + p.z * cs, ry: (p.ry || 0) - rot }));
+    // Postes de luz en las esquinas de la banqueta
+    [[-1, -1], [1, 1]].forEach(([a, b]) => out.push({ i: 8, x: bx + a * (BH + .7), z: bz + b * (BH + .7), ry: a > 0 ? 0 : Math.PI }));
   }
+  // Coches en sus carriles (cada calle tiene dos, uno de ida y otro de vuelta); algunos van manejando
+  for (let g = n0; g <= n1 + 1; g++) for (const lane of [1.75, 5.25]) for (const axis of [0, 1]) {
+    for (let u = n0 * CELL; u < (n1 + 1) * CELL; u += rand(9, 22)) {
+      if (((u % CELL) + CELL) % CELL < 9) continue;   // no en los cruces
+      if (Math.random() < .45) continue;
+      const fixed = g * CELL + lane, x = axis ? u : fixed, z = axis ? fixed : u, dir = lane < 3.5 ? 1 : -1;
+      const d2 = axis ? -dir : dir, ry = axis ? (d2 > 0 ? Math.PI / 2 : -Math.PI / 2) : (d2 > 0 ? 0 : Math.PI);
+      const i = L.theme === 'ciudad' || L.theme === 'volcan' ? (Math.random() < .2 ? 12 : 10) : 10;
+      out.push({ i, x, z, ry, drive: Math.random() < .6 ? rand(2.5, 4.5) : 0 });
+    }
+  }
+  // Cositas sueltas por todos lados para que siempre haya qué comer al principio
+  for (let k = 0; k < L.total * .25; k++) { const x = rand(0, W), z = rand(0, W), i = Math.random() * 5 | 0; out.push({ i, x, z, ry: rand(0, 6.3) }); }
   // Que haya de todos los tamaños para poder ir creciendo
   for (let i = 0; i < L.boss; i++) {
     let have = out.filter(p => p.i === i).length;
-    for (let t = 0; have < 4 && t < 80; t++) { const x = rand(0, W), z = rand(0, W); if (ok(x, z, SIZE(i) * .5)) { out.push({ i, x, z, ry: rand(0, 6.3) }); have++; } }
+    for (let t = 0; have < 4 && t < 80; t++) { const x = rand(0, W), z = rand(0, W); if (ok(x, z, SIZE(i) * .5) && (i < 8 || !onRoad(x, z, SIZE(i) * .5))) { out.push({ i, x, z, ry: rand(0, 6.3) }); have++; } }
   }
   return out.filter(p => ok(p.x, p.z, SIZE(p.i) * .5));
 }
@@ -1171,22 +1163,23 @@ function placeItems(L, layout) {
   for (const p of layout) {
     const r = SIZE(p.i) * .5;
     if (near(p.x, p.z).some(o => Math.hypot(o.x - p.x, o.z - p.z) < (o.r + r) * .8)) continue;
-    const it = newItem(L.theme, p.i, p.x, p.z, p.ry); if (!it) continue;
+    const it = newItem(L.theme, p.i, p.x, p.z, p.ry, p.v); if (!it) continue; if (p.drive) it.drive = p.drive;
     const k = Math.floor(it.x / cell) + ',' + Math.floor(it.z / cell); (grid.get(k) || grid.set(k, []).get(k)).push(it); items.push(it);
   }
   return items;
 }
 let soloDinos = 0;
-function newItem(theme, i, x, z, ry = rand(0, Math.PI * 2)) {
-  const pr = proto(theme, i);
+function newItem(theme, i, x, z, ry = rand(0, Math.PI * 2), v = null) {
+  if (v == null) v = Math.random() * VARS(theme, i).length | 0;
+  const pr = proto(theme, i, v), pk = i + ':' + v;
   // Hasta 12 dinos por nivel caminan con patitas animadas; el jefe y los objetos con humo también van aparte
   const solo = pr.tick || game.L.boss === i || (pr.dino && soloDinos < 12);
   let obj, anim = null, slot = -1;
-  if (solo) { obj = makeItem(theme, i); anim = obj.children[0].userData.anim; scene.add(obj); if (pr.dino) soloDinos++; }
-  else { obj = new THREE.Object3D(); slot = poolAdd(i, obj); if (slot < 0) return null; }
+  if (solo) { obj = makeItem(theme, i, v); anim = obj.children[0].userData.anim; scene.add(obj); if (pr.dino) soloDinos++; }
+  else { obj = new THREE.Object3D(); slot = poolAdd(pk, obj); if (slot < 0) return null; }
   obj.rotation.y = ry;
   obj.position.set(x, 0, z);
-  const it = { i, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? (game.L.boss === i ? .12 : rand(.25, .55)) : 0 };
+  const it = { i, pk, x, z, r: SIZE(i) * .5, obj, anim, solo, slot, fall: 0, vy: 0, shake: 0, seed: Math.random() * 6, head: obj.rotation.y, walk: pr.dino ? (game.L.boss === i ? .12 : rand(.25, .55)) : 0 };
   if (!solo) poolSync(it);
   return it;
 }
@@ -1210,20 +1203,21 @@ function startNow(n) {
   worldU.value = L.world; altU.value.setHex(T.ground[1]); groundMat.color.setHex(T.ground[0]);
   ground.scale.set(L.world + 400, L.world + 400, 1); ground.position.set(L.world / 2, 0, L.world / 2);
   scene.background = new THREE.Color(T.sky); scene.fog = new THREE.Fog(T.sky, 110, 380);
-  hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave; roadsU.value = T.roads ? 1 : 0;
+  hemi.groundColor.setHex(T.ground[1]); outU.value.setHex(T.out); waveU.value = T.wave; roadsU.value = 1; roadU.value.setHex(T.road); walkU.value.setHex(T.walk);
   game = { n, L, items: [], hx: L.world / 2, hz: L.world / 2, r: R0, show: R0, falling: [], over: false, t: 0, eaten: 0, look: new THREE.Vector2(), blink: 2, ponds: [], intro: 3.6 };
   shapeA.value.set(L.R, L.h[0], L.h[1], L.h[2]); shapeB.value.set(L.h[3], L.h[4], L.h[5]); pondColU.value.setHex(T.pond);
-  // 2 o 3 charcos (agua, hielo o lava según el mundo) que no estén en el centro
+  // 2 o 3 estanques, cada uno en medio de una cuadra (un parquecito), lejos de la rana
   for (let k = 0, tries = 0; k < 3 && tries < 200; tries++) {
-    const a = rand(0, 6.3), d = rand(L.R * .3, L.R * .75), x = L.world / 2 + Math.cos(a) * d, z = L.world / 2 + Math.sin(a) * d, r = rand(3, L.R * .12);
-    if (!inside(L, x, z, r + 3) || game.ponds.some(p => Math.hypot(p.x - x, p.z - z) < p.r + r + 6)) continue;
+    const a = rand(0, 6.3), d = rand(L.R * .3, L.R * .8), x0 = L.world / 2 + Math.cos(a) * d, z0 = L.world / 2 + Math.sin(a) * d;
+    const x = Math.floor(x0 / CELL) * CELL + BC, z = Math.floor(z0 / CELL) * CELL + BC, r = rand(4, 6);
+    if (!inside(L, x, z, BH + 1) || Math.hypot(x - L.world / 2, z - L.world / 2) < 20 || game.ponds.some(p => Math.hypot(p.x - x, p.z - z) < 1)) continue;
     game.ponds.push({ x, z, r }); k++;
   }
   pondsU.value.forEach((v, k) => { const p = game.ponds[k]; v.set(p ? p.x : -999, p ? p.z : -999, p ? p.r : 0); });
   buildScenery(L);
   soloDinos = 0;
-  const layout = generateLayout(L), counts = [];
-  layout.forEach(p => (counts[p.i] = (counts[p.i] || 0) + 1));
+  const layout = generateLayout(L), counts = {};
+  layout.forEach(p => { if (p.v == null) p.v = Math.random() * VARS(L.theme, p.i).length | 0; const k = p.i + ':' + p.v; counts[k] = (counts[k] || 0) + 1; });
   makePools(L, counts);
   game.items = placeItems(L, layout);
   game.growK = L.long ? 5 : 6;   // calibrado con un bot: un mundo se pasa rápido (~30-45 s jugando perfecto)
@@ -1340,6 +1334,16 @@ function step(dt) {
       if (!inside(g.L, it.x, it.z, it.r) || inPond(g, it.x, it.z, it.r)) { it.x += Math.sin(it.head) * sp * 2; it.z += Math.cos(it.head) * sp * 2; it.head += Math.PI * rand(.7, 1.3); }
       it.obj.rotation.y = it.head;
       if (it.anim) it.anim(g.t * 6 + it.seed, 3); else it.obj.position.y = Math.abs(Math.sin(g.t * 6 + it.seed)) * it.r * .15;
+    }
+    // Los coches manejan por su carril; al llegar a la orilla se dan la vuelta al otro carril, y se esperan si la rana les tapa el paso
+    if (it.drive && !it.carry) {
+      const fx = Math.sin(it.head), fz = Math.cos(it.head), ax = g.hx - it.x, az = g.hz - it.z;
+      const blocked = !fits(it.r, g.r) && Math.hypot(ax, az) < g.r + it.r + 1.5 && ax * fx + az * fz > 0;
+      if (!blocked) {
+        const v = it.drive * dt, nx = it.x + fx * v, nz = it.z + fz * v;
+        if (inside(g.L, nx + fx * it.r, nz + fz * it.r, 0) && !inPond(g, nx, nz, it.r)) { it.x = nx; it.z = nz; }
+        else { it.x -= -Math.cos(it.head) * 3.5; it.z -= Math.sin(it.head) * 3.5; it.head += Math.PI; it.obj.rotation.y = it.head; }
+      }
     }
     const dist = Math.hypot(it.x - g.hx, it.z - g.hz);
     if (fits(it.r, g.r)) {
