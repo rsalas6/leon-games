@@ -1,0 +1,378 @@
+<title>Cocinita</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: una cocina de caricatura a pantalla completa (escenario 16:9 acostado o 9:16 parado). Refri con comida, barra con tabla, sartén, olla y licuadora, y el amiguito con hambre en su mesita. Todo se juega arrastrando con el dedo. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{
+  --ink:#2a1f3d;
+  --sun:#ffd23a;
+  --grass:#6cc63a;
+  --pix:'Lilita One','Arial Rounded MT Bold',sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#ffe9b8;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+img{-webkit-user-drag:none;user-select:none;pointer-events:none}
+#room{position:fixed;inset:0;background:#f6d9a8 center/cover no-repeat;touch-action:none}
+#room::before{content:'';position:absolute;inset:-20px;background:inherit;filter:blur(14px) saturate(1.1);opacity:.9}
+#stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:center/100% 100% no-repeat;touch-action:none;overflow:visible}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+.slot{position:absolute;display:grid;place-items:center}
+.food{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);touch-action:none;cursor:grab;transition:transform .15s}
+.food .pic{position:absolute;inset:0;background:center/contain no-repeat}
+.food.cut .pic{-webkit-mask:linear-gradient(90deg,#000 0 30%,transparent 30% 35%,#000 35% 64%,transparent 64% 69%,#000 69%);mask:linear-gradient(90deg,#000 0 30%,transparent 30% 35%,#000 35% 64%,transparent 64% 69%,#000 69%)}
+.food.fried .pic{filter:sepia(.85) saturate(2) brightness(.82) hue-rotate(-15deg) drop-shadow(0 0 3px #ffb030)}
+.food .cont{position:absolute;inset:0;background:center/contain no-repeat}
+.food .liq{position:absolute;border-radius:50%}
+.food.drag{transform:scale(1.15);z-index:60;filter:drop-shadow(0 10px 6px rgba(0,0,0,.25))}
+.food.fresh{animation:pop .35s cubic-bezier(.3,1.8,.5,1)}
+@keyframes pop{from{transform:scale(.3)}to{transform:none}}
+.shelf{position:absolute;background:center/contain no-repeat;cursor:grab;touch-action:none;filter:drop-shadow(0 4px 2px rgba(0,0,0,.2));animation:wig 3s ease-in-out infinite}
+@keyframes wig{0%,92%,100%{transform:none}95%{transform:rotate(-6deg) scale(1.06)}98%{transform:rotate(5deg)}}
+.tool{position:absolute;background:center/contain no-repeat;filter:drop-shadow(0 6px 3px rgba(0,0,0,.18))}
+.tool.hot{animation:shake .12s linear infinite}
+@keyframes shake{50%{transform:translate(1px,-1px)}}
+.tool.glow{filter:drop-shadow(0 0 12px #fff6a0) drop-shadow(0 6px 3px rgba(0,0,0,.18))}
+#friend{position:absolute;background:center bottom/contain no-repeat;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+#friend.out{transform:translateX(130%) rotate(12deg)}
+#friend.chew{animation:chew .28s ease-in-out infinite}
+@keyframes chew{50%{transform:scale(1.03,.96)}}
+#friend.yuck{animation:yuck .12s linear 8}
+@keyframes yuck{50%{transform:translateX(6px) rotate(2deg)}}
+#friend.happy{animation:hop .45s ease-in-out 3}
+@keyframes hop{50%{transform:translateY(-6%)}}
+#nextBtn{position:absolute;width:clamp(52px,7vmin,76px);height:clamp(52px,7vmin,76px);padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 4px var(--ink),0 6px 0 4px rgba(42,31,61,.3);display:grid;place-items:center;z-index:30}
+#nextBtn svg{width:55%;height:55%}
+#nextBtn:active{transform:translateY(3px)}
+#blendBtn{position:absolute;border:0;padding:0;border-radius:50%;background:#ff5d8f;box-shadow:0 0 0 3px var(--ink),0 4px 0 3px rgba(42,31,61,.3);z-index:20}
+#blendBtn:active{transform:translateY(2px)}
+
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;justify-content:space-between;padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+#loading{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#ffe9b8;color:#fff;font-size:clamp(28px,6vw,44px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+#loading span{width:min(60vw,360px);height:22px;padding:4px;box-sizing:border-box;border-radius:99px;background:var(--ink);box-shadow:0 0 0 4px #fff}
+#loading i{display:block;height:100%;width:8%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);transition:width .2s}
+@media (max-width:620px){.ibtn{width:44px;height:44px}.ibtn svg{width:22px;height:22px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div id="room"><div id="stage"><canvas id="fx"></canvas></div></div>
+<div class="bar">
+  <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
+  <span></span>
+  <button class="px ibtn" id="muteBtn" aria-label="Sonido"></button>
+</div>
+<div id="loading"><b>Cocinita</b><span><i></i></span></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+let save = { muted: false, friend: 0 };
+try { Object.assign(save, JSON.parse(localStorage.getItem('cocinita')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('cocinita', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null, noiseBuf = null;
+function unlockAudio() {
+  try {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0);
+      noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+function noise(dur, freq, q, vol, delay = 0) {
+  if (save.muted || !actx || !noiseBuf) return;
+  try {
+    const s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime + delay;
+    s.buffer = noiseBuf; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f).connect(g).connect(actx.destination); s.start(t); s.stop(t + dur + .05);
+  } catch (e) {}
+}
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  pick: () => beep(700, .08, 'sine', .07, 300),
+  drop: () => beep(220, .1, 'triangle', .08, -80),
+  chop: () => { noise(.08, 3000, 2, .25); beep(180, .05, 'square', .04); },
+  sizzle: () => noise(.9, 6000, .6, .07),
+  bubble: () => [0, 1, 2].forEach(i => beep(rand(300, 600), .06, 'sine', .05, 300, i * .12)),
+  blend: () => { beep(140, 1.3, 'sawtooth', .035, 60); noise(1.3, 900, 1, .08); },
+  ding: () => { beep(1568, .25, 'sine', .07); beep(2093, .3, 'sine', .05, 0, .08); },
+  munch: () => [0, 1, 2, 3].forEach(i => noise(.07, 1200, 1.5, .2, i * .28)),
+  yum: () => [0, 4, 7, 12].forEach((s, i) => beep(523.25 * Math.pow(2, s / 12), .12, 'square', .045, 0, .9 + i * .08)),
+  yuck: () => { beep(330, .5, 'sawtooth', .05, -220, .4); beep(250, .4, 'square', .03, -150, .45); },
+  whoosh: () => noise(.4, 800, .5, .15),
+};
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; }
+$('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Datos ---------- */
+const UP = '__UP__img/cook/';
+// Cada comida: color de su sopa o licuado
+const FOODS = {
+  tomato: '#e8423a', carrot: '#ff8a2a', banana: '#ffe066', apple: '#ff6a6a', egg: '#ffe9a0', fish: '#9ac8e8',
+  chicken: '#f0b080', broccoli: '#5cb83c', cheese: '#ffd23a', watermelon: '#ff5d7a', sausage: '#d0603a', bread: '#e8b870',
+};
+// Lo que a cada amiguito le encanta y lo que le da guácala (cocinado, casi todo le gusta)
+const FRIENDS = [
+  { id: 'dino', loves: ['chicken', 'sausage', 'fish', 'egg'], yuck: ['broccoli'] },
+  { id: 'cat', loves: ['fish', 'cheese', 'egg'], yuck: ['banana', 'carrot'] },
+  { id: 'panda', loves: ['carrot', 'apple', 'broccoli', 'bread'], yuck: ['sausage', 'fish'] },
+  { id: 'monster', loves: ['watermelon', 'banana', 'cheese', 'bread'], yuck: ['tomato'] },
+];
+const TOOLS = ['board', 'pan', 'pot', 'blender', 'plate', 'bowl', 'glass', 'stove'];
+const NEED = ['kitchen-wide', 'kitchen-tall', ...Object.keys(FOODS), ...TOOLS, ...FRIENDS.flatMap(f => [0, 1, 2, 3].map(k => f.id + '-' + k))];
+const src = n => UP + n + '.webp';
+
+/* ---------- Escenario: posiciones en % del escenario (acostado / parado) ---------- */
+const LAND = {
+  ratio: 16 / 9, bg: 'kitchen-wide',
+  fridge: { x: 3.5, y: 19, w: 19.5, h: 54, cols: 3 },
+  board: { x: 31, y: 80, w: 13 }, stove: { x: 49, y: 84, w: 14 }, pan: { x: 47, y: 72, w: 11 }, pot: { x: 59, y: 72, w: 10 }, blender: { x: 71, y: 69, w: 9.5 },
+  friend: { x: 86, y: 84, w: 25 }, plate: { x: 86, y: 89, w: 12 }, next: { x: 96, y: 33 }, food: 7.5,
+};
+const PORT = {
+  ratio: 9 / 16, bg: 'kitchen-tall',
+  fridge: { x: 4, y: 20, w: 36, h: 42, cols: 2 },
+  board: { x: 17, y: 82, w: 26 }, stove: { x: 46, y: 88, w: 26 }, pan: { x: 43, y: 78, w: 22 }, pot: { x: 67, y: 79, w: 20 }, blender: { x: 88, y: 76, w: 15 },
+  friend: { x: 72, y: 70, w: 50 }, plate: { x: 72, y: 70, w: 22 }, next: { x: 88, y: 15 }, food: 15,
+};
+let LAY = LAND, SW = 0, SH = 0;
+const stage = $('#stage'), fx = $('#fx'), fxx = fx.getContext('2d');
+const P = (xp, yp) => ({ x: xp / 100 * SW, y: yp / 100 * SH });
+
+let tools = {}, friendEl = null, items = [], cur = null;
+function layout() {
+  const port = innerHeight > innerWidth; LAY = port ? PORT : LAND;
+  const vw = innerWidth, vh = innerHeight; if (vw / vh > LAY.ratio) { SH = vh; SW = vh * LAY.ratio; } else { SW = vw; SH = vw / LAY.ratio; }
+  Object.assign(stage.style, { width: SW + 'px', height: SH + 'px', backgroundImage: `url(${src(LAY.bg)})` });
+  $('#room').style.backgroundImage = `url(${src(LAY.bg)})`;
+  fx.width = SW * Math.min(2, devicePixelRatio); fx.height = SH * Math.min(2, devicePixelRatio); fxx.setTransform(fx.width / SW, 0, 0, fx.height / SH, 0, 0);
+  buildFridge(); placeTools(); placeFriend();
+  items.forEach(it => { if (it.at) moveTo(it, toolSpot(it.at), false); else it.el.remove(); });
+  items = items.filter(it => it.at);
+}
+function box(el, cx, cy, w, h) { Object.assign(el.style, { left: (cx - w / 2) + 'px', top: (cy - h / 2) + 'px', width: w + 'px', height: h + 'px' }); }
+function buildFridge() {
+  stage.querySelectorAll('.shelf').forEach(e => e.remove());
+  const F = LAY.fridge, keys = Object.keys(FOODS), rows = Math.ceil(keys.length / F.cols), cw = F.w / F.cols, ch = F.h / rows, s = Math.min(cw / 100 * SW, ch / 100 * SH) * .86;
+  keys.forEach((k, i) => {
+    const el = document.createElement('div'); el.className = 'shelf'; el.style.backgroundImage = `url(${src(k)})`; el.style.animationDelay = (-i * .37) + 's';
+    const c = P(F.x + cw * (i % F.cols + .5), F.y + ch * ((i / F.cols | 0) + .5)); box(el, c.x, c.y, s, s); el.dataset.food = k;
+    el.addEventListener('pointerdown', e => grabNew(e, k)); stage.appendChild(el);
+  });
+}
+function placeTools() {
+  for (const t of ['stove', 'board', 'pan', 'pot', 'blender']) {
+    let el = tools[t]; if (!el) { el = tools[t] = document.createElement('div'); el.className = 'tool'; el.style.backgroundImage = `url(${src(t)})`; stage.appendChild(el); }
+    const d = LAY[t], c = P(d.x, d.y), w = d.w / 100 * SW; box(el, c.x, c.y, w, w);
+  }
+  let b = $('#blendBtn'); if (!b) { b = document.createElement('button'); b.id = 'blendBtn'; b.setAttribute('aria-label', 'Licuar'); b.addEventListener('pointerdown', e => { e.stopPropagation(); blend(); }); stage.appendChild(b); }
+  const bl = LAY.blender, c = P(bl.x, bl.y), s = bl.w / 100 * SW * .32; box(b, c.x, c.y + bl.w / 100 * SW * .42, s, s);
+}
+function toolSpot(t) {
+  const d = t === 'plate' ? LAY.plate : LAY[t], c = P(d.x, d.y), w = d.w / 100 * SW;
+  if (t === 'board') return { x: c.x, y: c.y - w * .12 };
+  if (t === 'pan') return { x: c.x - w * .08, y: c.y - w * .08 };
+  if (t === 'pot') return { x: c.x, y: c.y - w * .25 };
+  if (t === 'blender') return { x: c.x, y: c.y - w * .35 };
+  return c;
+}
+
+/* ---------- Amiguito ---------- */
+let friend = FRIENDS[save.friend % FRIENDS.length], fState = 'idle', fTimer = null, bites = 0;
+function placeFriend() {
+  if (!friendEl) {
+    friendEl = document.createElement('div'); friendEl.id = 'friend'; stage.appendChild(friendEl);
+    const plate = document.createElement('div'); plate.className = 'tool'; plate.id = 'plateEl'; plate.style.backgroundImage = `url(${src('plate')})`; stage.appendChild(plate);
+    const nb = document.createElement('button'); nb.id = 'nextBtn'; nb.setAttribute('aria-label', 'Otro amiguito');
+    nb.innerHTML = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M2 6h7V2h2l4 6-4 6H9v-4H2z"/></svg>'; nb.addEventListener('click', e => { e.stopPropagation(); nextFriend(); }); stage.appendChild(nb);
+  }
+  const d = LAY.friend, c = P(d.x, d.y), w = d.w / 100 * SW;
+  Object.assign(friendEl.style, { left: (c.x - w / 2) + 'px', top: (c.y - w * 1.05) + 'px', width: w + 'px', height: (w * 1.05) + 'px' });
+  const pl = LAY.plate, pc = P(pl.x, pl.y), pw = pl.w / 100 * SW; box($('#plateEl'), pc.x, pc.y, pw, pw * .5);
+  const nx = P(LAY.next.x, LAY.next.y), nb = $('#nextBtn'); nb.style.left = (nx.x - 38) + 'px'; nb.style.top = (nx.y - 38) + 'px';
+  face(fState === 'idle' ? 0 : fState === 'open' ? 1 : fState === 'yuck' ? 3 : 2);
+}
+function face(k) { friendEl.style.backgroundImage = `url(${src(friend.id + '-' + k)})`; }
+function setFriendState(s) {
+  fState = s; friendEl.classList.remove('chew', 'yuck', 'happy');
+  if (s === 'idle') face(0); else if (s === 'open') face(1); else if (s === 'chew') { face(2); friendEl.classList.add('chew'); } else if (s === 'yuck') { face(3); friendEl.classList.add('yuck'); } else if (s === 'happy') { face(2); friendEl.classList.add('happy'); }
+}
+function mouthPos() { const r = friendEl.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height * .42 }; }
+function nextFriend() {
+  sfx.whoosh(); friendEl.classList.add('out'); clearTimeout(fTimer);
+  setTimeout(() => { save.friend = (save.friend + 1) % FRIENDS.length; persist(); friend = FRIENDS[save.friend]; bites = 0; setFriendState('idle'); friendEl.style.transition = 'none'; friendEl.style.transform = 'translateX(-130%) rotate(-12deg)'; void friendEl.offsetWidth; friendEl.style.transition = ''; friendEl.classList.remove('out'); friendEl.style.transform = ''; }, 420);
+}
+// Come: mastica, y luego feliz (con corazones) o guácala
+function feed(it) {
+  const kind = it.kind, cooked = it.state !== 'raw' && it.state !== 'cut';
+  const yuck = friend.yuck.includes(kind) && !cooked, love = friend.loves.includes(kind) || cooked;
+  clearTimeout(fTimer); setFriendState('chew'); sfx.munch();
+  const m = mouthPos(); for (let i = 0; i < 14; i++) spark(m.x, m.y + 10, FOODS[kind], 'crumb');
+  fTimer = setTimeout(() => {
+    if (yuck) { setFriendState('yuck'); sfx.yuck(); for (let i = 0; i < 6; i++) spark(m.x, m.y, '#9be05a', 'cloud'); fTimer = setTimeout(() => setFriendState('idle'), 1600); }
+    else { setFriendState('happy'); sfx.yum(); for (let i = 0; i < (love ? 14 : 6); i++) spark(m.x, m.y - 20, love ? '#ff5d8f' : '#ffd23a', love ? 'heart' : 'star');
+      bites++; fTimer = setTimeout(() => { setFriendState('idle'); if (bites >= 6) nextFriend(); }, 1500); }
+  }, 1100);
+}
+
+/* ---------- Comida que se arrastra ---------- */
+function makeItem(kind) {
+  const el = document.createElement('div'); el.className = 'food fresh'; el.innerHTML = '<div class="cont"></div><div class="pic"></div>';
+  el.style.setProperty('--s', (LAY.food / 100 * SW * (LAY === PORT ? .55 : 1)) + 'px'); el.querySelector('.pic').style.backgroundImage = `url(${src(kind)})`;
+  stage.appendChild(el); const it = { kind, state: 'raw', cuts: 0, el, x: 0, y: 0, at: null, t: 0 };
+  el.addEventListener('pointerdown', e => grab(e, it)); items.push(it); return it;
+}
+function render(it) {
+  const el = it.el; el.classList.toggle('cut', !!(it.state === 'cut' || it.cutDone)); el.classList.toggle('fried', it.state === 'fried');
+  const cont = el.querySelector('.cont'), pic = el.querySelector('.pic');
+  if (it.state === 'soup' || it.state === 'juice') {
+    cont.style.backgroundImage = `url(${src(it.state === 'soup' ? 'bowl' : 'glass')})`; pic.style.display = 'none';
+    let liq = el.querySelector('.liq'); if (!liq) { liq = document.createElement('div'); liq.className = 'liq'; if (it.state === 'soup') el.appendChild(liq); else el.insertBefore(liq, cont); }
+    Object.assign(liq.style, it.state === 'soup' ? { left: '14%', right: '14%', top: '22%', height: '20%', borderRadius: '50%', boxShadow: 'inset 0 4px 0 rgba(255,255,255,.35)' } : { left: '30%', right: '30%', top: '30%', bottom: '14%', borderRadius: '10% 10% 30% 30%' });
+    liq.style.background = FOODS[it.kind];
+  }
+}
+function moveTo(it, p, anim = true) { it.x = p.x; it.y = p.y; it.el.style.transition = anim ? 'left .25s,top .25s,transform .15s' : 'none'; it.el.style.left = p.x + 'px'; it.el.style.top = p.y + 'px'; }
+
+let drag = null;
+function stagePt(e) { const r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+function grabNew(e, kind) { e.preventDefault(); const it = makeItem(kind); const p = stagePt(e); moveTo(it, p, false); sfx.pick(); startDrag(e, it); }
+function grab(e, it) { e.preventDefault(); e.stopPropagation(); if (it.busy) return; if (it.at) { leaveTool(it); } sfx.pick(); startDrag(e, it); }
+function startDrag(e, it) { drag = { it, id: e.pointerId }; it.el.classList.add('drag'); it.el.classList.remove('fresh'); it.el.style.transition = 'transform .15s'; stage.setPointerCapture && stage.setPointerCapture(e.pointerId); }
+stage.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return; const p = stagePt(e); drag.it.x = p.x; drag.it.y = p.y; drag.it.el.style.left = p.x + 'px'; drag.it.el.style.top = p.y + 'px';
+  // El amiguito abre la boca cuando la comida se acerca
+  const m = mouthPos(), near = Math.hypot(p.x - m.x, p.y - m.y) < SW * (LAY === PORT ? .3 : .17);
+  if (near && fState === 'idle') setFriendState('open'); else if (!near && fState === 'open') setFriendState('idle');
+});
+['pointerup', 'pointercancel'].forEach(ev => stage.addEventListener(ev, e => { if (!drag || e.pointerId !== drag.id) return; const it = drag.it; drag = null; it.el.classList.remove('drag'); drop(it); }));
+function hitTool(p) {
+  const r = (t, k = 1) => { const d = t === 'plate' ? LAY.plate : LAY[t], c = P(d.x, d.y), w = d.w / 100 * SW * k; return Math.hypot(p.x - c.x, p.y - c.y) < w * .62; };
+  const m = mouthPos(); if (Math.hypot(p.x - m.x, p.y - m.y) < SW * (LAY === PORT ? .22 : .12) || r('plate', 1.2)) return 'friend';
+  for (const t of ['blender', 'pot', 'pan', 'board']) if (r(t)) return t;
+  return null;
+}
+function drop(it) {
+  const t = hitTool(it);
+  if (fState === 'open') setFriendState('idle');
+  if (t === 'friend') { const m = mouthPos(); moveTo(it, m); it.el.style.transform = 'scale(.2)'; it.el.style.opacity = '0'; setTimeout(() => remove(it), 300); feed(it); return; }
+  if (t && !items.some(o => o !== it && o.at === t)) {
+    if ((t === 'pot' || t === 'blender' || t === 'pan') && (it.state === 'soup' || it.state === 'juice')) return toss(it);
+    if (t === 'board' && it.state !== 'raw') return toss(it);
+    it.at = t; moveTo(it, toolSpot(t)); sfx.drop(); enterTool(it); return;
+  }
+  toss(it);
+}
+// Soltado en cualquier otro lado: hace "puf" y desaparece
+function toss(it) { spark(it.x, it.y, '#ffffff', 'cloud'); spark(it.x, it.y, '#ffffff', 'cloud'); sfx.tap(); it.el.style.transform = 'scale(0)'; setTimeout(() => remove(it), 200); }
+function remove(it) { it.el.remove(); items = items.filter(o => o !== it); if (it.at) leaveTool(it); }
+
+/* ---------- Utensilios: tabla (picar con toques), sartén (freír), olla (sopa), licuadora (licuado) ---------- */
+function enterTool(it) {
+  const t = it.at; it.t = 0;
+  if (t === 'pan') { tools.stove.classList.add('glow'); tools.pan.classList.add('hot'); sfx.sizzle(); if (it.state !== 'fried') { it.cooking = 'fried'; cookLater(it); } }
+  if (t === 'pot') { tools.stove.classList.add('glow'); tools.pot.classList.add('hot'); it.el.style.transform = 'scale(.75)'; sfx.bubble(); if (it.state !== 'soup') { it.cooking = 'soup'; cookLater(it); } }
+  if (t === 'blender') { it.el.style.transform = 'scale(.7)'; tools.blender.classList.add('glow'); }
+  if (t === 'board') { tools.board.classList.add('glow'); }
+}
+// A los 2.5 s queda frito o se vuelve sopa (con temporizador, para que no dependa de la animación)
+function cookLater(it) {
+  const tok = it.cookTok = Math.random();
+  setTimeout(() => {
+    if (it.cookTok !== tok || !it.cooking || !it.at) return;
+    it.state = it.cooking; it.cooking = null; render(it); it.el.style.transform = ''; sfx.ding();
+    for (let i = 0; i < 8; i++) spark(it.x, it.y - 20, '#fff6a0', 'star'); tools[it.at].classList.remove('hot');
+  }, 2500);
+}
+function leaveTool(it) {
+  const t = it.at; it.at = null; it.cooking = null; it.el.style.transform = '';
+  if (t === 'pan' || t === 'pot') { tools[t].classList.remove('hot'); if (!items.some(o => o.at === 'pan' || o.at === 'pot')) tools.stove.classList.remove('glow'); }
+  if (t === 'blender' || t === 'board') tools[t].classList.remove('glow');
+}
+// Picar: cada toque a la comida en la tabla es un corte; a los 3 queda en rebanadas
+stage.addEventListener('pointerdown', e => {
+  const p = stagePt(e), it = items.find(o => o.at === 'board');
+  if (!it || drag) return; const c = toolSpot('board');
+  if (Math.hypot(p.x - c.x, p.y - c.y) < LAY.board.w / 100 * SW * .55) chop(it);
+});
+function chop(it) {
+  if (it.state !== 'raw') return; it.cuts++; sfx.chop(); it.el.style.transform = 'scale(1.1,.9)'; setTimeout(() => (it.el.style.transform = ''), 90);
+  for (let i = 0; i < 5; i++) spark(it.x, it.y, FOODS[it.kind], 'crumb');
+  if (it.cuts >= 3) { it.state = 'cut'; it.cutDone = true; render(it); sfx.ding(); spark(it.x, it.y - 10, '#fff6a0', 'star'); }
+}
+function blend() {
+  const it = items.find(o => o.at === 'blender'); sfx.tap();
+  tools.blender.classList.add('hot'); setTimeout(() => tools.blender.classList.remove('hot'), 1300);
+  if (!it || it.state === 'juice') return; sfx.blend(); it.busy = true;
+  it.el.style.transition = 'transform 1.2s'; it.el.style.transform = 'scale(.7) rotate(720deg)';
+  setTimeout(() => { it.busy = false; it.state = 'juice'; it.el.style.transition = 'transform .2s'; it.el.style.transform = ''; render(it); sfx.ding(); for (let i = 0; i < 8; i++) spark(it.x, it.y - 20, FOODS[it.kind], 'star'); }, 1300);
+}
+
+/* ---------- Efectos: migajas, corazones, estrellitas, vapor y nubecitas ---------- */
+let parts = [];
+function spark(x, y, col, kind) { parts.push({ x, y, vx: rand(-1, 1) * (kind === 'heart' ? 90 : 160), vy: kind === 'crumb' ? rand(-160, -40) : rand(-200, -80), col, kind, t: 0, life: kind === 'cloud' ? 1 : rand(.7, 1.2), s: rand(.7, 1.3) }); }
+function drawHeart(x, y, s) { fxx.beginPath(); fxx.moveTo(x, y + s * .3); fxx.bezierCurveTo(x, y - s * .3, x - s, y - s * .3, x - s, y + s * .2); fxx.bezierCurveTo(x - s, y + s * .7, x, y + s, x, y + s * 1.2); fxx.bezierCurveTo(x, y + s, x + s, y + s * .7, x + s, y + s * .2); fxx.bezierCurveTo(x + s, y - s * .3, x, y - s * .3, x, y + s * .3); fxx.fill(); }
+function drawStar(x, y, s) { fxx.beginPath(); for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2, r = i % 2 ? s * .45 : s; fxx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } fxx.fill(); }
+let last = performance.now();
+function tick(t) {
+  const dt = Math.min(.05, (t - last) / 1000); last = t;
+  // Cocinando: a los 2.5 s queda frito o se vuelve sopa
+  for (const it of items) {
+    if (!it.cooking) continue; it.t += dt;
+    if (Math.random() < dt * 8) parts.push({ x: it.x + rand(-15, 15), y: it.y - 10, vx: rand(-10, 10), vy: -50, col: 'rgba(255,255,255,.7)', kind: 'steam', t: 0, life: 1.2, s: rand(.8, 1.4) });
+    if (it.cooking === 'fried' && Math.random() < dt * 1.2) sfx.sizzle();
+    if (it.cooking === 'soup' && Math.random() < dt * 1.5) sfx.bubble();
+  }
+  fxx.clearRect(0, 0, SW, SH);
+  parts = parts.filter(p => {
+    p.t += dt; if (p.kind !== 'steam' && p.kind !== 'heart' && p.kind !== 'cloud') p.vy += 500 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    const a = Math.max(0, 1 - p.t / p.life), u = SW / 100; fxx.globalAlpha = a; fxx.fillStyle = p.col;
+    if (p.kind === 'heart') drawHeart(p.x, p.y, u * 1.2 * p.s);
+    else if (p.kind === 'star') drawStar(p.x, p.y, u * 1.1 * p.s);
+    else if (p.kind === 'steam' || p.kind === 'cloud') { fxx.beginPath(); fxx.arc(p.x, p.y, u * (p.kind === 'cloud' ? 2 : 1) * p.s * (1 + p.t), 0, 7); fxx.fill(); }
+    else { fxx.beginPath(); fxx.arc(p.x, p.y, u * .45 * p.s, 0, 7); fxx.fill(); }
+    return p.t < p.life;
+  });
+  fxx.globalAlpha = 1;
+  requestAnimationFrame(tick);
+}
+
+/* ---------- Arranque: carga los dibujos y luego arma la cocina ---------- */
+(async () => {
+  const bar = $('#loading i'); let done = 0;
+  await Promise.all(NEED.map(n => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => { bar.style.width = Math.max(8, ++done / NEED.length * 100) + '%'; res(); }; im.src = src(n); })));
+  $('#loading').hidden = true; layout(); setFriendState('idle'); requestAnimationFrame(tick);
+  addEventListener('resize', () => setTimeout(layout, 50));
+  window.LEON_READY = true;
+})();
+window.__cook = { get items() { return items; }, feed: k => { const it = makeItem(k); it.x = 0; feed(it); remove(it); }, makeItem, drop, moveTo, chop, blend, get friend() { return friend; }, get state() { return fState; }, hitTool, layout, get LAY() { return LAY; }, P, toolSpot, mouthPos };
+})();
+</script>

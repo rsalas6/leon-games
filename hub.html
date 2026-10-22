@@ -26,16 +26,17 @@ img{-webkit-user-drag:none}
 .page{position:relative;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(22px,5vh,52px);padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 44px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:center;line-height:.95;text-align:center}
 .t1{font-size:clamp(22px,4.6vw,40px);color:#fff;letter-spacing:.06em;-webkit-text-stroke:.09em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
-.t2{font-size:clamp(64px,14vw,138px);color:var(--sun);letter-spacing:.02em;-webkit-text-stroke:.06em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink),0 .14em .1em rgba(0,0,0,.25);animation:wob 3s ease-in-out infinite}
+.t2{font-size:clamp(52px,min(12vw,13vh),130px);color:var(--sun);letter-spacing:.02em;-webkit-text-stroke:.06em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink),0 .14em .1em rgba(0,0,0,.25);animation:wob 3s ease-in-out infinite}
 @keyframes wob{50%{transform:rotate(-2deg) scale(1.03)}}
 
-.apps{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(24px,6vw,64px)}
+.apps{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;column-gap:clamp(22px,5vw,60px);row-gap:clamp(14px,3vh,32px)}
 .app{display:flex;flex-direction:column;align-items:center;gap:12px;text-decoration:none;color:#fff}
-.icon{width:clamp(120px,18vw,220px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
+.icon{width:clamp(84px,min(17vw,21vh),190px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
 .app:nth-child(2) .icon{animation-delay:-1s}
 .app:nth-child(3) .icon{animation-delay:-2s}
 .app:nth-child(4) .icon{animation-delay:-.5s}
 .app:nth-child(5) .icon{animation-delay:-1.5s}
+.app:nth-child(6) .icon{animation-delay:-2.5s}
 .icon img{width:100%;height:100%;display:block;object-fit:cover}
 @keyframes float{50%{transform:translateY(-10px)}}
 .app:active .icon{transform:scale(.92);animation:none}
@@ -53,7 +54,7 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .card p{margin:0;font-family:var(--body);font-weight:700;line-height:1.45;color:#5a4d6e}
 .card ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-family:var(--body);font-weight:800;line-height:1.4}
 .ok{align-self:center;font-family:var(--display);font-size:22px;letter-spacing:.06em;border:0;border-radius:99px;cursor:pointer;color:#fff;background:linear-gradient(#8fe04a,#5db82a);padding:12px 36px;box-shadow:0 5px 0 #3f8a1c}
-@media (orientation:landscape) and (max-height:520px){.icon{width:clamp(100px,24vh,160px)}.t2{font-size:56px}.page{gap:14px}}
+@media (orientation:landscape) and (max-height:520px){.icon{width:clamp(72px,19vh,130px)}.t2{font-size:44px}.page{gap:10px}.name{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.icon,.t2{animation:none}}
 </style>
 
@@ -67,6 +68,7 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     <a class="app" href="dino-hole/" aria-label="Rana Glotona"><span class="icon"><img src="icons/dino-hole.webp" alt=""></span><span class="name">Rana</span></a>
     <a class="app" href="dino-hide/" aria-label="Escondidas"><span class="icon"><img src="icons/dino-hide.webp" alt=""></span><span class="name">Escondidas</span></a>
     <a class="app" href="zombito/" aria-label="Zombito"><span class="icon"><img src="icons/zombito.webp" alt=""></span><span class="name">Zombito</span></a>
+    <a class="app" href="cocinita/" aria-label="Cocinita"><span class="icon"><img src="icons/cocinita.webp" alt=""></span><span class="name">Cocinita</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
   <button class="parent upd" id="updBtn">Actualizar</button>
