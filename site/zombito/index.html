@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261022115300';</script>
+<script>window.LEON_VERSION='20261022124015';</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -152,7 +152,7 @@ h1{margin:0;font-weight:400;font-size:clamp(30px,6vw,56px);color:#9bf06a;letter-
   <div class="side">
     <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
     <button class="px ibtn" id="backBtn" aria-label="Elegir otro nivel" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
-    <div id="candies" hidden><img alt="" src="../img/zomb/candy.webp"><span id="candyN">0</span></div>
+    <div id="candies" hidden><img alt="" src="../img/zomb/ham.webp"><span id="candyN">0</span></div>
   </div>
   <h1 id="title">ZOMBITO</h1>
   <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="prog"><i></i><img alt="" src="../img/zomb/hero-0.webp"></div></div>
@@ -165,7 +165,7 @@ h1{margin:0;font-weight:400;font-size:clamp(30px,6vw,56px);color:#9bf06a;letter-
 
 <div id="win" hidden>
   <div class="big">¡LLEGASTE!</div>
-  <div class="final"><img alt="" src="../img/zomb/candy.webp"><span id="finalN">0</span></div>
+  <div class="final"><img alt="" src="../img/zomb/ham.webp"><span id="finalN">0</span></div>
   <div class="row">
     <button class="px wbtn" id="menuBtn" aria-label="Elegir otro nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
     <button class="px wbtn" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
@@ -241,7 +241,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 /* ---------- Sprites ---------- */
 const UP = '../img/zomb/';
 const SPRITES = ['hero-0', 'hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5', 'ghost-0', 'ghost-1', 'bat-0', 'bat-1', 'pumpkin-0', 'pumpkin-1', 'skel-0', 'skel-1',
-  'candy', 'lolly', 'star', 'gpumpkin', 'flag', 'tomb', 'chest', 'balloon', 'house'];
+  'ham', 'goldham', 'star', 'gpumpkin', 'flag', 'tomb', 'chest', 'balloon', 'house'];
 const IMG = {};
 function loadImages(names, onProgress) {
   let done = 0;
@@ -279,7 +279,7 @@ function genLevel(def) {
   W = def.len + 30; solid = Array.from({ length: W }, () => new Uint8Array(H));
   const items = [], enemies = [], qcontent = {}, ground = new Int8Array(W).fill(3);
   const setG = (x, h) => { ground[x] = h; for (let y = 0; y < h; y++) solid[x][y] = T_GROUND; };
-  const candyArc = (x0, n, y0, hgt) => { for (let i = 0; i < n; i++) items.push({ kind: 'candy', x: x0 + i + .5, y: y0 + Math.sin(i / (n - 1 || 1) * Math.PI) * hgt + .5 }); };
+  const candyArc = (x0, n, y0, hgt) => { for (let i = 0; i < n; i++) items.push({ kind: 'ham', x: x0 + i + .5, y: y0 + Math.sin(i / (n - 1 || 1) * Math.PI) * hgt + .5 }); };
   let x = 0, gh = 3;
   for (; x < 12; x++) setG(x, gh);
   candyArc(5, 4, gh + .3, 0);
@@ -290,11 +290,11 @@ function genLevel(def) {
     if (seg === 'flat') { const n = 6 + (Math.random() * 5 | 0); for (let i = 0; i < n; i++) setG(x + i, gh); candyArc(x + 1, Math.min(5, n - 2), gh + .4, Math.random() < .5 ? 0 : 1.5); x += n; }
     else if (seg === 'qrow') {
       const n = 7; for (let i = 0; i < n; i++) setG(x + i, gh);
-      const by = gh + 3; for (let i = 2; i < 5; i++) { const t = i === 3 ? T_Q : (Math.random() < .5 ? T_Q : T_BRICK); solid[x + i][by] = t; if (t === T_Q) qcontent[(x + i) + ',' + by] = Math.random() < .12 ? 'star' : 'candy'; }
+      const by = gh + 3; for (let i = 2; i < 5; i++) { const t = i === 3 ? T_Q : (Math.random() < .5 ? T_Q : T_BRICK); solid[x + i][by] = t; if (t === T_Q) qcontent[(x + i) + ',' + by] = Math.random() < .12 ? 'star' : 'ham'; }
       x += n;
     } else if (seg === 'tomb') {
       const n = 6, th = Math.random() < .5 ? 1 : 2; for (let i = 0; i < n; i++) setG(x + i, gh);
-      for (let y = 0; y < th; y++) solid[x + 3][gh + y] = T_TOMB; items.push({ kind: 'candy', x: x + 3.5, y: gh + th + 1.6 });
+      for (let y = 0; y < th; y++) solid[x + 3][gh + y] = T_TOMB; items.push({ kind: 'ham', x: x + 3.5, y: gh + th + 1.6 });
       x += n;
     } else if (seg === 'pit') {
       setG(x, gh); setG(x + 1, gh); const w = 2 + (Math.random() < .4 ? 1 : 0); for (let i = 0; i < w; i++) ground[x + 2 + i] = 0;
@@ -313,7 +313,7 @@ function genLevel(def) {
     } else if (seg === 'stairsUp') {
       const n = 8; for (let i = 0; i < n; i++) setG(x + i, gh);
       for (let s = 0; s < 3; s++) for (let y = 0; y <= s; y++) solid[x + 2 + s][gh + y] = T_STEP;
-      items.push({ kind: 'lolly', x: x + 4.5, y: gh + 4.5 }); x += n;
+      items.push({ kind: 'goldham', x: x + 4.5, y: gh + 4.5 }); x += n;
     }
   }
   // Escalera final y la meta (bandera y casita)
@@ -352,7 +352,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 
-const HERO = { w: .72, h: 1.35 }, RUN = 5.4, GRAV = 40, JUMP = 15.8, JUMP2 = 13;
+const HERO = { w: .78, h: 1.3 }, RUN = 5.2, GRAV = 40, JUMP = 13.6, JUMP2 = 9.5;
 let loading = false;
 async function start(n) {
   if (loading) return;
@@ -390,8 +390,8 @@ function collideY(h, dy) {
 function headBump(tx, ty, l, r) {
   const g = game, t = solid[tx][ty]; g.bumps[tx + ',' + ty] = .25;
   if (t === T_Q) {
-    solid[tx][ty] = T_USED; const what = g.lv.qcontent[tx + ',' + ty] || 'candy';
-    if (what === 'star') { g.items.push({ kind: 'star', x: tx + .5, y: ty + 1.4, got: false, t: 0, vy: 6, vx: 2.2, move: true }); sfx.block(); }
+    solid[tx][ty] = T_USED; const what = g.lv.qcontent[tx + ',' + ty] || 'ham';
+    if (what === 'star') { g.items.push({ kind: 'star', x: tx + .5, y: ty + 1.4, got: false, t: 0, vy: 4, vx: .7, move: true }); sfx.block(); }
     else { g.pops.push({ x: tx + .5, y: ty + 1, t: 0 }); addCandy(1); sfx.block(); }
     burst(tx + .5, ty + 1, 8, ['#ffd23a', '#fff', '#ff8fc4']);
   } else sfx.bump();
@@ -417,7 +417,7 @@ function update(dt) {
     h.vx += (want - h.vx) * Math.min(1, dt * 4);
     const blocked = collideX(h, h.vx * dt); h.blocked = blocked;
     // Salto: mientras se mantiene el dedo, sube más alto
-    h.vy -= GRAV * (h.holding && h.vy > 0 ? .55 : 1) * dt; h.vy = Math.max(h.vy, -22);
+    h.vy -= GRAV * (h.holding && h.vy > 0 ? .72 : 1) * dt; h.vy = Math.max(h.vy, -22);
     const was = h.onGround, hit = collideY(h, h.vy * dt);
     if (hit === 'floor') { h.vy = 0; h.onGround = true; h.jumps = 0; if (!was) burst(h.x, h.y, 4, ['#fff', '#e8e0ff'], 2); }
     else { if (hit === 'ceil') h.vy = Math.min(0, h.vy); if (h.onGround) h.coyote = .1; h.onGround = false; h.coyote = Math.max(0, (h.coyote || 0) - dt); }
@@ -439,11 +439,12 @@ function update(dt) {
   // Dulces y estrellas
   for (const it of g.items) {
     if (it.got) continue; it.t += dt;
-    if (it.move) { it.vy -= 20 * dt; it.x += it.vx * dt; it.y += it.vy * dt; if (isSolid(Math.floor(it.x), Math.floor(it.y - .4))) { it.y = Math.floor(it.y - .4) + 1.4; it.vy = 7; } if (isSolid(Math.floor(it.x + .4 * Math.sign(it.vx)), Math.floor(it.y))) it.vx *= -1; if (it.y < -3) it.got = true; }
-    if (Math.abs(it.x - h.x) < .75 && it.y > h.y - .3 && it.y < h.y + HERO.h + .5) {
+    if (it.move) { it.vy -= 20 * dt; it.x += it.vx * dt; it.y += it.vy * dt; if (isSolid(Math.floor(it.x), Math.floor(it.y - .4))) { it.y = Math.floor(it.y - .4) + 1.4; it.vy = 3.5; } if (isSolid(Math.floor(it.x + .4 * Math.sign(it.vx)), Math.floor(it.y))) it.vx *= -1; if (it.y < -3) it.got = true; }
+    const reach = it.kind === 'star' ? 1.3 : .75;
+    if (Math.abs(it.x - h.x) < reach && it.y > h.y - .5 && it.y < h.y + HERO.h + (it.kind === 'star' ? 1.2 : .5)) {
       it.got = true;
       if (it.kind === 'star') { h.star = 9; sfx.star(); starMusic = true; music(true); burst(it.x, it.y, 20, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a']); }
-      else { addCandy(it.kind === 'lolly' ? 5 : 1); sfx.candy(); burst(it.x, it.y, 6, ['#ffd23a', '#fff', '#ff8fc4'], 3); }
+      else { addCandy(it.kind === 'goldham' ? 5 : 1); sfx.candy(); burst(it.x, it.y, 6, ['#ffd23a', '#fff', '#ff8fc4'], 3); }
     }
   }
   // Bichitos: caminan de un lado a otro; se les brinca encima
@@ -461,7 +462,7 @@ function update(dt) {
     const ey = e.yy, dx = h.x - e.x, dy = h.y - ey;
     if (Math.abs(dx) < .8 && dy > -1.2 && dy < .9) {
       if (h.star > 0) stomp(e);
-      else if (h.vy < 0 && dy > .25) { stomp(e); h.vy = 12; h.jumps = 1; }
+      else if (h.vy < 0 && dy > .25) { stomp(e); h.vy = 9.5; h.jumps = 1; }
       else if (h.blink <= 0) { h.blink = 1.4; sfx.ouch(); h.vy = 8; collideX(h, -1.2); }
     }
   }
@@ -473,6 +474,9 @@ function update(dt) {
   // Cámara: un poco adelante del zombito
   const target = Math.max(0, Math.min(W - viewW / tileP, h.x - viewW / tileP * .32));
   g.cam += (target - g.cam) * Math.min(1, dt * 6);
+  // Si brinca muy alto o sube una loma, la cámara sube también: nunca se sale de la pantalla
+  const visTop = viewH / tileP - groundPad() - 1.2, wantY = Math.max(0, h.y + HERO.h + 1.6 - visTop);
+  g.camY = (g.camY || 0) + (wantY - (g.camY || 0)) * Math.min(1, dt * 5);
   const p = Math.min(1, h.x / g.lv.flagX); $('#prog i').style.width = p * 100 + '%'; $('#prog img').style.left = (6 + p * 88) + '%';
 }
 
@@ -493,7 +497,7 @@ function sprite(name, wx, wy, hTiles, flip = false, alpha = 1) {
   const im = IMG[name]; if (!im || !im.width) return; const hp = hTiles * tileP, wp = hp * im.width / im.height;
   drawImg(name, sx(wx) - wp / 2, sy(wy) - hp, wp, hp, flip, alpha);
 }
-const sx = wx => (wx - game.cam) * tileP, sy = wy => viewH - (wy + groundPad()) * tileP;
+const sx = wx => (wx - game.cam) * tileP, sy = wy => viewH - (wy - (game.camY || 0) + groundPad()) * tileP;
 const groundPad = () => Math.max(0, (viewH / tileP - 10.5) * .5) - .6;
 function render() {
   const g = game; if (!g) return; const W0 = viewW, H0 = viewH;
@@ -530,10 +534,10 @@ function render() {
   // Dulces y estrellas
   for (const it of g.items) {
     if (it.got || it.x < g.cam - 2 || it.x > g.cam + W0 / tileP + 2) continue;
-    const bob = it.move ? 0 : Math.sin(it.t * 3) * .12, s = it.kind === 'lolly' ? 1 : it.kind === 'star' ? .95 : .72;
+    const bob = it.move ? 0 : Math.sin(it.t * 3) * .12, s = it.kind === 'goldham' ? 1 : it.kind === 'star' ? .95 : .72;
     sprite(it.kind, it.x, it.y - s / 2 + bob, s);
   }
-  for (const p of g.pops) sprite('candy', p.x, p.y + p.t * 3, .7, false, 1 - p.t / .6);
+  for (const p of g.pops) sprite('ham', p.x, p.y + p.t * 3, .7, false, 1 - p.t / .6);
   // Bichitos
   for (const e of g.enemies) {
     if (e.x < g.cam - 3 || e.x > g.cam + W0 / tileP + 3) continue;
@@ -550,7 +554,7 @@ function render() {
     if (!h.onGround && g.phase === 'run') fr = 5;
     else if ((g.started && Math.abs(h.vx) > .5 && !h.blocked) || g.phase === 'walk') fr = 1 + ((g.t * 11) | 0) % 4;
     if (h.star > 0) { cx.save(); cx.filter = `hue-rotate(${(g.t * 720) % 360}deg) saturate(1.6)`; }
-    sprite('hero-' + fr, h.x, h.y, 1.95);
+    sprite('hero-' + fr, h.x, h.y, 1.8);
     if (h.star > 0) { cx.restore(); if (Math.random() < .5) burst(h.x + rand(-.4, .4), h.y + rand(0, 1.5), 1, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a'], 1.5); }
   }
   // Partículas

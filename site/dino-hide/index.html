@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261022115300';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261022124015';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -508,9 +508,9 @@ function buildWorld(L) {
   const top = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 2.2, bevelEnabled: true, bevelThickness: .4, bevelSize: .5, bevelSegments: 3, curveSegments: 64 }), [M(T.ground), M(T.side)]);
   top.rotation.x = Math.PI / 2; top.position.y = -.4; top.receiveShadow = true; world.add(top);
   // Manchas de pasto más oscuro / arena mojada para que el piso no sea plano
-  for (let i = 0; i < 14; i++) { const p = new THREE.Mesh(new THREE.CircleGeometry(rand(1.5, 4), 20), M(T.ground2)); p.rotation.x = -Math.PI / 2; p.position.set(rand(-W, W), .02, rand(-D, D)); p.scale.y = rand(.5, 1); p.receiveShadow = true; world.add(p); }
+  for (let i = 0; i < (night ? 0 : 14); i++) { const p = new THREE.Mesh(new THREE.CircleGeometry(rand(1.5, 4), 20), M(T.ground2)); p.rotation.x = -Math.PI / 2; p.position.set(rand(-W, W), .02, rand(-D, D)); p.scale.y = rand(.5, 1); p.receiveShadow = true; world.add(p); }
   // Agua o lava alrededor de la isla
-  if (T.water || T.lava) { const w = new THREE.Mesh(new THREE.CircleGeometry(160, 48), M(T.water || 0xff5a1a, T.lava ? { emissive: 0xff4a00, emissiveIntensity: .6 } : {})); w.rotation.x = -Math.PI / 2; w.position.y = -1.6; w.scale.y = .7; world.add(w); }
+  if (T.water || T.lava) { const w = new THREE.Mesh(new THREE.CircleGeometry(160, 48), M(T.water ? (night ? 0x1a2f5e : T.water) : 0xff5a1a, T.lava ? { emissive: 0xff4a00, emissiveIntensity: .6 } : {})); w.rotation.x = -Math.PI / 2; w.position.y = -1.6; w.scale.y = .7; world.add(w); }
   else { const g = new THREE.Mesh(new THREE.CircleGeometry(160, 48), M(night ? 0x223060 : shadeHex(T.ground2, -.08))); g.rotation.x = -Math.PI / 2; g.position.y = -2.4; world.add(g); }
   // Calle con banquetas en la ciudad
   if (T.road) {
@@ -658,7 +658,7 @@ function framing() {
   const g = game, aspect = innerWidth / innerHeight;
   const vFov = camera.fov * Math.PI / 180, hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
   // Lo que se ve de ancho: toda la isla, salvo en los panorámicos o en el teléfono parado (ahí se desliza con el dedo)
-  const halfW = Math.min(g.L.wide ? 11 : g.W + 1, Math.max(5.2, 9 * aspect));
+  const halfW = Math.min(g.L.wide ? 11 : g.W + 1, Math.max(5.6, 9 * aspect));
   const dist = Math.max(halfW / Math.tan(hFov / 2), (g.D + 2.5) / Math.tan(vFov / 2) * .62);
   g.camDist = dist; g.panMax = Math.max(0, g.W - halfW + 1.5); if (g.pan == null) g.pan = 0;
 }
@@ -666,7 +666,7 @@ function updateCamera(dt) {
   const g = game, d = g.camDist, sway = Math.sin(g.t * .3) * .3;
   g.pan = Math.max(-g.panMax, Math.min(g.panMax, g.pan + (g.panV || 0) * dt)); g.panV = (g.panV || 0) * Math.pow(.02, dt);
   // Parado (teléfono): más desde arriba, para que la isla llene la pantalla a lo alto
-  if (innerHeight > innerWidth) { camera.position.set(g.pan + sway, d * .88, d * .5 + 2); camera.lookAt(g.pan, 0, .6); }
+  if (innerHeight > innerWidth) { camera.position.set(g.pan + sway, d * .9, d * .5 + 3.6); camera.lookAt(g.pan, 0, 2.8); }
   else { camera.position.set(g.pan + sway, d * .62, d * .78 + 2); camera.lookAt(g.pan, .5, -.6); }
   if (g.shake > 0) { g.shake -= dt; camera.position.x += rand(-.15, .15); camera.position.y += rand(-.1, .1); }
 }
@@ -709,9 +709,9 @@ function shakeSpot(sp) { sp.anim = 1; rustle(); burst(sp.x, sp.h * .6, sp.z, 12,
 // El dino se mete al escondite: ¡puf! hojitas y desaparece
 function hideIn(d) { d.obj.visible = false; d.spot.anim = 1; rustle(.08, .3); burst(d.spot.x, d.spot.h * .6, d.spot.z, 8, leafCols(), 3, .24, 4); }
 function reveal(d) {
-  const g = game; if (d.state === 'out' || d.state === 'found') return;
+  const g = game; if (d.state === 'out' || d.state === 'walk' || d.state === 'found') return;
   if (d.spot) { d.spot.dino = null; shakeSpot(d.spot); if (d.state === 'hidden') d.obj.position.set(d.spot.x, 0, d.spot.z); }
-  d.obj.visible = true; d.state = 'out'; d.t = 0; d.from.copy(d.obj.position); d.eyes.visible = false;
+  d.obj.visible = true; d.state = 'out'; d.t = 0; d.land = null; d.from.copy(d.obj.position); d.eyes.visible = false;
   d.slot = g.found++;
   const n = g.L.dinos, x = (d.slot - (n - 1) / 2) * Math.min(3.1, 18 / n) + g.pan;
   d.to.set(x, 0, THEMES[g.L.theme].road ? 7.2 : 7);
@@ -781,17 +781,27 @@ function update(dt) {
       d.obj.rotation.y += (face - d.obj.rotation.y) * Math.min(1, dt * 4);
       if (g.L.night) {
         // Ojitos que brillan asomándose por un ladito del escondite, del lado de la cámara
-        d.eyes.visible = true; const sp = d.spot, toCam = new THREE.Vector3(camera.position.x - sp.x, 0, camera.position.z - sp.z).normalize();
+        const sp = d.spot, near = g.torchHit ? Math.hypot(torch.target.position.x - sp.x, torch.target.position.z - sp.z) : 99;
+        d.eyes.visible = near < 3.4; const toCam = new THREE.Vector3(camera.position.x - sp.x, 0, camera.position.z - sp.z).normalize();
         d.eyes.position.set(sp.x + toCam.x * Math.max(sp.w, sp.d) * .42 + toCam.z * (sp.side || 1) * .6, sp.h * .62, sp.z + toCam.z * Math.max(sp.w, sp.d) * .42 - toCam.x * (sp.side || 1) * .6); d.eyes.lookAt(camera.position);
         const blink = (g.t + d.k * 1.7) % 3.4 < .14; d.eyes.scale.set(1, blink ? .15 : 1, 1);
       }
     } else if (d.state === 'out') {
-      const k = Math.min(1, d.t / 1.1), e = k * (2 - k);
-      d.obj.position.lerpVectors(d.from, d.to, e); d.obj.position.y = Math.sin(k * Math.PI) * 3.2;
-      d.obj.rotation.y = Math.atan2(d.to.x - d.from.x, d.to.z - d.from.z) * (1 - k) + k * 0;
-      if (k >= 1) { d.state = 'found'; d.obj.position.copy(d.to); play(d.obj, 'idle'); burst(d.to.x, .4, d.to.z, 10, [0xffd23a, 0xffffff], 3, .22, 4); if (g.found === g.L.dinos) setTimeout(() => game === g && winLevel(), 700); }
+      // Sale brincando por encima del escondite y cae enfrente de él...
+      if (!d.land) { const sp = d.spot, toCam = new THREE.Vector3(camera.position.x - sp.x, 0, camera.position.z - sp.z).normalize(); d.land = new THREE.Vector3(sp.x, 0, sp.z).addScaledVector(toCam, Math.max(sp.w, sp.d) * .5 + 1.2); d.hopH = sp.h * .75 + .6; }
+      const k = Math.min(1, d.t / .7);
+      d.obj.position.lerpVectors(d.from, d.land, k); d.obj.position.y = Math.sin(k * Math.PI) * d.hopH;
+      d.obj.rotation.y = Math.atan2(d.land.x - d.from.x, d.land.z - d.from.z);
+      if (k >= 1) { d.obj.position.copy(d.land); d.state = 'walk'; d.t = 0; play(d.obj, 'run'); burst(d.land.x, .3, d.land.z, 8, [0xffffff, 0xe8f0ff], 2.5, .22, 2.5); }
+    } else if (d.state === 'walk') {
+      // ...y luego corre a su lugar en la fila de los encontrados
+      const dx = d.to.x - d.obj.position.x, dz = d.to.z - d.obj.position.z, dist = Math.hypot(dx, dz), v = 5 * dt;
+      d.obj.rotation.y = Math.atan2(dx, dz); d.obj.position.y = Math.abs(Math.sin(d.t * 9)) * .12;
+      if (dist <= v) { d.state = 'found'; d.obj.position.copy(d.to); play(d.obj, 'jump'); setTimeout(() => d.state === 'found' && play(d.obj, 'idle'), 900); burst(d.to.x, .4, d.to.z, 10, [0xffd23a, 0xffffff], 3, .22, 4); if (g.found === g.L.dinos) setTimeout(() => game === g && winLevel(), 900); }
+      else { d.obj.position.x += dx / dist * v; d.obj.position.z += dz / dist * v; }
     } else if (d.state === 'found') {
-      d.obj.rotation.y = Math.sin(g.t * 2.5 + d.k) * .35; d.obj.position.y = Math.abs(Math.sin(g.t * 5 + d.k)) * .18;
+      const face = Math.atan2(camera.position.x - d.obj.position.x, camera.position.z - d.obj.position.z) + Math.sin(g.t * 1.5 + d.k) * .25;
+      d.obj.rotation.y += (face - d.obj.rotation.y) * Math.min(1, dt * 5); d.obj.position.y = 0;
     } else if (d.state === 'dance') {
       const k = Math.min(1, d.t / 1.2); d.obj.position.lerpVectors(d.from, d.to, k);
       if (k >= 1 && d.obj.userData.cur !== d.obj.userData.acts.jump) play(d.obj, 'jump');
