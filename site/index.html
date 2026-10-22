@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261022093625';</script>
+<script>window.LEON_VERSION='20261022095425';</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -45,6 +45,7 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .icon{width:clamp(130px,24vw,250px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
 .app:nth-child(2) .icon{animation-delay:-1s}
 .app:nth-child(3) .icon{animation-delay:-2s}
+.app:nth-child(4) .icon{animation-delay:-.5s}
 .icon img{width:100%;height:100%;display:block;object-fit:cover}
 @keyframes float{50%{transform:translateY(-10px)}}
 .app:active .icon{transform:scale(.92);animation:none}
@@ -132,6 +133,7 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     <a class="app" href="dino-race/" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.webp" alt=""></span><span class="name">Carrera</span></a>
     <a class="app" href="dino-puzzle/" aria-label="Rompecabezas"><span class="icon"><img src="icons/dino-puzzle.webp" alt=""></span><span class="name">Puzzle</span></a>
     <a class="app" href="dino-hole/" aria-label="Rana Glotona"><span class="icon"><img src="icons/dino-hole.webp" alt=""></span><span class="name">Rana</span></a>
+    <a class="app" href="dino-hide/" aria-label="Escondidas"><span class="icon"><img src="icons/dino-hide.webp" alt=""></span><span class="name">Escondidas</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
   <button class="parent upd" id="updBtn">Actualizar</button>

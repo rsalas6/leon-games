@@ -1,0 +1,734 @@
+<title>Escondidas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: diorama 3D (una islita de juguete) a pantalla completa; arriba la casita, el nivel, los retratos de los dinos por encontrar y el sonido. Menú: tarjetas de mundos sobre un bosque mágico. Look: 3D caricatura brillante. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{
+  --ink:#2a1f3d;
+  --sun:#ffd23a;
+  --mint:#7fe0b8;
+  --grass:#6cc63a;
+  --pix:'Lilita One','Arial Rounded MT Bold',sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#bfeee0;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+#app{position:fixed;inset:0;touch-action:none}
+#app canvas{display:block;width:100%;height:100%;touch-action:none}
+.bg{position:fixed;inset:0;background:url(__UP__img/menus/bg-hide-wide.webp) 50% 50%/cover no-repeat #9fe0c8}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/menus/bg-hide-tall.webp)}}
+.bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.45),rgba(255,255,255,.08) 70%)}
+
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.px:focus-visible{outline:4px solid #fff;outline-offset:6px}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:16px}
+.side.end{justify-content:flex-end}
+h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);letter-spacing:.04em;text-align:center;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
+#hud{display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+#lvl{font-size:clamp(15px,2.6vw,20px);color:#fff;background:var(--ink);padding:5px 16px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#tray{display:flex;gap:clamp(6px,1.4vw,12px);padding:6px 10px;border-radius:22px;background:rgba(255,255,255,.85);box-shadow:0 0 0 4px var(--ink),0 6px 0 4px rgba(42,31,61,.25)}
+#tray img{width:clamp(40px,7vw,62px);height:clamp(40px,7vw,62px);border-radius:14px;background:#e9f4ff;filter:brightness(0) opacity(.28);transition:filter .3s}
+#tray img.got{filter:none;animation:got .6s cubic-bezier(.3,1.8,.5,1)}
+@keyframes got{0%{transform:scale(.3)}60%{transform:scale(1.35) rotate(-8deg)}100%{transform:none}}
+
+#menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 96px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,18vw,200px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
+.lv{position:relative;aspect-ratio:1;padding:0;overflow:visible;background:#fff}
+.lv svg{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;pointer-events:none}
+.lv b{position:absolute;left:10px;top:8px;font-weight:400;font-size:clamp(18px,2.6vw,24px);color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),0 4px 0 var(--ink)}
+.lv .star{position:absolute;right:-12px;top:-12px;width:36px;height:36px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+
+#lvlLoad{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(42,31,61,.55);color:#fff;font-size:clamp(28px,6vw,44px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+#lvlLoad span{width:min(60vw,360px);height:22px;padding:4px;box-sizing:border-box;border-radius:99px;background:var(--ink);box-shadow:0 0 0 4px #fff}
+#lvlLoad i{display:block;height:100%;width:8%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);transition:width .2s}
+
+/* La cuenta: carita que se tapa los ojos y números 1-2-3 */
+#count{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;background:rgba(42,31,61,var(--veil,.5));transition:background .4s}
+#count svg{width:clamp(130px,26vmin,230px);height:auto;filter:drop-shadow(0 8px 0 rgba(42,31,61,.35));animation:peek 1.2s ease-in-out infinite}
+@keyframes peek{50%{transform:translateY(-8px) rotate(-3deg)}}
+#count b{font-weight:400;font-size:clamp(70px,16vmin,150px);line-height:1;color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink)}
+#count b.pop{animation:numpop .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes numpop{from{transform:scale(.2)}to{transform:none}}
+#go{position:fixed;left:50%;top:42%;z-index:41;pointer-events:none;white-space:nowrap;font-size:clamp(38px,9vw,84px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:gopop 1.3s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes gopop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}15%{transform:translate(-50%,-50%) scale(1.15);opacity:1}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-80%) scale(1);opacity:0}}
+.hint{position:fixed;left:0;top:0;z-index:39;width:64px;height:64px;margin:-10px 0 0 -18px;pointer-events:none;animation:tap .9s ease-in-out infinite}
+@keyframes tap{50%{transform:translate(4px,10px) scale(.9)}}
+
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%}
+#win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:26px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);pointer-events:none}
+#win .big{font-size:clamp(34px,8vw,76px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+#win .row{display:flex;gap:28px;pointer-events:auto}
+.wbtn{min-width:clamp(110px,22vw,170px);height:clamp(64px,10vw,84px);padding:0 18px;display:flex;align-items:center;justify-content:center}
+.wbtn svg{width:30px;height:30px;shape-rendering:crispEdges}
+.wbtn.go{background:var(--grass)}
+@media (max-width:620px){
+  .bar{gap:8px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  .side{gap:8px}
+  .ibtn{width:44px;height:44px}
+  .ibtn svg{width:22px;height:22px}
+  #tray img{width:36px;height:36px;border-radius:10px}
+  #tray{gap:5px;padding:5px 7px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" id="menuBg" aria-hidden="true"></div>
+<div id="app" hidden></div>
+
+<div class="bar">
+  <div class="side">
+    <button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button>
+    <button class="px ibtn" id="backBtn" aria-label="Elegir otro nivel" hidden><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+  </div>
+  <h1 id="title">ESCONDIDAS</h1>
+  <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="tray"></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<main id="menu"><div id="levels"></div></main>
+<div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
+<div id="count" hidden>
+  <svg viewBox="0 0 120 120" aria-hidden="true">
+    <circle cx="60" cy="62" r="46" fill="#6cc63a" stroke="#2a1f3d" stroke-width="6"/>
+    <ellipse cx="60" cy="84" rx="20" ry="9" fill="#ff8fb0"/>
+    <path d="M44 88q16 12 32 0" fill="none" stroke="#2a1f3d" stroke-width="5" stroke-linecap="round"/>
+    <g fill="#ffd9a8" stroke="#2a1f3d" stroke-width="5"><ellipse cx="38" cy="54" rx="22" ry="17"/><ellipse cx="82" cy="54" rx="22" ry="17"/></g>
+    <g stroke="#2a1f3d" stroke-width="4" stroke-linecap="round"><path d="M26 46v12M34 42v16M42 42v16M94 46v12M86 42v16M78 42v16"/></g>
+  </svg>
+  <b id="countN">1</b>
+</div>
+
+<canvas id="confetti" hidden></canvas>
+<div id="win" hidden>
+  <div class="big">¡LOS ENCONTRASTE!</div>
+  <div class="row">
+    <button class="px wbtn" id="menuBtn" aria-label="Elegir otro nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+    <button class="px wbtn" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
+    <button class="px wbtn go" id="nextBtn" aria-label="Siguiente nivel"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M2 6h7V2h2l4 6-4 6H9v-4H2z"/></svg></button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="__UP__vendor/GLTFLoader.js"></script>
+<script src="__UP__vendor/SkeletonUtils.js"></script>
+<script>/*__MODELS__*/</script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+let save = { done: {}, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('dinoHide')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('dinoHide', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null, noiseBuf = null;
+function unlockAudio() {
+  try {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0);
+      noiseBuf = actx.createBuffer(1, actx.sampleRate * .5, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+// Hojas que se sacuden: ruido filtrado
+function rustle(vol = .12, dur = .35) {
+  if (save.muted || !actx || !noiseBuf) return;
+  try {
+    const s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime;
+    s.buffer = noiseBuf; f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = .8;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .04); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f).connect(g).connect(actx.destination); s.start(t); s.stop(t + dur + .05);
+  } catch (e) {}
+}
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  count: n => beep([392, 494, 587][n] || 587, .18, 'triangle', .08),
+  go: () => [523, 784, 1047].forEach((f, i) => beep(f, .14, 'square', .05, 0, i * .07)),
+  found: k => [0, 4, 7, 12].forEach((s, i) => beep(523.25 * Math.pow(2, (s + k * 2) / 12), .14, 'square', .055, 0, i * .07)),
+  giggle: () => [0, 1, 2, 3].forEach(i => beep(900 + (i % 2) * 220, .06, 'sine', .04, 0, i * .07)),
+  boing: () => { beep(220, .35, 'sine', .08, 500); beep(330, .2, 'triangle', .04, 300, .05); },
+  run: () => [0, 1, 2, 3, 4, 5].forEach(i => beep(160 + (i % 2) * 40, .05, 'triangle', .04, 0, i * .09)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => beep(f, .16, 'square', .06, 0, i * .12)),
+};
+const SONG = [0, 4, 7, 4, 9, 7, 4, 2, 0, 2, 4, 7, 4, 2, 0, -3], BASS = [0, 0, 5, 5, 7, 7, 0, 0];
+let songStep = 0, songTimer = null;
+function music(on) {
+  clearInterval(songTimer); songTimer = null;
+  if (!on) return;
+  songTimer = setInterval(() => {
+    if (save.muted || !actx || document.hidden) return;
+    const n = SONG[songStep % SONG.length]; if (songStep % 4 !== 3) beep(587.3 * Math.pow(2, n / 12), .2, 'triangle', .018);
+    if (songStep % 2 === 0) beep(146.8 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .32, 'sine', .028);
+    songStep++;
+  }, 260);
+}
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', () => { save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Mundos y niveles ---------- */
+// Cada mundo: colores del cielo y del piso, modelos que sirven de escondite, adornos y árboles de la orilla
+const THEMES = {
+  jardin: { name: 'Jardín', sky: ['#8fd8ff', '#effcff'], ground: 0x7fd14f, ground2: 0x6cc045, side: 0x9a6a3a, grass: 0x5cb83c, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0xa98bff],
+    spots: ['plant_bushLarge', 'plant_bushDetailed', 'tree_oak', 'log_large', 'rock_largeA', 'mushroom_redGroup', 'stump_old', 'plant_bushLarge'], decor: ['flower_redA', 'flower_yellowA', 'grass_large', 'flower_purpleA'], border: ['tree_default', 'tree_oak', 'tree_fat', 'tree_detailed'] },
+  playa: { name: 'Playa', sky: ['#7fd3ff', '#fff4d8'], ground: 0xf6dc9a, ground2: 0xeccf88, side: 0xd8a860, grass: null, flowers: [0xffb3c6, 0xffffff], water: 0x3ab0e8,
+    spots: ['rocks-sand-a', 'chest', 'ship-wreck', 'tower-complete-small', 'rocks-sand-b', 'barrel', 'rocks-large', 'crate'], decor: ['palm-bend'], border: ['palm-straight', 'palm-bend'] },
+  nieve: { name: 'Nieve', sky: ['#b8dcff', '#f6fbff'], ground: 0xf2f8ff, ground2: 0xe0eefb, side: 0x9ab0c8, grass: null, flowers: [0xffffff, 0xbfe6ff],
+    spots: ['snowman', 'tree-snow-b', 'IGLOO', 'present-a-cube', 'snow-pile', 'tree-decorated-snow', 'tree-snow-c', 'sled'], decor: ['snowman-hat'], border: ['tree-snow-b', 'tree-snow-c'] },
+  ciudad: { name: 'Ciudad', sky: ['#9fdcff', '#eef8ff'], ground: 0x84d457, ground2: 0x74c64c, side: 0x8a8f9c, grass: 0x5cb83c, flowers: [0xff5d8f, 0xffd23a], road: true,
+    spots: ['sedan', 'van', 'truck', 'dumpster', 'tree-large', 'building-type-a', 'delivery', 'planter', 'suv'], decor: ['light-square', 'tree-small', 'bench'], border: ['building-type-c', 'building-type-f', 'building-type-k', 'building-type-b'] },
+  desierto: { name: 'Desierto', sky: ['#ffcf8a', '#fff4e0'], ground: 0xf3c477, ground2: 0xe8b468, side: 0xc0804a, grass: null, flowers: [0xff5d8f, 0xffd23a],
+    spots: ['tent_detailedClosed', 'cactus_tall', 'rock_tallA', 'crate', 'barrel', 'stone_tallA', 'tent_smallClosed', 'cactus_tall'], decor: ['cactus_short'], border: ['cactus_tall', 'rock_tallA', 'rock_tallB'] },
+  volcan: { name: 'Volcán', sky: ['#ffa77a', '#ffe2c4'], ground: 0x7a6866, ground2: 0x6a5a5a, side: 0x4a3a3a, grass: null, flowers: [0xff6a1a, 0xffd23a], lava: true,
+    spots: ['rock_largeB', 'stone_tallA', 'rock_tallB', 'chest', 'stump_round', 'DEADTREE', 'rock_largeC', 'rock_tallA'], decor: ['rock_smallA'], border: ['rock_tallA', 'rock_tallB'] },
+};
+// watch: qué tanto se alcanza a ver mientras se esconden (1 = todo); peek: qué tanto se asoman; sneak: se cambian de escondite; wide: mundo panorámico
+const LEVELS = [
+  { theme: 'jardin', dinos: 3, spots: 5, peek: .95, watch: 1 },
+  { theme: 'playa', dinos: 3, spots: 6, peek: .8, watch: .9 },
+  { theme: 'nieve', dinos: 4, spots: 6, peek: .7, watch: .7 },
+  { theme: 'jardin', night: 1, dinos: 3, spots: 6, peek: .6, watch: .6 },
+  { theme: 'ciudad', dinos: 4, spots: 7, peek: .55, watch: .45 },
+  { theme: 'desierto', dinos: 4, spots: 7, peek: .45, watch: .35, sneak: 1 },
+  { theme: 'volcan', dinos: 5, spots: 8, peek: .4, watch: .25, sneak: 1 },
+  { theme: 'playa', night: 1, dinos: 4, spots: 7, peek: .4, watch: .2 },
+  { theme: 'ciudad', night: 1, dinos: 5, spots: 9, peek: .35, watch: .1, sneak: 1, wide: 1 },
+  { theme: 'jardin', dinos: 6, spots: 11, peek: .3, watch: 0, sneak: 1, wide: 1 },
+];
+const DINOS = [
+  { m: 'raptor', c: 0x3fae4a }, { m: 'trice', c: 0x3f86c8 }, { m: 'stego', c: 0xff8a2a },
+  { m: 'trex', c: 0x9a6ad8 }, { m: 'para', c: 0xffc83a }, { m: 'apato', c: 0xff6f91 },
+];
+const CRITTERS = ['bunny', 'shiba', 'frog', 'sheep'];
+const NAT = { grass: 0x7ed957, leafsGreen: 0x5cc241, leafsDark: 0x2f9e44, leafsFall: 0xff9a2e, woodBark: 0x9c6234, woodBarkDark: 0x7a4a2a, woodInner: 0xf0d5a8, wood: 0xc8844a,
+  woodDark: 0x8a5a34, stone: 0xb9bdd0, stoneDark: 0x8e94a8, _defaultMat: 0xb9bdd0, dirt: 0xa5683a, colorRed: 0xe8423a, colorRedDark: 0xb02a30, colorTan: 0xf2c48a, colorYellow: 0xffc83a, colorPurple: 0xa98bff };
+const themeModels = t => { const T = THEMES[t]; return [...new Set([...T.spots, ...T.decor, ...T.border].filter(n => !/^[A-Z]+$/.test(n)).map(n => 'k/' + n))]; };
+const ALWAYS = [...DINOS.map(d => d.m), ...CRITTERS];
+
+/* ---------- Escena ---------- */
+const app = $('#app');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1, .1, 400);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xa8c890, .95); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff0d0, .8); sun.position.set(-12, 26, 14); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 90 }); scene.add(sun);
+// Linterna para los niveles de noche: la mueve el dedo
+const torch = new THREE.SpotLight(0xfff2cc, 0, 0, .34, .55, 1); torch.position.set(0, 16, 12); torch.castShadow = true; torch.shadow.mapSize.set(1024, 1024); scene.add(torch); scene.add(torch.target);
+const torchGlow = new THREE.Mesh(new THREE.CircleGeometry(1, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .12, depthWrite: false }));
+torchGlow.visible = false; scene.add(torchGlow);
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize);
+
+// Cielo con degradado (y estrellas de noche)
+function skyTex(top, bottom, stars) {
+  const cv = document.createElement('canvas'); cv.width = 16; cv.height = 256; const x = cv.getContext('2d');
+  if (stars) { cv.width = 512; }
+  const g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, top); g.addColorStop(1, bottom); x.fillStyle = g; x.fillRect(0, 0, cv.width, 256);
+  if (stars) for (let i = 0; i < 160; i++) { x.fillStyle = `rgba(255,255,230,${rand(.4, 1)})`; const r = rand(.6, 1.8); x.beginPath(); x.arc(rand(0, 512), rand(0, 170), r, 0, 7); x.fill(); }
+  const t = new THREE.CanvasTexture(cv); return t;
+}
+
+// Isla-diorama: disco de piso con su orilla de tierra
+let world = null;   // grupo con todo lo del nivel
+const SPH = new THREE.SphereGeometry(1, 16, 12);
+const M = (c, o) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, o || {}));
+function ell(rx, ry, rz, m) { const o = new THREE.Mesh(SPH, m); o.scale.set(rx, ry, rz); o.castShadow = true; return o; }
+
+function kenney(name) {
+  if (name === 'IGLOO') {
+    const g = new THREE.Group(), w = M(0xf8fbff), b = M(0xd8e8f8);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), w); dome.castShadow = true; g.add(dome);
+    for (let i = 1; i < 4; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(Math.sin(Math.acos(i * .25)), .025, 6, 32), b); r.rotation.x = Math.PI / 2; r.position.y = i * .25; g.add(r); }
+    const door = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .7, 16), w); door.rotation.x = Math.PI / 2; door.position.set(0, .28, .9); g.add(door);
+    const hole = new THREE.Mesh(new THREE.CylinderGeometry(.26, .26, .72, 16), M(0x2a3a5a)); hole.rotation.x = Math.PI / 2; hole.position.set(0, .24, .92); g.add(hole);
+    return g;
+  }
+  if (name === 'DEADTREE') {
+    const g = new THREE.Group(), w = M(0x5a4038);
+    const add = (rt, rb, h, x, y, z, rx, rz) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 7), w); c.position.set(x, y, z); c.rotation.set(rx, 0, rz); c.castShadow = true; g.add(c); };
+    add(.18, .32, 2, 0, 1, 0, 0, 0); add(.07, .12, 1, .35, 1.8, 0, 0, -.8); add(.06, .1, .9, -.3, 1.6, .1, 0, .9); add(.05, .08, .6, 0, 2.1, .25, .7, 0);
+    return g;
+  }
+  return recolor(modelClone('k/' + name), nm => NAT[nm] != null ? NAT[nm] : null);
+}
+// Dinosaurio pintado de su color, con sus animaciones (idle, walk, run, jump)
+const lightOf = c => new THREE.Color(c).lerp(new THREE.Color(0xfff2c8), .55).getHex();
+const darkOf = c => new THREE.Color(c).multiplyScalar(.62).getHex();
+function makeAnimal(name, c) {
+  const m = modelClone(name);
+  if (c != null) recolor(m, nm => /black|eye|claw/i.test(nm) ? null : /light|yellow|belly|wing/i.test(nm) ? lightOf(c) : /red/i.test(nm) ? 0xff6f91 : /dark|purple/i.test(nm) ? darkOf(c) : c);
+  m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
+  const g = new THREE.Group(); g.add(m);
+  const mixer = new THREE.AnimationMixer(m), acts = {};
+  MODELS[name].animations.forEach(a => { if (!acts[a.name]) acts[a.name] = mixer.clipAction(a); });
+  g.userData = { mixer, acts, cur: null, model: m };
+  return g;
+}
+function play(o, name, fade = .2, once = false) {
+  const u = o.userData, a = u.acts[name] || u.acts.idle || Object.values(u.acts)[0]; if (!a || u.cur === a) return;
+  a.reset(); a.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat); a.clampWhenFinished = once; a.play();
+  if (u.cur) a.crossFadeFrom(u.cur, fade, false); u.cur = a;
+}
+// Escala un objeto: `h` de alto o `w` de ancho, lo que quede más chico, y lo apoya en el piso
+function fit(o, w, h) {
+  const b = modelBox(o), s = b.getSize(new THREE.Vector3()), k = Math.min(w / Math.max(s.x, s.z, .01), h / Math.max(s.y, .01));
+  o.scale.multiplyScalar(k); o.updateMatrixWorld(true);
+  const b2 = modelBox(o); o.position.y -= b2.min.y; return o;
+}
+
+/* ---------- Partículas: hojas, nieve, chispas y estrellitas ---------- */
+const PART_GEO = new THREE.PlaneGeometry(1, 1), parts = [];
+for (let i = 0; i < 160; i++) { const m = new THREE.Mesh(PART_GEO, new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true })); m.visible = false; scene.add(m); parts.push({ m, life: 0 }); }
+let partI = 0;
+function burst(x, y, z, n, cols, speed = 5, size = .28, up = 6) {
+  for (let k = 0; k < n; k++) {
+    const p = parts[partI++ % parts.length]; p.m.visible = true; p.m.material.color.setHex(pick(cols)); p.m.material.opacity = 1;
+    p.m.position.set(x + rand(-.5, .5), y + rand(0, .6), z + rand(-.5, .5)); p.m.scale.setScalar(size * rand(.6, 1.3));
+    const a = rand(0, 6.3); p.v = new THREE.Vector3(Math.cos(a) * rand(.3, 1) * speed, rand(.5, 1) * up, Math.sin(a) * rand(.3, 1) * speed * .6);
+    p.spin = new THREE.Vector3(rand(-8, 8), rand(-8, 8), rand(-8, 8)); p.life = rand(.9, 1.5); p.t = 0;
+  }
+}
+function updateParts(dt) {
+  for (const p of parts) {
+    if (p.life <= 0) { p.m.visible = false; continue; }
+    p.t += dt; p.life -= dt; p.v.y -= 9 * dt; p.v.multiplyScalar(1 - dt * 1.2);
+    p.m.position.addScaledVector(p.v, dt); p.m.rotation.x += p.spin.x * dt; p.m.rotation.y += p.spin.y * dt;
+    if (p.m.position.y < .05) { p.m.position.y = .05; p.v.set(0, 0, 0); }
+    p.m.material.opacity = Math.min(1, p.life * 2);
+  }
+}
+
+/* ---------- Juego ---------- */
+let game = null;
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), tmpV = new THREE.Vector3();
+const PROXY_MAT = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+
+function buildWorld(L) {
+  if (world) { scene.remove(world); world.traverse(o => { if (o.geometry && o.geometry !== SPH && o.geometry !== PART_GEO) o.geometry.dispose(); }); }
+  world = new THREE.Group(); scene.add(world);
+  const T = THEMES[L.theme], night = !!L.night, W = L.wide ? 18 : 10.5, D = 7.5;
+  // Cielo y luces
+  scene.background = night ? skyTex('#0b1640', '#2a3a78', true) : skyTex(T.sky[0], T.sky[1]);
+  scene.fog = new THREE.Fog(night ? 0x1a2550 : new THREE.Color(T.sky[1]).getHex(), 60, 160);
+  hemi.intensity = night ? .16 : .95; hemi.color.setHex(night ? 0x7a8cff : 0xffffff); hemi.groundColor.setHex(night ? 0x202040 : T.ground2);
+  sun.intensity = night ? .12 : .8; sun.color.setHex(night ? 0x8aa0ff : 0xfff0d0);
+  torch.intensity = night ? 1.9 : 0; torchGlow.visible = night;
+  // Piso: una islita ovalada con su orilla de tierra (como un juguete)
+  const shape = new THREE.Shape(); shape.absellipse(0, 0, W + 4, D + 4, 0, Math.PI * 2, false, 0);
+  const top = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 2.2, bevelEnabled: true, bevelThickness: .4, bevelSize: .5, bevelSegments: 3, curveSegments: 64 }), [M(T.ground), M(T.side)]);
+  top.rotation.x = Math.PI / 2; top.position.y = -.4; top.receiveShadow = true; world.add(top);
+  // Manchas de pasto más oscuro / arena mojada para que el piso no sea plano
+  for (let i = 0; i < 14; i++) { const p = new THREE.Mesh(new THREE.CircleGeometry(rand(1.5, 4), 20), M(T.ground2)); p.rotation.x = -Math.PI / 2; p.position.set(rand(-W, W), .02, rand(-D, D)); p.scale.y = rand(.5, 1); p.receiveShadow = true; world.add(p); }
+  // Agua o lava alrededor de la isla
+  if (T.water || T.lava) { const w = new THREE.Mesh(new THREE.CircleGeometry(160, 48), M(T.water || 0xff5a1a, T.lava ? { emissive: 0xff4a00, emissiveIntensity: .6 } : {})); w.rotation.x = -Math.PI / 2; w.position.y = -1.6; w.scale.y = .7; world.add(w); }
+  else { const g = new THREE.Mesh(new THREE.CircleGeometry(160, 48), M(night ? 0x223060 : shadeHex(T.ground2, -.08))); g.rotation.x = -Math.PI / 2; g.position.y = -2.4; world.add(g); }
+  // Calle con banquetas en la ciudad
+  if (T.road) {
+    const r = new THREE.Mesh(new THREE.PlaneGeometry(W * 2 + 8, 3.4), M(0x4e5260)); r.rotation.x = -Math.PI / 2; r.position.set(0, .03, 7.2); r.receiveShadow = true; world.add(r);
+    for (const z of [5.3, 9.1]) { const s = new THREE.Mesh(new THREE.BoxGeometry(W * 2 + 8, .12, .5), M(0xd0d2da)); s.position.set(0, .06, z); s.receiveShadow = true; world.add(s); }
+    for (let x = -W - 3; x < W + 3; x += 2.4) { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .16), M(0xffd23a)); l.rotation.x = -Math.PI / 2; l.position.set(x, .04, 7.2); world.add(l); }
+  }
+  // Árboles (o casas, palmeras, rocas) en la orilla de atrás y de los lados
+  for (let k = 0; k < (L.wide ? 26 : 16); k++) {
+    const a = Math.PI + (k / ((L.wide ? 26 : 16) - 1)) * Math.PI, o = kenney(pick(T.border));
+    fit(o, rand(3, 4.2), rand(3.4, 5)); o.position.x = Math.cos(a) * (W + 2.5) + rand(-.6, .6); o.position.z = Math.sin(a) * (D + 2.5) + rand(-.6, .6); o.rotation.y = rand(0, 6.3); world.add(o);
+  }
+  // Pastito y florecitas
+  if (T.grass) {
+    const tuft = new THREE.ConeGeometry(.08, .45, 3); const n = L.wide ? 700 : 420, gm = new THREE.InstancedMesh(tuft, M(T.grass, { emissive: T.grass, emissiveIntensity: night ? .05 : .35 }), n), m4 = new THREE.Matrix4();
+    for (let i = 0; i < n; i++) { m4.makeTranslation(rand(-W - 2, W + 2), .2, rand(-D - 2, D + 2)); gm.setMatrixAt(i, m4); } world.add(gm);
+  }
+  const fl = new THREE.CircleGeometry(.14, 6).rotateX(-Math.PI / 2), nf = L.wide ? 160 : 90, fm = new THREE.InstancedMesh(fl, new THREE.MeshBasicMaterial({ color: 0xffffff }), nf), m4 = new THREE.Matrix4(), fc = new THREE.Color();
+  for (let i = 0; i < nf; i++) { m4.makeTranslation(rand(-W - 2, W + 2), .04, rand(-D - 2, D + 2)); fm.setMatrixAt(i, m4); fm.setColorAt(i, fc.setHex(pick(T.flowers)).multiplyScalar(night ? .3 : 1)); } world.add(fm);
+  // Luciérnagas de noche
+  game.flies = [];
+  if (night) for (let i = 0; i < 30; i++) { const f = new THREE.Mesh(new THREE.SphereGeometry(.08, 6, 4), new THREE.MeshBasicMaterial({ color: 0xfff27a })); f.userData = { x: rand(-W, W), z: rand(-D, D), ph: rand(0, 6.3), sp: rand(.3, .8) }; world.add(f); game.flies.push(f); }
+  return { W, D };
+}
+function shadeHex(h, l) { const c = new THREE.Color(h); c.offsetHSL(0, 0, l); return c.getHex(); }
+
+// Acomoda los escondites en filas escalonadas, sin encimarse, dejando el frente libre para los dinos encontrados
+function placeSpots(L, W, D) {
+  const T = THEMES[L.theme], out = [], names = shuffle([...T.spots, ...T.spots]).slice(0, L.spots);
+  const zMin = -D + 1.5, zMax = T.road ? 2.8 : 3.8;
+  for (let i = 0; i < L.spots; i++) {
+    let best = null, bd = -1;
+    for (let t = 0; t < 60; t++) {
+      const x = rand(-W + 1.8, W - 1.8), z = rand(zMin, zMax), d = Math.min(99, ...out.map(o => Math.hypot((o.x - x) * .8, o.z - z)));
+      if (d > bd) { bd = d; best = { x, z }; }
+    }
+    out.push({ ...best, name: names[i % names.length] });
+  }
+  return out;
+}
+
+function makeSpot(s) {
+  const o = kenney(s.name); fit(o, rand(3.4, 4), rand(3.1, 3.7));
+  // Los escondites bajitos (rocas, troncos) se estiran hacia arriba para que de veras tapen a un dino
+  { const hh = modelBox(o).getSize(new THREE.Vector3()).y; if (hh < 2.7) { o.scale.y *= Math.min(1.9, 2.7 / hh); o.position.y *= Math.min(1.9, 2.7 / hh); } }
+  const pivot = new THREE.Group(); pivot.position.set(s.x, 0, s.z); pivot.add(o); world.add(pivot);
+  o.rotation.y = rand(-.4, .4) + (/sedan|van|truck|delivery|suv|boat|canoe|log/.test(s.name) ? Math.PI / 2 * (Math.random() < .5 ? 1 : -1) + rand(-.3, .3) : 0);
+  o.updateMatrixWorld(true);
+  const b = new THREE.Box3().setFromObject(o), sz = b.getSize(new THREE.Vector3());
+  const r = Math.max(sz.x, sz.z) / 2, proxy = new THREE.Mesh(new THREE.CylinderGeometry(Math.max(1.5, r + .4), Math.max(1.5, r + .4), sz.y + 1.4, 12), PROXY_MAT);
+  proxy.position.y = (sz.y + 1.4) / 2; pivot.add(proxy);
+  const spot = { ...s, pivot, obj: o, proxy, w: sz.x, d: sz.z, h: sz.y, anim: 0, dino: null };
+  proxy.userData.spot = spot;
+  return spot;
+}
+
+function makeDino(def, k) {
+  const g = makeAnimal(def.m, def.c); fit(g.userData.model, 2.9, 2.0);
+  world.add(g);
+  // Ojitos que brillan en la oscuridad (solo de noche, mientras está escondido)
+  const eyes = new THREE.Group(), em = new THREE.MeshBasicMaterial({ color: 0xfff27a });
+  for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(.11, 10, 8), em); e.position.x = sx * .17; e.scale.y = 1.3; eyes.add(e); }
+  eyes.visible = false; world.add(eyes);
+  const proxy = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 6), PROXY_MAT); proxy.position.y = .8; g.add(proxy);
+  const d = { def, k, obj: g, eyes, proxy, state: 'play', spot: null, peek: 0, t: 0, from: new THREE.Vector3(), to: new THREE.Vector3(), slot: -1 };
+  proxy.userData.dino = d;
+  return d;
+}
+
+// Retratos de los dinos (para la bandeja de arriba), hechos con el mismo motor 3D
+let thumbR = null;
+function portrait(def) {
+  if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(128, 128); thumbR.setPixelRatio(1); }
+  const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff, 0x8a9a70, 1)); const dl = new THREE.DirectionalLight(0xffffff, .6); dl.position.set(3, 6, 5); sc.add(dl);
+  const g = makeAnimal(def.m, def.c); fit(g.userData.model, 2.2, 1.55); g.rotation.y = -.5; play(g, 'idle'); g.userData.mixer.update(.01); sc.add(g);
+  const cam = new THREE.PerspectiveCamera(30, 1, .1, 50); cam.position.set(0, 1.6, 4.6); cam.lookAt(0, .75, 0);
+  thumbR.clear(); thumbR.render(sc, cam); return thumbR.domElement.toDataURL();
+}
+
+function spotHidePos(sp, peek) {
+  // Detrás del escondite (visto desde la cámara) y un poco hacia un lado: con `peek` alto se le ve la cola o la cabeza
+  const back = tmpV.set(sp.x - camera.position.x, 0, sp.z - camera.position.z).normalize();
+  const side = new THREE.Vector3(-back.z, 0, back.x).multiplyScalar(sp.side || 1);
+  const depth = Math.max(sp.d, sp.w) * .38 + .5;
+  return new THREE.Vector3(sp.x, 0, sp.z).addScaledVector(back, depth).addScaledVector(side, (Math.max(sp.w, sp.d) * .5 + .4) * peek * .9);
+}
+
+let loadingLvl = false;
+async function start(n) {
+  if (loadingLvl) return;
+  const L = LEVELS[n], need = [...themeModels(L.theme), ...ALWAYS];
+  if (need.some(m => !MODELS[m])) {
+    loadingLvl = true; const ov = $('#lvlLoad'), bar = ov.querySelector('i'); ov.hidden = false; window.LEON_PROGRESS = 0;
+    const iv = setInterval(() => (bar.style.width = Math.max(8, (window.LEON_PROGRESS || 0) * 100) + '%'), 100);
+    await loadModels(need, '__UP__models/');
+    clearInterval(iv); ov.hidden = true; loadingLvl = false;
+  }
+  startNow(n);
+}
+function startNow(n) {
+  const L = LEVELS[n];
+  game = { n, L, t: 0, phase: 'play', found: 0, idle: 0, sneakT: rand(9, 13), critters: [], hintT: 0 };
+  const { W, D } = buildWorld(L); game.W = W; game.D = D;
+  framing();
+  game.spots = placeSpots(L, W, D).map(makeSpot);
+  const defs = shuffle([...DINOS]).slice(0, L.dinos);
+  game.dinos = defs.map(makeDino);
+  // Los dinos empiezan jugando en el claro del frente
+  game.dinos.forEach((d, i) => { const x = (i - (L.dinos - 1) / 2) * 3.2; d.obj.position.set(x, 0, 5.8); d.obj.rotation.y = 0; play(d.obj, i % 2 ? 'jump' : 'idle'); d.t = rand(0, 1); });
+  // Cada dino escoge su escondite
+  const free = shuffle([...game.spots]);
+  game.dinos.forEach(d => { d.spot = free.pop(); d.spot.dino = d; d.spot.side = Math.random() < .5 ? -1 : 1; d.peek = L.peek; });
+  // Bandeja de retratos
+  const tray = $('#tray'); tray.innerHTML = '';
+  game.dinos.forEach(d => { const im = document.createElement('img'); im.alt = ''; im.src = portrait(d.def); tray.appendChild(im); d.img = im; });
+  $('#lvl').textContent = 'NIVEL ' + (n + 1);
+  $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
+  app.hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false;
+  resize(); music(true);
+  // Juegan un ratito, luego la carita se tapa los ojos y cuenta 1-2-3 mientras corren a esconderse
+  game.countAt = 1.6;
+}
+
+// Cámara: se aleja lo necesario para que quepa toda la isla (o, en los panorámicos, se desliza con el dedo)
+function framing() {
+  const g = game, aspect = innerWidth / innerHeight;
+  const vFov = camera.fov * Math.PI / 180, hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
+  // Lo que se ve de ancho: toda la isla, salvo en los panorámicos o en el teléfono parado (ahí se desliza con el dedo)
+  const halfW = Math.min(g.L.wide ? 11 : g.W + 1, Math.max(5.2, 9 * aspect));
+  const dist = Math.max(halfW / Math.tan(hFov / 2), (g.D + 2.5) / Math.tan(vFov / 2) * .62);
+  g.camDist = dist; g.panMax = Math.max(0, g.W - halfW + 1.5); if (g.pan == null) g.pan = 0;
+}
+function updateCamera(dt) {
+  const g = game, d = g.camDist, sway = Math.sin(g.t * .3) * .3;
+  g.pan = Math.max(-g.panMax, Math.min(g.panMax, g.pan + (g.panV || 0) * dt)); g.panV = (g.panV || 0) * Math.pow(.02, dt);
+  // Parado (teléfono): más desde arriba, para que la isla llene la pantalla a lo alto
+  if (innerHeight > innerWidth) { camera.position.set(g.pan + sway, d * .88, d * .5 + 2); camera.lookAt(g.pan, 0, .6); }
+  else { camera.position.set(g.pan + sway, d * .62, d * .78 + 2); camera.lookAt(g.pan, .5, -.6); }
+  if (g.shake > 0) { g.shake -= dt; camera.position.x += rand(-.15, .15); camera.position.y += rand(-.1, .1); }
+}
+
+function countdown() {
+  const g = game, el = $('#count'), num = $('#countN');
+  el.style.setProperty('--veil', (1 - g.L.watch) * .88 + .06); el.hidden = false; g.phase = 'count';
+  // Los dinos corren a esconderse mientras cuenta
+  g.dinos.forEach((d, i) => setTimeout(() => { if (game !== g) return; d.state = 'run'; d.from.copy(d.obj.position); d.to.copy(spotHidePos(d.spot, d.peek)); d.t = 0; play(d.obj, 'run'); }, 150 + i * 220));
+  sfx.run();
+  [0, 1, 2].forEach(i => setTimeout(() => { if (game !== g) return; num.textContent = i + 1; num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop'); sfx.count(i); }, i * 900));
+  setTimeout(() => {
+    if (game !== g) return; el.hidden = true; g.phase = 'search'; sfx.go();
+    const go = document.createElement('div'); go.id = 'go'; go.textContent = '¿DÓNDE ESTÁN?'; document.body.appendChild(go); setTimeout(() => go.remove(), 1400);
+    // Por si alguno no llegó todavía
+    g.dinos.forEach(d => { if (d.state === 'run') { d.obj.position.copy(d.to); d.state = 'hidden'; play(d.obj, 'idle'); } });
+  }, 2900);
+}
+
+// Toque: busca primero dinos que se están cambiando de escondite, luego escondites
+function onTap(cx, cy) {
+  const g = game; if (!g || g.phase !== 'search') return;
+  camera.updateMatrixWorld(); world.updateMatrixWorld(true);
+  ptr.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ptr, camera);
+  const objs = [...g.dinos.filter(d => d.state === 'sneak' || d.state === 'hidden').map(d => d.proxy), ...g.spots.map(s => s.proxy)];
+  // Generoso para dedos chiquitos: si el toque pasa por varios escondites, gana el que tiene un dino
+  const hits = ray.intersectObjects(objs, false);
+  const hit = hits.find(h => h.object.userData.dino || (h.object.userData.spot && h.object.userData.spot.dino && h.object.userData.spot.dino.state === 'hidden')) || hits[0];
+  g.idle = 0;
+  if (!hit) { sfx.tap(); return; }
+  const d0 = hit.object.userData.dino;
+  if (d0) return reveal(d0);
+  const sp = hit.object.userData.spot;
+  shakeSpot(sp);
+  if (sp.dino && sp.dino.state === 'hidden') reveal(sp.dino);
+  else if (!sp.busy) surprise(sp);
+}
+function shakeSpot(sp) {
+  sp.anim = 1; rustle(); const T = THEMES[game.L.theme];
+  const cols = game.L.theme === 'nieve' ? [0xffffff, 0xdff0ff] : game.L.theme === 'playa' || game.L.theme === 'desierto' ? [0xf6dc9a, 0xe8c070, 0xffffff] : game.L.theme === 'volcan' ? [0xff8a2a, 0xffd23a, 0x5a4a4a] : game.L.theme === 'ciudad' ? [0xffd23a, 0xffffff, 0x5ac8ff] : [0x5cc241, 0x2f9e44, 0x9be05a];
+  burst(sp.x, sp.h * .6, sp.z, 12, cols, 4, .26, 5);
+}
+function reveal(d) {
+  const g = game; if (d.state === 'out' || d.state === 'found') return;
+  if (d.spot) { d.spot.dino = null; shakeSpot(d.spot); }
+  d.state = 'out'; d.t = 0; d.from.copy(d.obj.position); d.eyes.visible = false;
+  d.slot = g.found++;
+  const n = g.L.dinos, x = (d.slot - (n - 1) / 2) * Math.min(3.1, 18 / n) + g.pan;
+  d.to.set(x, 0, THEMES[g.L.theme].road ? 7.2 : 7);
+  play(d.obj, 'jump', .1); sfx.found(d.slot); g.shake = .25;
+  burst(d.from.x, 1.6, d.from.z, 22, [0xffd23a, 0xff5d8f, 0x5ac8ff, 0xffffff, 0x8fe04a], 6, .3, 8);
+  d.img.classList.add('got');
+}
+// En un escondite vacío sale una sorpresa: conejito que saluda, perrito, rana u oveja
+function surprise(sp) {
+  sp.busy = true; sfx.boing();
+  const name = pick(CRITTERS), c = makeAnimal(name); fit(c.userData.model, 1.9, 1.6);
+  const p = spotHidePos(sp, 0); c.position.copy(p); c.rotation.y = 0; world.add(c);
+  play(c, c.userData.acts.wave ? 'wave' : c.userData.acts.jump ? 'jump' : c.userData.acts.gallop_jump ? 'gallop_jump' : 'idle');
+  game.critters.push({ o: c, sp, t: 0, p0: p.clone() });
+}
+
+// Manita que señala un escondite (pista para cuando León tarda)
+function showHand(sp) {
+  camera.updateMatrixWorld(); const v = new THREE.Vector3(sp.x, sp.h * .9, sp.z).project(camera);
+  const el = document.createElement('div'); el.className = 'hint';
+  el.innerHTML = '<svg viewBox="0 0 32 32"><path d="M12 30c-3 0-5-2-6-4l-3-7c-.6-1.4 1.4-2.4 2.3-1.2L8 21V6a2 2 0 0 1 4 0v9-3a2 2 0 0 1 4 0v3-2a2 2 0 0 1 4 0v3-1a2 2 0 0 1 4 0v7c0 5-3 9-8 9z" fill="#fff" stroke="#2a1f3d" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+  el.style.left = ((v.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((1 - v.y) / 2 * innerHeight) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 2600);
+}
+function winLevel() {
+  const g = game; g.phase = 'win'; save.done[g.n] = true; persist();
+  sfx.win(); confetti();
+  // Todos al centro a bailar
+  g.dinos.forEach((d, i) => { d.state = 'dance'; d.t = 0; d.from.copy(d.obj.position); d.to.set((i - (g.L.dinos - 1) / 2) * Math.min(3.1, 18 / g.L.dinos) + g.pan, 0, 4.5); play(d.obj, 'run'); });
+  setTimeout(() => { if (game === g) $('#win').hidden = false; }, 1700);
+}
+
+function update(dt) {
+  const g = game; if (!g) return;
+  g.t += dt;
+  if (g.countAt != null) { g.countAt -= dt; if (g.countAt <= 0) { g.countAt = null; countdown(); } }
+  // Dinos
+  for (const d of g.dinos) {
+    d.obj.userData.mixer.update(dt);
+    d.t += dt;
+    if (d.state === 'play') { d.obj.position.y = 0; d.obj.rotation.y = Math.sin(g.t * 2 + d.k) * .4; }
+    else if (d.state === 'run' || d.state === 'sneak') {
+      const dur = d.state === 'sneak' ? 2.4 : 1.5, k = Math.min(1, d.t / dur), e = k * k * (3 - 2 * k);
+      d.obj.position.lerpVectors(d.from, d.to, e); d.obj.position.y = Math.abs(Math.sin(k * Math.PI * 4)) * .25;
+      d.obj.rotation.y = Math.atan2(d.to.x - d.from.x, d.to.z - d.from.z);
+      if (k >= 1) { d.state = 'hidden'; d.obj.position.copy(d.to); play(d.obj, 'idle'); }
+    } else if (d.state === 'hidden') {
+      // Escondido: mira hacia la cámara, de vez en cuando se asoma un poquito más
+      const target = spotHidePos(d.spot, d.peek); d.obj.position.lerp(target, Math.min(1, dt * 3)); d.obj.position.y = 0;
+      const face = Math.atan2(camera.position.x - d.obj.position.x, camera.position.z - d.obj.position.z) + (d.spot.side || 1) * .6;
+      d.obj.rotation.y += (face - d.obj.rotation.y) * Math.min(1, dt * 4);
+      if (g.L.night) {
+        d.eyes.visible = true; const hp = d.obj.position.clone(); const sideV = new THREE.Vector3().subVectors(hp, new THREE.Vector3(d.spot.x, 0, d.spot.z)).setY(0).normalize();
+        d.eyes.position.set(hp.x - sideV.x * .2, 1.25, hp.z - sideV.z * .2 + .3); d.eyes.lookAt(camera.position);
+        const blink = (g.t + d.k * 1.7) % 3.4 < .14; d.eyes.scale.set(1, blink ? .15 : 1, 1);
+      }
+    } else if (d.state === 'out') {
+      const k = Math.min(1, d.t / 1.1), e = k * (2 - k);
+      d.obj.position.lerpVectors(d.from, d.to, e); d.obj.position.y = Math.sin(k * Math.PI) * 3.2;
+      d.obj.rotation.y = Math.atan2(d.to.x - d.from.x, d.to.z - d.from.z) * (1 - k) + k * 0;
+      if (k >= 1) { d.state = 'found'; d.obj.position.copy(d.to); play(d.obj, 'idle'); burst(d.to.x, .4, d.to.z, 10, [0xffd23a, 0xffffff], 3, .22, 4); if (g.found === g.L.dinos) setTimeout(() => game === g && winLevel(), 700); }
+    } else if (d.state === 'found') {
+      d.obj.rotation.y = Math.sin(g.t * 2.5 + d.k) * .35; d.obj.position.y = Math.abs(Math.sin(g.t * 5 + d.k)) * .18;
+    } else if (d.state === 'dance') {
+      const k = Math.min(1, d.t / 1.2); d.obj.position.lerpVectors(d.from, d.to, k);
+      if (k >= 1 && d.obj.userData.cur !== d.obj.userData.acts.jump) play(d.obj, 'jump');
+      d.obj.rotation.y = k < 1 ? Math.atan2(d.to.x - d.from.x, d.to.z - d.from.z) : Math.sin(g.t * 3 + d.k) * .6;
+    }
+  }
+  // Escondites que se sacuden
+  for (const sp of g.spots) {
+    if (sp.anim > 0) {
+      sp.anim = Math.max(0, sp.anim - dt * 1.6); const a = sp.anim, w = Math.sin((1 - a) * 22) * a;
+      sp.pivot.rotation.z = w * .14 * (sp.side || 1); sp.pivot.scale.set(1 + w * .06, 1 - w * .08 + a * .05, 1 + w * .06);
+    } else { sp.pivot.rotation.z = 0; sp.pivot.scale.set(1, 1, 1); }
+  }
+  // Sorpresas que se asoman y se vuelven a esconder
+  g.critters = g.critters.filter(c => {
+    c.t += dt; c.o.userData.mixer.update(dt);
+    const up = c.t < .35 ? c.t / .35 : c.t > 1.8 ? Math.max(0, 1 - (c.t - 1.8) / .35) : 1;
+    c.o.position.set(c.p0.x, (c.sp.h * .55 + .2) * Math.sin(up * Math.PI / 2), c.p0.z + up * .8);
+    c.o.rotation.y = Math.atan2(camera.position.x - c.o.position.x, camera.position.z - c.o.position.z);
+    if (c.t > 2.2) { world.remove(c.o); c.sp.busy = false; return false; }
+    return true;
+  });
+  if (g.phase === 'search') {
+    g.idle += dt;
+    // Pista: si tarda, el escondite de un dino se sacude solito y el dino se asoma más
+    if (g.idle > 7) {
+      g.idle = 3.5; const hid = g.dinos.filter(d => d.state === 'hidden');
+      if (hid.length) { const d = pick(hid); shakeSpot(d.spot); sfx.giggle(); d.peek = Math.min(1.1, d.peek + .2); showHand(d.spot); }
+    }
+    // Dinos traviesos: uno se cambia de escondite corriendo a la vista
+    if (g.L.sneak) {
+      g.sneakT -= dt;
+      if (g.sneakT < 0) {
+        g.sneakT = rand(9, 14); const hid = g.dinos.filter(d => d.state === 'hidden'), empty = g.spots.filter(s => !s.dino && !s.busy);
+        if (hid.length && empty.length) {
+          const d = pick(hid), ns = pick(empty); shakeSpot(d.spot); d.spot.dino = null; d.spot = ns; ns.dino = d; ns.side = Math.random() < .5 ? -1 : 1;
+          d.state = 'sneak'; d.t = 0; d.from.copy(d.obj.position); d.to.copy(spotHidePos(ns, d.peek)); d.eyes.visible = false; play(d.obj, 'run'); sfx.giggle();
+        }
+      }
+    }
+  }
+  // Linterna: sigue al dedo; si no lo mueve, pasea solita despacito
+  if (g.L.night) {
+    if (!g.torchHit) g.torchHit = new THREE.Vector3(0, 0, 0);
+    if (performance.now() - (g.lastMove || 0) > 2500) g.torchHit.set(g.pan + Math.sin(g.t * .35) * g.W * .7, 0, Math.sin(g.t * .5) * 3 - 2);
+    torch.target.position.lerp(g.torchHit, Math.min(1, dt * 8)); torch.position.set(torch.target.position.x * .5 + g.pan * .5, 15, 12);
+    torchGlow.position.set(torch.target.position.x, .06, torch.target.position.z); torchGlow.scale.setScalar(4.6);
+    for (const f of g.flies) { const u = f.userData; f.position.set(u.x + Math.sin(g.t * u.sp + u.ph) * 1.5, 1 + Math.sin(g.t * 2 + u.ph) * .5, u.z + Math.cos(g.t * u.sp * .8 + u.ph) * 1.2); }
+  }
+  updateParts(dt);
+  updateCamera(dt);
+}
+
+/* ---------- Dedo: tocar, deslizar (mundo panorámico) y mover la linterna ---------- */
+let down = null;
+app.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now(), lx: e.clientX, moved: false }; moveTorch(e); });
+app.addEventListener('pointermove', e => {
+  if (game && game.L.night) moveTorch(e);
+  if (!down) return;
+  const dx = e.clientX - down.lx; down.lx = e.clientX;
+  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 14) down.moved = true;
+  if (down.moved && game && game.panMax) { game.pan -= dx * game.camDist / innerWidth * .9; game.panV = -dx * 30 * game.camDist / innerWidth; }
+});
+app.addEventListener('pointerup', e => { if (down && !down.moved) onTap(e.clientX, e.clientY); down = null; });
+app.addEventListener('pointercancel', () => (down = null));
+function moveTorch(e) {
+  const g = game; if (!g || !g.L.night) return;
+  ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ptr, camera);
+  const p = new THREE.Vector3(); if (ray.ray.intersectPlane(groundPlane, p)) { g.torchHit = p; g.lastMove = performance.now(); }
+}
+
+/* ---------- Menú ---------- */
+const CARD = {
+  jardin: ['#9be3ff', '#7fd14f', '#3f9a2e'], playa: ['#8fdcff', '#f6dc9a', '#2f9ad8'], nieve: ['#c4e2ff', '#f2f8ff', '#8fb0d8'],
+  ciudad: ['#a8e0ff', '#84d457', '#4e5260'], desierto: ['#ffd090', '#f3c477', '#c0804a'], volcan: ['#ffb08a', '#7a6866', '#ff5a1a'],
+};
+function cardSVG(L, n) {
+  const [sky, ground, accent] = CARD[L.theme], night = L.night, d = DINOS[n % DINOS.length].c.toString(16).padStart(6, '0');
+  return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="${night ? '#14204e' : sky}"/>` +
+    (night ? '<circle cx="78" cy="20" r="9" fill="#fff6c8"/><circle cx="20" cy="18" r="1.5" fill="#fff"/><circle cx="40" cy="10" r="1.2" fill="#fff"/><circle cx="58" cy="26" r="1.4" fill="#fff"/>' : '<circle cx="80" cy="18" r="10" fill="#ffe36a"/>') +
+    `<ellipse cx="50" cy="92" rx="70" ry="34" fill="${night ? '#2c3f5a' : ground}"/>` +
+    `<path d="M14 66 q4-8 12-6 q2-10 14-8 q10-6 16 4 q10 0 10 10z" fill="#${d}"/><circle cx="22" cy="62" r="2.4" fill="#fff"/><circle cx="22.6" cy="62" r="1.2" fill="#2a1f3d"/>` +
+    `<path d="M34 80 q-4-22 16-26 q18-6 26 8 q14 2 12 18z" fill="${night ? '#24482e' : (L.theme === 'nieve' ? '#e8f2ff' : L.theme === 'playa' || L.theme === 'desierto' ? '#c88a4a' : L.theme === 'volcan' ? '#5a4a4a' : L.theme === 'ciudad' ? '#ff6a5a' : '#3faa3a')}" stroke="#2a1f3d" stroke-width="2.5"/>` +
+    `<circle cx="58" cy="62" r="4.2" fill="${night ? '#fff27a' : '#fff'}"/><circle cx="68" cy="62" r="4.2" fill="${night ? '#fff27a' : '#fff'}"/>` +
+    (night ? '' : '<circle cx="59" cy="62.5" r="2" fill="#2a1f3d"/><circle cx="69" cy="62.5" r="2" fill="#2a1f3d"/>') + '</svg>';
+}
+function buildMenu() {
+  const box = $('#levels'); box.innerHTML = '';
+  LEVELS.forEach((L, n) => {
+    const b = document.createElement('button'); b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1) + ' ' + THEMES[L.theme].name + (L.night ? ' de noche' : ''));
+    b.innerHTML = cardSVG(L, n) + `<b>${n + 1}</b>` + (save.done[n] ? '<span class="star"></span>' : '');
+    b.addEventListener('click', () => { sfx.tap(); start(n); });
+    box.appendChild(b);
+  });
+}
+function showMenu() {
+  music(false);
+  if (world) { scene.remove(world); world = null; }
+  game = null; app.hidden = true; $('#win').hidden = true; $('#count').hidden = true; $('#confetti').hidden = true; $('#hud').hidden = true;
+  $('#menu').hidden = false; $('#menuBg').hidden = false; $('#backBtn').hidden = true; $('#title').hidden = false;
+  buildMenu();
+}
+$('#backBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#menuBtn').addEventListener('click', () => { sfx.tap(); showMenu(); });
+$('#againBtn').addEventListener('click', () => { sfx.tap(); start(game.n); });
+$('#nextBtn').addEventListener('click', () => { sfx.tap(); start((game.n + 1) % LEVELS.length); });
+addEventListener('resize', () => { if (game) framing(); });
+
+function confetti() {
+  const c = $('#confetti'); c.hidden = false;
+  const W = c.width = Math.ceil(innerWidth / 3), H = c.height = Math.ceil(innerHeight / 3), x = c.getContext('2d');
+  const bits = Array.from({ length: 90 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, v: rand(.6, 1.6), d: rand(-.4, .4), r: rand(0, 6), col: ['#ffd23a', '#ff5d8f', '#5ac8ff', '#6cc63a', '#fff'][Math.random() * 5 | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, W, H);
+    bits.forEach(b => { b.y += b.v; b.x += b.d; b.r += .1; x.fillStyle = b.col; x.save(); x.translate(b.x, b.y); x.rotate(b.r); x.fillRect(-2, -1, 4, 2); x.restore(); });
+    if (t - t0 < 3600 && !c.hidden) requestAnimationFrame(f); else c.hidden = true;
+  })(t0);
+}
+
+let last = performance.now();
+(function loop(t) {
+  const dt = Math.min(.05, (t - last) / 1000); last = t;
+  if (game && !app.hidden) { update(dt); renderer.render(scene, camera); }
+  requestAnimationFrame(loop);
+})(last);
+
+resize();
+showMenu();
+// Para pruebas: #nivel3 abre directo ese nivel
+{ const m = /^#nivel(\d+)$/.exec(location.hash); if (m) start(Math.min(LEVELS.length, +m[1]) - 1); }
+window.__hide = { start, update, render: () => renderer.render(scene, camera), get game() { return game; }, onTap, camera, scene };
+window.LEON_READY = true;
+})();
+</script>
