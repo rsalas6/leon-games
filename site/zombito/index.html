@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261022124154';</script>
+<script>window.LEON_VERSION='20261022124240';</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -28,8 +28,8 @@
 html,body{height:100%;margin:0;overflow:hidden;background:#3a2a6a;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
 #game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;image-rendering:auto}
-.bg{position:fixed;inset:0;background:url(../img/zomb/bg-zomb-wide.webp) 50% 50%/cover no-repeat #4a3a8a}
-@media (orientation:portrait){.bg{background-image:url(../img/zomb/bg-zomb-tall.webp)}}
+.bg{position:fixed;inset:0;background:url(../img/zomb/bg-trex-wide.webp) 50% 50%/cover no-repeat #4a3a8a}
+@media (orientation:portrait){.bg{background-image:url(../img/zomb/bg-trex-tall.webp)}}
 .bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.25),rgba(255,255,255,0) 70%)}
 
 .px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
@@ -155,7 +155,7 @@ h1{margin:0;font-weight:400;font-size:clamp(30px,6vw,56px);color:#9bf06a;letter-
     <div id="candies" hidden><img alt="" src="../img/zomb/ham.webp"><span id="candyN">0</span></div>
   </div>
   <h1 id="title">ZOMBITO</h1>
-  <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="prog"><i></i><img alt="" src="../img/zomb/hero-0.webp"></div></div>
+  <div id="hud" hidden><div id="lvl">NIVEL 1</div><div id="prog"><i></i><img alt="" src="../img/zomb/trex-0.webp"></div></div>
   <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
 </div>
 
@@ -240,7 +240,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 
 /* ---------- Sprites ---------- */
 const UP = '../img/zomb/';
-const SPRITES = ['hero-0', 'hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5', 'ghost-0', 'ghost-1', 'bat-0', 'bat-1', 'pumpkin-0', 'pumpkin-1', 'skel-0', 'skel-1',
+const SPRITES = ['trex-0', 'trex-1', 'trex-2', 'trex-3', 'trex-4', 'trex-5', 'ghost-0', 'ghost-1', 'bat-0', 'bat-1', 'pumpkin-0', 'pumpkin-1', 'skel-0', 'skel-1',
   'ham', 'goldham', 'star', 'gpumpkin', 'flag', 'tomb', 'chest', 'balloon', 'house'];
 const IMG = {};
 function loadImages(names, onProgress) {
@@ -554,7 +554,7 @@ function render() {
     if (!h.onGround && g.phase === 'run') fr = 5;
     else if ((g.started && Math.abs(h.vx) > .5 && !h.blocked) || g.phase === 'walk') fr = 1 + ((g.t * 11) | 0) % 4;
     if (h.star > 0) { cx.save(); cx.filter = `hue-rotate(${(g.t * 720) % 360}deg) saturate(1.6)`; }
-    sprite('hero-' + fr, h.x, h.y, 1.8);
+    sprite('trex-' + fr, h.x, h.y, 1.8);
     if (h.star > 0) { cx.restore(); if (Math.random() < .5) burst(h.x + rand(-.4, .4), h.y + rand(0, 1.5), 1, ['#ffd23a', '#ff5d8f', '#5ac8ff', '#9bf06a'], 1.5); }
   }
   // Partículas
