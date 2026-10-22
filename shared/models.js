@@ -17,7 +17,9 @@ function loadModels(names, base) {
           for (let i = 0; i < f.length; i++) f[i] = sw.array[i] / max;
           o.geometry.setAttribute('skinWeight', new THREE.BufferAttribute(f, sw.itemSize));
         }
-        const conv = mt => { const l = new THREE.MeshLambertMaterial({ name: mt.name, color: mt.color.clone(), map: mt.map || null, skinning: !!o.isSkinnedMesh, vertexColors: mt.vertexColors }); if (l.map) l.map.encoding = THREE.LinearEncoding; return l; };
+        // Una textura que no cargó (imagen vacía) haría el objeto negro: mejor sin textura
+        const okMap = mt => mt.map && mt.map.image && (mt.map.image.width || mt.map.image.naturalWidth) ? mt.map : null;
+        const conv = mt => { const l = new THREE.MeshLambertMaterial({ name: mt.name, color: mt.color.clone(), map: okMap(mt), skinning: !!o.isSkinnedMesh, vertexColors: mt.vertexColors }); if (l.map) l.map.encoding = THREE.LinearEncoding; return l; };
         o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
       });
       MODELS[n] = g; res();

@@ -1201,6 +1201,13 @@ function placeRacer(r, dt) {
 // Acceso para pruebas automáticas
 window.__race = { get player() { return player; }, get segments() { return segments; }, get state() { return state; }, camera, scene, THREE,
   step(n, dt = 1 / 60) { for (let i = 0; i < n; i++) { racers.forEach(r => updateRacer(r, dt)); updateCamera(dt); } renderer.render(scene, camera); } };
+// Diagnóstico (solo pruebas): #diag manda una foto de la carrera a un servidor local
+if (location.hash === '#diag') (async () => {
+  while (!window.LEON_READY) await new Promise(r => setTimeout(r, 200));
+  $('#playBtn').click(); await new Promise(r => setTimeout(r, 6000));
+  renderer.render(scene, camera);
+  fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag: 'race', img: renderer.domElement.toDataURL('image/png'), info: { ua: navigator.userAgent } }) });
+})();
 
 /* ---------- Cámara ---------- */
 const camPos = new THREE.Vector3(0, 8, 12), camLook = new THREE.Vector3();

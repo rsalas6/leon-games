@@ -1740,7 +1740,7 @@
 			this.nodeNamesUsed = {}; // Use an THREE.ImageBitmapLoader if imageBitmaps are supported. Moves much of the
 			// expensive work of uploading a texture to the GPU off the main thread.
 
-			if ( typeof createImageBitmap !== 'undefined' && /Firefox/.test( navigator.userAgent ) === false && !/^((?!chrome|android).)*safari/i.test( navigator.userAgent ) && !/iPad|iPhone|iPod/.test( navigator.userAgent ) ) {
+			if ( false ) { // Juegos de León: siempre TextureLoader (ImageBitmap falla en algunos iPad y deja los objetos negros)
 
 				this.textureLoader = new THREE.ImageBitmapLoader( this.options.manager );
 

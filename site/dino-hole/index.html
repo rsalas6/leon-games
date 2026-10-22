@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261021203536';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261022093625';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -210,7 +210,9 @@ function loadModels(names, base) {
           for (let i = 0; i < f.length; i++) f[i] = sw.array[i] / max;
           o.geometry.setAttribute('skinWeight', new THREE.BufferAttribute(f, sw.itemSize));
         }
-        const conv = mt => { const l = new THREE.MeshLambertMaterial({ name: mt.name, color: mt.color.clone(), map: mt.map || null, skinning: !!o.isSkinnedMesh, vertexColors: mt.vertexColors }); if (l.map) l.map.encoding = THREE.LinearEncoding; return l; };
+        // Una textura que no cargó (imagen vacía) haría el objeto negro: mejor sin textura
+        const okMap = mt => mt.map && mt.map.image && (mt.map.image.width || mt.map.image.naturalWidth) ? mt.map : null;
+        const conv = mt => { const l = new THREE.MeshLambertMaterial({ name: mt.name, color: mt.color.clone(), map: okMap(mt), skinning: !!o.isSkinnedMesh, vertexColors: mt.vertexColors }); if (l.map) l.map.encoding = THREE.LinearEncoding; return l; };
         o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
       });
       MODELS[n] = g; res();
@@ -1220,7 +1222,7 @@ function startNow(n) {
   layout.forEach(p => { if (p.v == null) p.v = Math.random() * VARS(L.theme, p.i).length | 0; const k = p.i + ':' + p.v; counts[k] = (counts[k] || 0) + 1; });
   makePools(L, counts);
   game.items = placeItems(L, layout);
-  game.growK = L.long ? 5 : 6;   // calibrado con un bot: un mundo se pasa rápido (~30-45 s jugando perfecto)
+  game.growK = L.long ? 2.6 : 3;   // calibrado con un bot: ~50-80 s jugando perfecto (León tarda unos minutos)
   game.boss = game.items.find(it => it.i === L.boss);
   $('#bossIcon').src = thumb(L.theme, L.boss);
   $('#lvl').textContent = 'NIVEL ' + (n + 1); $('#score').textContent = '0';
@@ -1316,11 +1318,14 @@ function step(dt) {
   for (const it of g.items) {
     if (it.fall || it.carry) continue;
     // Los dinos caminan despacito por el mundo
-    if (it.walk && it.i === g.L.boss && !fits(it.r, g.r)) {
-      // El titán acecha: se queda siempre arriba en la pantalla, mirando a la rana, y la sigue con pasos lentos y pesados
+    if (it.walk && it.i === g.L.boss) {
+      // El titán acecha: se queda siempre arriba en la pantalla, mirando a la rana, y la sigue con pasos lentos y pesados.
+      // Cuando la rana ya puede con él, se queda quieto temblando de miedo (sin girar)
+      const scared = fits(it.r, g.r), fdx = g.hx - it.x, fdz = g.hz - it.z, fd = Math.hypot(fdx, fdz);
       const tx = g.hx, tz = g.hz - (it.r * .7 + g.r + 3), ddx = tx - it.x, ddz = tz - it.z, dd = Math.hypot(ddx, ddz);
-      const want = Math.atan2(-(g.hx - it.x), -(g.hz - it.z)); let dh = want - it.head; dh = Math.atan2(Math.sin(dh), Math.cos(dh)); it.head += dh * Math.min(1, dt * 2);
-      const moving = dd > 2 && g.intro <= 0;
+      if (fd > it.r * .6) { const want = Math.atan2(-fdx, -fdz); let dh = want - it.head; dh = Math.atan2(Math.sin(dh), Math.cos(dh)); it.head += Math.max(-dt * 1.5, Math.min(dt * 1.5, dh)); }
+      if (scared && it.shake <= 0) it.shake = .3;
+      const moving = !scared && dd > 2 && g.intro <= 0;
       if (moving) { const v = Math.min(dd, dt * Math.min(5, .5 + dd * .25)), nx = it.x + ddx / dd * v, nz = it.z + ddz / dd * v; if (inside(g.L, nx, nz, it.r * .6)) { it.x = nx; it.z = nz; } }
       it.obj.rotation.y = it.head;
       if (it.anim) it.anim(g.t * (moving ? 4 : 1.5) + it.seed, moving ? 3 : 1);
@@ -1331,7 +1336,7 @@ function step(dt) {
       if (it.scared) it.head = Math.atan2(-fdx / fd, -fdz / fd);   // huye en dirección contraria a la rana
       const sp = it.walk * dt * Math.min(2.2, 1 + it.i * .08) * (it.scared ? 1.8 : 1);
       it.x -= Math.sin(it.head) * sp; it.z -= Math.cos(it.head) * sp;
-      if (!inside(g.L, it.x, it.z, it.r) || inPond(g, it.x, it.z, it.r)) { it.x += Math.sin(it.head) * sp * 2; it.z += Math.cos(it.head) * sp * 2; it.head += Math.PI * rand(.7, 1.3); }
+      if (!inside(g.L, it.x, it.z, it.r) || inPond(g, it.x, it.z, it.r)) { it.x += Math.sin(it.head) * sp; it.z += Math.cos(it.head) * sp; if (!it.scared) it.head += Math.PI * rand(.7, 1.3); }
       it.obj.rotation.y = it.head;
       if (it.anim) it.anim(g.t * 6 + it.seed, 3); else it.obj.position.y = Math.abs(Math.sin(g.t * 6 + it.seed)) * it.r * .15;
     }
@@ -1526,6 +1531,18 @@ function loop(now) {
 resize();
 requestAnimationFrame(loop);
 showMenu();
+// Para pruebas: #nivel3 abre directo ese nivel
+{ const m = /^#nivel(\d+)(diag)?$/.exec(location.hash); if (m) (async () => {
+  await start(Math.min(LEVELS.length, +m[1]) - 1);
+  if (!m[2]) return;
+  // Diagnóstico (solo pruebas): manda una foto del juego y qué moldes salieron oscuros a un servidor local
+  for (let k = 0; k < 90; k++) step(1 / 30);
+  renderer.render(scene, camera); const img = renderer.domElement.toDataURL('image/png');
+  const dark = [], tex = {};
+  for (const [k, pr] of Object.entries(protos)) { const c = pr.body.attributes.color; if (!c) continue; let sum = 0; for (let i = 0; i < c.count; i++) sum += c.getX(i) + c.getY(i) + c.getZ(i); const avg = sum / c.count / 3; if (avg < .12) dark.push(k + ' ' + avg.toFixed(3)); }
+  for (const [n, g] of Object.entries(MODELS)) g.scene.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(mt => { if (mt.map) tex[n] = (mt.map.image && mt.map.image.constructor.name) + ' ' + (mt.map.image && mt.map.image.width); }); });
+  fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag: 'lvl' + m[1], img, info: { ua: navigator.userAgent, dark, tex, protos: Object.keys(protos).length } }) });
+})(); }
 window.LEON_READY = true;   // la pantalla de carga ya se puede quitar
 window.__dbg = { proto, bakeSkinned, THEMES, qdino };
 window.__hole = { renderer, scene, camera, inside, start, step, render: () => renderer.render(scene, camera), get game() { return game; } };
