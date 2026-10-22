@@ -272,11 +272,11 @@ function dino(kind, c) {
 }
 // Cada mundo: 16 cosas de la más chiquita a la más grande; la última es el jefe del nivel largo
 const THEMES = {
-  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('trex', 0x7a5ad8)] },
-  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('trex', 0x2f8fd0)] },
-  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trex', 0x6a9ad8)] },
-  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('trex', 0xd07a3a)] },
-  volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('trex', 0xb8321a)] },
+  selva: { far: [0x5fae4a, 0x4e9a3e], farKind: 'hill', pond: 0x3aa8e8, grass: 0x4ea640, grassN: .22, flowers: [0xff5d8f, 0xffd23a, 0xffffff, 0x9a6ad8], out: 0x3f8a2e, wave: 0, border: () => K(['tree_oak', 'tree_fat', 'tree_default', 'tree_palmTall'][Math.random() * 4 | 0])(), butterflies: true, ground: [0x6fbf4a, 0x62b040], sky: 0x9ee8d6, items: [K('flower_redA'), K('mushroom_red'), () => F.egg(), K('grass_leafsLarge'), K('stone_largeA'), K('plant_bushLarge'), () => dino('compy', 0xff9a2e), K('log_large'), () => dino('raptor', 0x3fae4a), K('tree_palmShort'), () => dino('stego', 0xff8a2a), () => dino('trice', 0x3f86c8), K('tree_palmTall'), K('tree_oak'), () => dino('brachio', 0x9a6ad8), () => dino('trex', 0x3faa3a), () => dino('raptor', 0x7a4ad8)] },
+  playa: { far: [0x7bd63a, 0xf6dc9a], farKind: 'island', pond: 0x3ab0e8, grass: 0x9ab84a, grassN: .08, flowers: [0xffb3c6, 0xffffff, 0xff8a3a], out: 0x3ab0e8, wave: 1, border: () => K('rocks-sand-a')(), butterflies: true, ground: [0xf6dc9a, 0xefd08a], sky: 0xaee8ff, items: [() => F.shell(), () => F.starfish(), () => F.crab(), K('bottle-large'), () => F.ball(), () => F.sandcastle(), K('barrel'), () => F.turtle(), K('chest'), () => dino('compy', 0x5ac8ff), K('boat-row-small'), K('cannon'), K('palm-bend'), K('ship-small'), K('tower-complete-small'), K('ship-pirate-large'), () => dino('compy', 0xff7a3a)] },
+  nieve: { far: [0x9aaccc, 0xffffff], farKind: 'peak', pond: 0xa8d8f8, grass: 0xbfe0f0, grassN: .12, flowers: [0xffffff, 0xbfe6ff], out: 0x9cc8ee, wave: .5, border: () => K(Math.random() < .5 ? 'tree-snow-b' : 'tree-snow-c')(), butterflies: false, ground: [0xbcd6f0, 0xb0cceb], sky: 0xd8ecff, items: [() => F.snowball(), K('present-a-cube'), () => F.penguin(), K('present-b-round'), K('sled'), K('snowman'), K('reindeer'), K('tree-snow-c'), () => dino('raptor', 0x5ab0e0), K('train-wagon'), K('tree-snow-b'), () => dino('trice', 0x8a96c8), K('train-locomotive'), () => F.igloo(), () => F.iceberg(), () => F.mountain(), () => dino('trice', 0x6a9ad8)] },
+  desierto: { far: [0xc8703a, 0xe09a5a], farKind: 'mesa', pond: 0x3aa8e8, grass: 0xc8a050, grassN: .12, flowers: [0xff5d8f, 0xffd23a], out: 0xd08a4a, wave: 0, border: () => Math.random() < .6 ? K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a })() : K('rock_tallA', { stone: 0xc08860, dirt: 0xb07850, grass: 0xd8a060 })(), butterflies: true, ground: [0xf0b066, 0xe6a25a], sky: 0xffe0a8, items: [K('stone_largeB', { stone: 0xd8a878, _defaultMat: 0xd8a878 }), () => F.bone(), () => dino('compy', 0xc08850), K('cactus_short', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), () => F.egg(0xf4e8c8, 0xc0603a), () => F.wheel(), K('stone_tallA', { stone: 0xc89070, _defaultMat: 0xc89070 }), K('cactus_tall', { leafsGreen: 0x3f9a4a, grass: 0x3f9a4a }), K('tent_detailedClosed', { colorRed: 0xff8a2a, colorRedDark: 0xd06a1a }), () => F.camel(), () => F.jeep(), () => dino('stego', 0xd8a060), () => F.oasis(), () => F.hut(false), K('stone_largeA', { stone: 0xb07850, _defaultMat: 0xb07850 }), () => F.pyramid(), () => dino('stego', 0xd07a3a)] },
+  volcan: { far: [0x4a3a3a, 0xff6a1a], farKind: 'volcano', pond: 0xff5a1a, grass: 0x6a5a5a, grassN: .1, flowers: [0xff6a1a, 0xffd23a], out: 0xff5a1a, wave: 1, border: () => Math.random() < .5 ? F.deadTree() : F.lavaRock(true), butterflies: false, ground: [0x5a4a4a, 0x4c3e3e], sky: 0xf3a582, items: [() => F.lavaRock(false), () => F.egg(0xe8423a, 0xffd23a), K('mushroom_tanGroup', { colorTan: 0xff8a2a }), () => F.crystal(), K('stone_largeA', { stone: 0x5a5058, _defaultMat: 0x5a5058 }), () => F.deadTree(), () => dino('compy', 0xe8423a), () => F.lavaPool(), K('chest'), () => dino('stego', 0x8a5a3a), () => dino('raptor', 0xd04a2a), () => dino('ptero', 0xff8a2a), () => F.lavaRock(true), () => dino('trice', 0xc0603a), () => dino('trex', 0xd04a2a), () => F.volcano(), () => dino('ptero', 0xd8421a)] },
   ciudad: { roads: 1, far: [0x9aa8c0, 0xc8d4e8], farKind: 'peak', pond: 0x3aa8e8, grass: 0x5cae40, grassN: .03, flowers: [0xff5d8f, 0xffd23a], out: 0x7e8798, wave: 0,
     border: () => K(['low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a'][Math.random() * 4 | 0])(), butterflies: false,
     ground: [0x9aa4b4, 0x8e98a8], sky: 0xbfe4ff,
@@ -286,9 +286,9 @@ const THEME_KEYS = Object.keys(THEMES);
 // Modelos de cada mundo: se descargan solo cuando León entra a un nivel de ese mundo (y luego quedan guardados sin internet)
 const THEME_MODELS = {
   selva: ['raptor', 'stego', 'trice', 'apato', 'trex', 'para', ...['flower_redA', 'grass_leafsLarge', 'log_large', 'mushroom_red', 'plant_bushLarge', 'stone_largeA', 'tree_default', 'tree_fat', 'tree_oak', 'tree_palmShort', 'tree_palmTall'].map(n => 'k/' + n)],
-  playa: ['trex', 'para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
-  nieve: ['trex', 'raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
-  desierto: ['trex', 'para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
+  playa: ['para', 'shark', ...['barrel', 'boat-row-small', 'bottle-large', 'cannon', 'chest', 'palm-bend', 'rocks-sand-a', 'ship-pirate-large', 'ship-small', 'tower-complete-small'].map(n => 'k/' + n)],
+  nieve: ['raptor', 'trice', ...['present-a-cube', 'present-b-round', 'reindeer', 'sled', 'snowman', 'train-locomotive', 'train-wagon', 'tree-snow-b', 'tree-snow-c'].map(n => 'k/' + n)],
+  desierto: ['para', 'stego', ...['cactus_short', 'cactus_tall', 'rock_tallA', 'stone_largeA', 'stone_largeB', 'stone_tallA', 'tent_detailedClosed'].map(n => 'k/' + n)],
   volcan: ['para', 'dragon', 'raptor', 'stego', 'trex', 'trice', ...['chest', 'mushroom_tanGroup', 'stone_largeA'].map(n => 'k/' + n)],
   ciudad: ['trex', ...['ambulance', 'building-skyscraper-a', 'building-type-a', 'building-type-c', 'cone', 'construction-barrier', 'dumpster', 'firetruck', 'garbage-truck', 'hatchback-sports', 'kart-oobi',
     'low-detail-building-a', 'low-detail-building-c', 'low-detail-building-e', 'low-detail-building-wide-a', 'police', 'road-sign-stop', 'sedan', 'taxi', 'tree-small'].map(n => 'k/' + n)],
@@ -317,7 +317,8 @@ const fits = (rad, r) => rad < r * .92;
 function makeItem(theme, i) {
   const g = THEMES[theme].items[i]();
   const s = modelBox(g).getSize(new THREE.Vector3());
-  g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7));
+  // Los jefes delgados (cuello largo) se agrandan para que se vean igual de inmensos que los demás
+  g.scale.multiplyScalar(SIZE(i) / Math.max(s.x, s.z, s.y * .7) * (i === 16 && s.x < s.z * .3 ? 1.6 : 1));
   const wrap = new THREE.Group(); wrap.add(g);
   wrap.rotation.y = rand(0, Math.PI * 2);
   return wrap;
@@ -495,63 +496,53 @@ ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground)
 // El hoyo: pared oscura, fondo negro, labio de rana y ojitos
 const hole = new THREE.Group(); scene.add(hole);
 const wallGeo = new THREE.CylinderGeometry(1, 1, 1, 48, 1, true);
-{ const cols = [], p = wallGeo.attributes.position; for (let i = 0; i < p.count; i++) { const k = p.getY(i) + .5; cols.push(.17 * k, .12 * k, .26 * k); } wallGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); }
+{ const cols = [], p = wallGeo.attributes.position; for (let i = 0; i < p.count; i++) { const k = p.getY(i) + .5; cols.push(.42 * k, .1 * k, .14 * k); } wallGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); }
 const wall = new THREE.Mesh(wallGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })); hole.add(wall);
 const floor = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: 0x000000 })); floor.rotation.x = -Math.PI / 2; hole.add(floor);
-const rim = new THREE.Group(); hole.add(rim);
-const ringMesh = (a, b, c, y) => { const m = new THREE.Mesh(new THREE.RingGeometry(a, b, 56), new THREE.MeshBasicMaterial({ color: c })); m.rotation.x = -Math.PI / 2; m.position.y = y; rim.add(m); return m; };
-ringMesh(1.16, 1.24, 0x2a1f3d, .02);
-// Labios gorditos en 3D (verde por fuera, rosa por dentro) y cachetes chapeados
-// Materiales propios de la rana: León puede elegir su color en el menú
-const frogMat = new THREE.MeshLambertMaterial({ color: 0x5fc83a }), frogMatD = new THREE.MeshLambertMaterial({ color: 0x48a82e });
-const lip = new THREE.Mesh(new THREE.TorusGeometry(1.06, .11, 10, 56), frogMat); lip.rotation.x = Math.PI / 2; lip.position.y = .05; rim.add(lip);
-const lip2 = new THREE.Mesh(new THREE.TorusGeometry(.96, .05, 8, 56), M(0xff6f91)); lip2.rotation.x = Math.PI / 2; lip2.position.y = .07; rim.add(lip2);
-addOutlines(lip);
-// Cachetes que se inflan al masticar
-const cheeks = [];
-for (const sx of [-1, 1]) { const ch = ell(.26, .12, .2, M(0xff8fb0)); ch.position.set(sx * .9, .14, .45); ch.rotation.y = sx * .5; rim.add(ch); cheeks.push(ch); }
-// Cabeza de rana: una loma verde detrás de la boca, con manchitas y dos ojos grandes encima
-const headRig = new THREE.Group(); rim.add(headRig);
-const dome = ell(1.18, .62, .78, frogMat); dome.position.set(0, -.08, -1.18); headRig.add(dome);
-[[-.55, .3, -1.05, .16], [.6, .25, -1.0, .13], [.1, .42, -1.45, .18], [-.25, .45, -1.6, .1]].forEach(([x, y, z, r]) => { const sp = ell(r, r * .4, r, frogMatD); sp.position.set(x, y, z); headRig.add(sp); });
-const eyeRig = new THREE.Group(); headRig.add(eyeRig);
-const pupils = [], balls = [];
-for (const s of [-1, 1]) {
-  const e = new THREE.Group(); e.position.set(s * .5, .38, -1.22); eyeRig.add(e);
-  const bump = ell(.4, .34, .4, frogMat); e.add(bump);
-  const ball = new THREE.Group(); ball.position.set(0, .3, .12); e.add(ball); balls.push(ball);
-  ball.add(ell(.32, .32, .3, M(0xffffff)));
-  const pu = ell(.15, .18, .08, M(0x1a1420)); pu.position.set(0, 0, .27); ball.add(pu); pupils.push(pu);
-  const sh = new THREE.Mesh(SPH, SHINE); sh.scale.setScalar(.06); sh.position.set(.06, .08, .34); ball.add(sh);
+// La cara de la rana: el hoyo es su boca abierta. Cabeza ancha y aplanada detrás, labio de arriba verde, mandíbula de abajo
+// clarita (como la panza de una rana de verdad) y ojos saltones con iris dorado y pupila horizontal.
+// León puede elegir su color en el menú (se pintan la piel y la mandíbula)
+const frogMat = new THREE.MeshLambertMaterial({ color: 0x4fae34 }), frogMatD = new THREE.MeshLambertMaterial({ color: 0xd8f0a0 }), frogMatS = new THREE.MeshLambertMaterial({ color: 0x3a8a26 });
+const face = new THREE.Group(); hole.add(face);
+const halfTorus = (r, t, mat, back) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r, t, 12, 40, Math.PI), mat); m.rotation.x = Math.PI / 2; if (!back) m.rotation.z = Math.PI; return m; };
+// Labio de arriba (atrás) grueso y mandíbula de abajo (adelante) más delgada: juntos dibujan una boca, no un aro
+const upperLip = halfTorus(1.04, .15, frogMat, false); upperLip.position.y = .06; face.add(upperLip);
+const jaw = new THREE.Group(); face.add(jaw);
+const lowerLip = halfTorus(1.04, .1, frogMatD, true); lowerLip.position.y = .02; jaw.add(lowerLip);
+for (const sx of [-1, 1]) { const c = ell(.17, .13, .17, frogMat); c.position.set(sx * 1.04, .05, 0); face.add(c); }   // comisuras
+// Cabeza: loma ancha y baja detrás de la boca, con manchas oscuras y dos fosas nasales
+const head = new THREE.Group(); face.add(head);
+const dome = ell(1.22, .5, .82, frogMat); dome.position.set(0, -.04, -.98); head.add(dome);
+[[-.62, .3, -1.2, .14], [.5, .32, -1.32, .11], [.05, .4, -1.5, .16], [.85, .2, -.9, .09], [-.3, .38, -1.65, .1]].forEach(([x, y, z, r]) => { const sp = ell(r, r * .35, r * .8, frogMatS); sp.position.set(x, y, z); head.add(sp); });
+for (const sx of [-1, 1]) { const n = ell(.05, .03, .035, M(0x1a2a14)); n.position.set(sx * .16, .17, -1.12); head.add(n); }
+// Ojos saltones: bulto de piel, ojo dorado, pupila negra horizontal, brillito y párpado que parpadea
+const pupils = [], lids = [];
+for (const sx of [-1, 1]) {
+  const e = new THREE.Group(); e.position.set(sx * .66, .3, -1.18); head.add(e);
+  const bump = ell(.36, .3, .36, frogMat); e.add(bump);
+  const ball = ell(.27, .27, .27, M(0xd9a52a)); ball.position.set(0, .18, .06); e.add(ball);
+  const ring = ell(.275, .275, .2, M(0x8a5a10)); ring.position.set(0, .18, .02); e.add(ring);
+  const pu = ell(.16, .065, .05, M(0x0c0c0c)); pu.position.set(0, .2, .31); e.add(pu); pupils.push(pu);
+  const sh = new THREE.Mesh(SPH, SHINE); sh.scale.setScalar(.045); sh.position.set(sx * -.07, .3, .3); e.add(sh);
+  const lid = new THREE.Mesh(new THREE.SphereGeometry(.29, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), frogMat); lid.position.set(0, .18, .06); lid.rotation.x = -1.7; e.add(lid); lids.push(lid);
 }
+// Lengüita rosa al fondo de la boca
+const mouthTongue = ell(.34, .08, .4, M(0xc8456a)); mouthTongue.position.set(0, -.6, .35); face.add(mouthTongue);
 // Corona dorada: aparece cuando la rana ya puede comerse al jefe
-const crown = new THREE.Group(); crown.position.set(0, .95, -1.35); headRig.add(crown); crown.visible = false;
+const crown = new THREE.Group(); crown.position.set(0, .72, -1.3); head.add(crown); crown.visible = false;
 { const gold = M(0xffd23a, { emissive: 0xffb000, emissiveIntensity: .25 });
   const band = new THREE.Mesh(new THREE.CylinderGeometry(.42, .46, .22, 14, 1, true), gold); band.material.side = THREE.DoubleSide; crown.add(band);
   for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2, sp = new THREE.Mesh(new THREE.ConeGeometry(.1, .3, 6), gold); sp.position.set(Math.cos(a) * .42, .24, Math.sin(a) * .42); crown.add(sp);
     const gem = ell(.06, .06, .06, M([0xff5d8f, 0x5ac8ff, 0x8fe04a][k % 3])); gem.position.set(Math.cos(a) * .44, .02, Math.sin(a) * .44); crown.add(gem); } }
-// Lengua: sale de la boca hacia lo que quiere atrapar (vive en el grupo del hoyo, sin la escala de la boca)
-const tongueRig = new THREE.Group(); hole.add(tongueRig);
+// Lengua: sale de la boca de la rana hacia lo que quiere atrapar (vive en el grupo del hoyo, sin la escala de la rana)
+const tongueRig = new THREE.Group(); tongueRig.rotation.order = 'YXZ'; hole.add(tongueRig);
 const tongueGeo = new THREE.CylinderGeometry(1, 1, 1, 10); tongueGeo.rotateX(Math.PI / 2); tongueGeo.translate(0, 0, .5);
-const tongue = new THREE.Mesh(tongueGeo, M(0xff5d8f)); tongueRig.add(tongue);
-const tongueTip = ell(1, .7, 1, M(0xff7aa3)); tongueRig.add(tongueTip);
+const tongue = new THREE.Mesh(tongueGeo, M(0xe8577a)); tongueRig.add(tongue);
+const tongueTip = ell(1, .7, 1, M(0xf06a8c)); tongueRig.add(tongueTip);
 tongueRig.visible = false;
 
-const FROG_COLORS = [[0x5fc83a, 0x48a82e], [0xff7eb3, 0xe85a95], [0x5ab0ff, 0x3a8ee0], [0xffc83a, 0xe0a020]];
-function setFrogColor(k) { const [a, b] = FROG_COLORS[k] || FROG_COLORS[0]; frogMat.color.setHex(a); frogMatD.color.setHex(b); }
-// Ondas en la boca cada vez que traga algo
-const RIPPLE_GEO = new THREE.RingGeometry(.9, 1, 40).rotateX(-Math.PI / 2), ripples = [];
-for (let k = 0; k < 5; k++) { const m = new THREE.Mesh(RIPPLE_GEO, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false })); m.visible = false; scene.add(m); ripples.push({ m, t: 1 }); }
-let rippleI = 0;
-function ripple() { const r = ripples[rippleI++ % ripples.length]; r.t = 0; r.m.visible = true; }
-function updateRipples(dt) {
-  const g = game;
-  for (const r of ripples) {
-    if (r.t >= 1) { r.m.visible = false; continue; }
-    r.t += dt * 1.6; const k = Math.min(1, r.t);
-    r.m.position.set(g.hx, .06, g.hz); r.m.scale.setScalar(g.show * (1.1 + k * 1.2)); r.m.material.opacity = (1 - k) * .7;
-  }
-}
+const FROG_COLORS = [[0x4fae34, 0xd8f0a0], [0xff7eb3, 0xffd6e6], [0x3a8ee0, 0xc8e4ff], [0xf0b020, 0xfff0b0]];
+function setFrogColor(k) { const [a, b] = FROG_COLORS[k] || FROG_COLORS[0]; frogMat.color.setHex(a); frogMatD.color.setHex(b); frogMatS.color.setHex(a).multiplyScalar(.72); }
 
 /* ---------- Escenario vivo: pasto que se mece, florecitas, mariposas y árboles en la orilla ---------- */
 // Las matas y flores desaparecen dentro del hoyo, igual que el piso
@@ -852,7 +843,7 @@ function startNow(n) {
   layout.forEach(p => (counts[p.i] = (counts[p.i] || 0) + 1));
   makePools(L, counts);
   game.items = placeItems(L, layout);
-  game.growK = L.long ? 2.1 : 2.5;   // calibrado con un bot: ~400 cosas (nivel corto) y ~600 (largo) antes de poder con el titán
+  game.growK = L.long ? 5 : 6;   // calibrado con un bot: un mundo se pasa rápido (~30-45 s jugando perfecto)
   game.boss = game.items.find(it => it.i === L.boss);
   $('#bossIcon').src = thumb(L.theme, L.boss);
   $('#lvl').textContent = 'NIVEL ' + (n + 1); $('#score').textContent = '0';
@@ -881,18 +872,17 @@ addEventListener('keydown', e => (keys[e.key] = true));
 addEventListener('keyup', e => (keys[e.key] = false));
 
 // Puntos: más grande = más puntos; si come varias cosas seguidas hace combo
-const PTS = i => Math.round(5 * Math.pow(1.5, i));
 const PCOL = ['#ffd23a', '#ff5d8f', '#5ac8ff', '#8fe04a', '#ffffff', '#ff9a2e'];
 function addPoints(it) {
   const g = game;
-  g.combo = g.t - (g.lastEatT || -9) < .7 ? (g.combo || 1) + 1 : 1; g.lastEatT = g.t;
-  const pts = PTS(it.i) * Math.min(g.combo, 5);
+  // Puntos simples: entre más grande lo que te comes, más puntos (1 por lo más chiquito, 100 por el jefe)
+  const pts = it.i === g.L.boss ? 100 : it.i + 1;
   g.score = (g.score || 0) + pts;
   const sc = $('#score'); sc.textContent = g.score; sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
   if (document.querySelectorAll('.pts').length > 10) return;
   proj.set(g.hx + rand(-g.r * .5, g.r * .5), g.r * .6, g.hz - g.r * .3).project(camera);
-  const el = document.createElement('div'); el.className = 'pts' + (g.combo > 2 ? ' combo' : '');
-  el.textContent = '+' + pts + (g.combo > 1 ? ' x' + Math.min(g.combo, 5) : '');
+  const el = document.createElement('div'); el.className = 'pts' + (pts >= 10 ? ' combo' : '');
+  el.textContent = '+' + pts;
   el.style.color = PCOL[(g.eaten + it.i) % PCOL.length];
   el.style.transform = `translate(${(proj.x + 1) / 2 * innerWidth}px,${(1 - proj.y) / 2 * innerHeight}px) translate(-50%,-50%)`;
   document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
@@ -989,7 +979,7 @@ function step(dt) {
     it.obj.rotation.x += it.tilt.y * dt * 2.2; it.obj.rotation.z -= it.tilt.x * dt * 2.2;
     if (!it.solo) poolSync(it);
     if (y < -(SIZE(it.i) * 1.2 + 2) && !it.gone) {
-      it.gone = true; ripple(); if (it.solo) scene.remove(it.obj); else poolSync(it); g.eaten++; grow(it); addPoints(it); burst(Math.min(10, 3 + (it.i >> 1)), it.i); updateMeter();
+      it.gone = true; if (it.solo) scene.remove(it.obj); else poolSync(it); g.eaten++; grow(it); addPoints(it); burst(Math.min(10, 3 + (it.i >> 1)), it.i); updateMeter();
       if (it === g.boss) winLevel();
     }
   }
@@ -1002,26 +992,26 @@ function step(dt) {
   hole.position.set(g.hx, 0, g.hz);
   const R = g.show, depth = 3 + R * 3;
   wall.scale.set(R, depth, R); wall.position.y = -depth / 2; floor.scale.setScalar(R); floor.position.y = -depth + .01;
-  rim.scale.set(R, Math.max(1, R * .9), R);
   holeU.value.set(g.hx, g.hz, R);
-  pupils.forEach(p => { p.position.x = g.look.x * .09; p.position.y = -g.look.y * .06; });
-  g.blink -= dt; if (g.blink < 0) g.blink = rand(2, 5);
+  // La cara crece con el hoyo; la boca se abre más y los cachetes se inflan al tragar; parpadea y mira hacia donde va
   g.chomp = Math.max(0, (g.chomp || 0) - dt * 2.5);
-  const bl = g.blink < .12 ? .12 : g.chomp > .3 ? .35 : 1;   // parpadea, y entrecierra los ojos de gusto al comer
-  balls.forEach(b => (b.scale.y = bl));
   const ch = Math.sin(Math.min(1, g.chomp) * Math.PI);
-  rim.scale.x = rim.scale.z = R * (1 + ch * .1);
-  cheeks.forEach(c => c.scale.set(.26 * (1 + ch * .9), .12 * (1 + ch * 1.4), .2 * (1 + ch * .9)));   // cachetes inflados al masticar
-  headRig.position.y = Math.abs(Math.sin(g.t * 8)) * .06 * (g.look.length() > .3 ? 1 : 0) + ch * .08;
-  // Al empezar sale brincando del piso; al ganar baila
-  if (g.pop < 1) { g.pop = Math.min(1, g.pop + dt * 1.6); const p = g.pop, back = 1 + 2.7 * Math.pow(p - 1, 3) + 1.7 * Math.pow(p - 1, 2); headRig.scale.setScalar(Math.max(.01, back)); headRig.position.y += (1 - p) * -1.2; }
-  else headRig.scale.setScalar(1);
-  if (g.over) { headRig.position.y += Math.abs(Math.sin(g.t * 9)) * .5; headRig.rotation.z = Math.sin(g.t * 9) * .25; } else headRig.rotation.z = 0;
-  updateRipples(dt);
+  face.scale.set(R * (1 + ch * .08), Math.max(1, R * .9), R * (1 + ch * .08));
+  jaw.position.z = ch * .08; jaw.scale.set(1 + ch * .06, 1 + ch * .8, 1);
+  head.position.y = Math.abs(Math.sin(g.t * 8)) * .05 * (g.look.length() > .3 ? 1 : 0) + ch * .1;
+  head.rotation.x = -ch * .08;
+  pupils.forEach(p => { p.position.x = g.look.x * .06; p.position.y = .2 - g.look.y * .04; });
+  g.blink = (g.blink == null ? 3 : g.blink) - dt; if (g.blink < 0) g.blink = rand(2, 5);
+  const shut = g.blink < .12 || (g.chomp > .4);
+  lids.forEach(l => (l.rotation.x += ((shut ? .95 : -1.7) - l.rotation.x) * Math.min(1, dt * 25)));
+  // Al empezar sale del piso de un brinco; al ganar baila
+  if (g.pop < 1) { g.pop = Math.min(1, g.pop + dt * 1.6); const p = g.pop, back = 1 + 2.7 * Math.pow(p - 1, 3) + 1.7 * Math.pow(p - 1, 2); head.scale.setScalar(Math.max(.01, back)); head.position.y += (1 - p) * -1.2; }
+  else head.scale.setScalar(1);
+  if (g.over) { head.position.y += Math.abs(Math.sin(g.t * 9)) * .5; head.rotation.z = Math.sin(g.t * 9) * .2; } else head.rotation.z = 0;
   crown.visible = fits(g.boss.r, g.r) && !g.over; crown.rotation.y += dt * 1.5;
   updateTongue(dt);
   // El titán ruge de vez en cuando y tiembla el piso
-  if (!g.over && g.boss && !g.boss.fall) { g.roarT = (g.roarT == null ? 4 : g.roarT) - dt; if (g.roarT < 0) { g.roarT = rand(9, 13); sfx.roar(); g.shake = Math.max(g.shake || 0, .25); g.boss.shake = .6; if (!fits(g.boss.r, g.r)) g.intro = 2.4; } }  updateCamera(dt);
+  if (!g.over && g.boss && !g.boss.fall) { g.roarT = (g.roarT == null ? 4 : g.roarT) - dt; if (g.roarT < 0) { g.roarT = rand(9, 13); sfx.roar(); g.shake = Math.max(g.shake || 0, .25); g.boss.shake = .6; } }  updateCamera(dt);
 }
 // La lengua atrapa cosas que caben y están cerca (ayuda a León y es divertida de ver)
 function updateTongue(dt) {
@@ -1053,9 +1043,12 @@ function updateTongue(dt) {
       T.st = 'idle'; T.cd = Math.max(.25, .9 - g.r * .05); T.it = null;
     }
   }
-  const w = .14 + g.r * .06;
-  tongueRig.visible = true; tongueRig.rotation.y = Math.atan2(dx, dz);
-  tongue.position.set(0, .25, 0); tongue.scale.set(w, w * .45, Math.max(.01, len)); tongueTip.position.set(0, .25, len); tongueTip.scale.setScalar(w * 1.7);
+  // La lengua sale de la boca de la rana (atrás del hoyo) y llega hasta la cosa atrapada
+  const w = .1 + g.r * .05, R = g.show, my = .2 * R, mz = 0;
+  const tx = g.hx + dx / d * len, tz = g.hz + dz / d * len, ty = it.obj.position.y + it.r * .3;
+  const hx = tx - g.hx, hz = tz - (g.hz + mz), hl = Math.hypot(hx, hz), tl = Math.hypot(hl, my - ty);
+  tongueRig.visible = true; tongueRig.position.set(0, my, mz); tongueRig.rotation.y = Math.atan2(hx, hz); tongueRig.rotation.x = Math.atan2(my - ty, hl);
+  tongue.position.set(0, 0, 0); tongue.scale.set(w, w * .45, Math.max(.01, tl)); tongueTip.position.set(0, 0, tl); tongueTip.scale.setScalar(w * 1.7);
 }
 function refill() {
   const g = game; let top = 0; while (top < g.L.boss && fits(SIZE(top + 1) * .5, g.r)) top++;
