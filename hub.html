@@ -55,6 +55,13 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .ok{align-self:center;font-family:var(--display);font-size:22px;letter-spacing:.06em;border:0;border-radius:99px;cursor:pointer;color:#fff;background:linear-gradient(#8fe04a,#5db82a);padding:12px 36px;box-shadow:0 5px 0 #3f8a1c}
 @media (orientation:landscape) and (max-height:520px){.icon{width:clamp(72px,19vh,130px)}.t2{font-size:44px}.page{gap:10px}.name{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.icon,.t2{animation:none}}
+.app{position:relative}
+.app .hold{position:absolute;left:50%;top:0;width:clamp(84px,min(17vw,21vh),190px);aspect-ratio:1;transform:translateX(-50%);border-radius:24%;pointer-events:none;background:conic-gradient(rgba(255,77,109,.55) calc(var(--p,0)*1turn),transparent 0);opacity:0;transition:opacity .2s}
+.app.holding .hold{opacity:1}
+.reset .card{text-align:center}
+.reset .row{display:flex;gap:12px;justify-content:center}
+.reset .no{background:linear-gradient(#fff,#eee);color:var(--ink);box-shadow:0 5px 0 #bbb}
+.reset .yes{background:linear-gradient(#ff7a96,#ff4d6d);box-shadow:0 5px 0 #c0304a}
 </style>
 
 <div class="world" aria-hidden="true"></div>
@@ -62,16 +69,23 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 <main class="page">
   <h1 aria-label="Juegos de León"><span class="t1">JUEGOS DE</span><span class="t2">LEÓN</span></h1>
   <nav class="apps">
-    <a class="app" href="dino-race/" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.webp" alt=""></span><span class="name">Carrera</span></a>
-    <a class="app" href="dino-puzzle/" aria-label="Rompecabezas"><span class="icon"><img src="icons/dino-puzzle.webp" alt=""></span><span class="name">Puzzle</span></a>
-    <a class="app" href="dino-hole/" aria-label="Rana Glotona"><span class="icon"><img src="icons/dino-hole.webp" alt=""></span><span class="name">Rana</span></a>
-    <a class="app" href="dino-hide/" aria-label="Escondidas"><span class="icon"><img src="icons/dino-hide.webp" alt=""></span><span class="name">Escondidas</span></a>
-    <a class="app" href="zombito/" aria-label="Zombito"><span class="icon"><img src="icons/zombito.webp" alt=""></span><span class="name">Zombito</span></a>
+    <a class="app" href="dino-race/" data-keys="dinoRace3d" aria-label="Dino Race"><span class="icon"><img src="icons/dino-race.webp" alt=""></span><span class="name">Carrera</span></a>
+    <a class="app" href="dino-puzzle/" data-keys="dinoPuzzle" aria-label="Rompecabezas"><span class="icon"><img src="icons/dino-puzzle.webp" alt=""></span><span class="name">Puzzle</span></a>
+    <a class="app" href="dino-hole/" data-keys="dinoHole3d,dinoHole" aria-label="Rana Glotona"><span class="icon"><img src="icons/dino-hole.webp" alt=""></span><span class="name">Rana</span></a>
+    <a class="app" href="dino-hide/" data-keys="dinoHide" aria-label="Escondidas"><span class="icon"><img src="icons/dino-hide.webp" alt=""></span><span class="name">Escondidas</span></a>
+    <a class="app" href="zombito/" data-keys="zombito" aria-label="Zombito"><span class="icon"><img src="icons/zombito.webp" alt=""></span><span class="name">Zombito</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
   <button class="parent upd" id="updBtn">Actualizar</button>
 </main>
 
+<div class="sheet reset" id="reset" hidden>
+  <div class="card">
+    <h2 id="resetTitle">¿Empezar de nuevo?</h2>
+    <p>Se borrará todo lo que llevas en este juego, como si fuera nuevo.</p>
+    <div class="row"><button class="ok no" id="resetNo">NO</button><button class="ok yes" id="resetYes">SÍ, BORRAR</button></div>
+  </div>
+</div>
 <div class="sheet" id="help" hidden>
   <div class="card">
     <h2>Instalar como app</h2>
@@ -107,6 +121,18 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     } catch (e) {}
     location.replace(location.pathname + '?v=' + Date.now());
   });
+  // Mantener presionado un juego 3 segundos: opción para borrar su progreso y empezar de cero
+  const reset = document.getElementById('reset'); let holdT = null, held = null, pending = null;
+  document.querySelectorAll('.app[data-keys]').forEach(a => {
+    a.insertAdjacentHTML('beforeend', '<span class="hold"></span>');
+    const stop = () => { clearInterval(holdT); holdT = null; a.classList.remove('holding'); a.style.setProperty('--p', 0); };
+    a.addEventListener('pointerdown', () => { const t0 = Date.now(); held = null; a.classList.add('holding'); holdT = setInterval(() => { const p = (Date.now() - t0) / 3000; a.style.setProperty('--p', Math.min(1, p)); if (p >= 1) { stop(); held = a; pending = a; document.getElementById('resetTitle').textContent = '¿Empezar ' + (a.getAttribute('aria-label') || 'el juego') + ' de nuevo?'; reset.hidden = false; } }, 50); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => a.addEventListener(ev, stop));
+    a.addEventListener('click', e => { if (held === a) { e.preventDefault(); held = null; } });
+    a.addEventListener('contextmenu', e => e.preventDefault());
+  });
+  document.getElementById('resetNo').addEventListener('click', () => { reset.hidden = true; pending = null; });
+  document.getElementById('resetYes').addEventListener('click', () => { if (pending) pending.dataset.keys.split(',').forEach(k => { try { localStorage.removeItem(k); } catch (e) {} }); reset.hidden = true; pending = null; });
   ['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
   document.addEventListener('contextmenu', e => e.preventDefault());
 })();
