@@ -125,9 +125,13 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
   const reset = document.getElementById('reset'); let holdT = null, held = null, pending = null;
   document.querySelectorAll('.app[data-keys]').forEach(a => {
     a.insertAdjacentHTML('beforeend', '<span class="hold"></span>');
-    const stop = () => { clearInterval(holdT); holdT = null; a.classList.remove('holding'); a.style.setProperty('--p', 0); };
-    a.addEventListener('pointerdown', () => { const t0 = Date.now(); held = null; a.classList.add('holding'); holdT = setInterval(() => { const p = (Date.now() - t0) / 3000; a.style.setProperty('--p', Math.min(1, p)); if (p >= 1) { stop(); held = a; pending = a; document.getElementById('resetTitle').textContent = '¿Empezar ' + (a.getAttribute('aria-label') || 'el juego') + ' de nuevo?'; reset.hidden = false; } }, 50); });
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => a.addEventListener(ev, stop));
+    let t0 = 0;
+    const stop = () => { clearInterval(holdT); holdT = null; t0 = 0; a.classList.remove('holding'); a.style.setProperty('--p', 0); };
+    const fire = () => { stop(); held = a; pending = a; document.getElementById('resetTitle').textContent = '¿Empezar ' + (a.getAttribute('aria-label') || 'el juego') + ' de nuevo?'; reset.hidden = false; };
+    a.addEventListener('pointerdown', () => { t0 = Date.now(); held = null; a.classList.add('holding'); holdT = setInterval(() => { const p = (Date.now() - t0) / 3000; a.style.setProperty('--p', Math.min(1, p)); if (p >= 1) fire(); }, 50); });
+    // Al soltar: si ya pasaron 3 segundos se abre aunque el reloj se haya frenado
+    a.addEventListener('pointerup', () => { if (t0 && Date.now() - t0 >= 3000) fire(); else stop(); });
+    ['pointerleave', 'pointercancel'].forEach(ev => a.addEventListener(ev, stop));
     a.addEventListener('click', e => { if (held === a) { e.preventDefault(); held = null; } });
     a.addEventListener('contextmenu', e => e.preventDefault());
   });
