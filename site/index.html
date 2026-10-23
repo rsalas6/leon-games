@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261023120404';</script>
+<script>window.LEON_VERSION='20261023132732';</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -29,6 +29,8 @@
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden;color:var(--ink);font-family:var(--display);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none;background:var(--sky)}
 a,button{touch-action:manipulation;-webkit-touch-callout:none}
+.app,.app *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.app img{-webkit-user-drag:none;pointer-events:none}
 img{-webkit-user-drag:none}
 .world{position:fixed;inset:0;background:url(img/hub3d-wide.webp) 50% 60%/cover no-repeat var(--sky)}
 @media (orientation:portrait){.world{background-image:url(img/hub3d-tall.webp)}}
@@ -199,7 +201,9 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     const fire = () => { stop(); held = a; pending = a; document.getElementById('resetTitle').textContent = '¿Empezar ' + (a.getAttribute('aria-label') || 'el juego') + ' de nuevo?'; reset.hidden = false; };
     a.addEventListener('pointerdown', () => { t0 = Date.now(); held = null; a.classList.add('holding'); holdT = setInterval(() => { const p = (Date.now() - t0) / 3000; a.style.setProperty('--p', Math.min(1, p)); if (p >= 1) fire(); }, 50); });
     // Al soltar: si ya pasaron 3 segundos se abre aunque el reloj se haya frenado
-    a.addEventListener('pointerup', () => { if (t0 && Date.now() - t0 >= 3000) fire(); else stop(); });
+    a.addEventListener('pointerup', e => { if (t0 && Date.now() - t0 >= 3000) fire(); else { const tap = t0 && e.pointerType === 'touch'; stop(); if (tap) location.href = a.href; } });
+    // En el celular el dedo sostenido no debe seleccionar texto, arrastrar la imagen ni abrir la vista previa del enlace
+    a.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
     ['pointerleave', 'pointercancel'].forEach(ev => a.addEventListener(ev, stop));
     a.addEventListener('click', e => { if (held === a) { e.preventDefault(); held = null; } });
     a.addEventListener('contextmenu', e => e.preventDefault());
