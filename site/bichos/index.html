@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Juegos de León">
+<meta name="theme-color" content="#5ac8ff">
+<script>window.LEON_VERSION='20261031135312';</script>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<title>Aplasta Bichos</title>
+<style>
+/* Layout: mantel de picnic a pantalla completa; los bichos cruzan y se aplastan con un toque. Arriba: casita, puntos y corazones, sonido. Sin niveles: cada vez salen más y más rápido. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{--ink:#2a1f3d;--sun:#ffd23a;--grass:#6cc63a;--red:#ff4d6d;--pix:'Lilita One','Arial Rounded MT Bold',sans-serif;color-scheme:light}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#6cc63a;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+.bg{position:fixed;inset:0;background:url(../img/bugs/bugbg-wide.webp) 50% 50%/cover no-repeat #6cc63a}
+@media (orientation:portrait){.bg{background-image:url(../img/bugs/bugbg-tall.webp)}}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:14px;align-items:center}
+.side.end{justify-content:flex-end}
+#hud{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#score{display:flex;align-items:center;gap:6px;font-size:clamp(24px,4.4vw,38px);color:#fff;background:var(--ink);padding:2px 18px 4px 8px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#score img{width:38px;height:38px;object-fit:contain}
+#score.bump{animation:bump .2s ease-out}
+@keyframes bump{50%{transform:scale(1.2)}}
+#hearts{display:flex;gap:4px}
+#hearts img{width:clamp(30px,5vw,44px);height:clamp(30px,5vw,44px);object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink));transition:transform .2s,opacity .2s}
+#hearts img.off{opacity:.25;transform:scale(.7);filter:grayscale(1)}
+.over{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;background:rgba(42,31,61,.35)}
+.over h2{margin:0;font-weight:400;font-size:clamp(40px,9vw,92px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.over .pic{max-width:clamp(150px,30vmin,260px);max-height:30vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 8px 0 rgba(42,31,61,.3));animation:bob 1.6s ease-in-out infinite}
+.over .final{display:flex;align-items:center;gap:10px;font-size:clamp(28px,5.6vw,52px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.over .final img{width:58px;height:58px}
+.over .best{font-size:clamp(18px,3vw,26px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.go{min-width:clamp(150px,30vw,230px);height:clamp(76px,12vw,100px);background:var(--grass);display:flex;align-items:center;justify-content:center}
+.go svg{width:44px;height:44px}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-4deg)}}
+@media (max-width:620px){.bar{gap:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}.ibtn{width:44px;height:44px}.side{gap:8px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+<style>@media (display-mode: standalone), (display-mode: fullscreen){html,body{height:var(--fullh,100%)!important}#app,.bg,.world,#menu,#play,#win,#confetti,#leonIntro{bottom:auto!important;height:var(--fullh,100%)!important}}</style>
+<script>(()=>{const fit=()=>{if(!(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))return;const land=innerWidth>innerHeight,h=land?Math.min(screen.width,screen.height):Math.max(screen.width,screen.height),gap=h-innerHeight;document.documentElement.style.setProperty('--fullh',(gap>0&&gap<=90?h:innerHeight)+'px')};fit();addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,300))})()</script>
+</head>
+<body>
+<div id="leonIntro" aria-hidden="true">
+  <div class="li-scene"></div>
+  <div class="li-top">
+    <div class="li-title"><span>L</span><span>E</span><span>Ó</span><span>N</span></div>
+    <div class="li-sub">GAMES</div>
+  </div>
+  <div class="li-load">
+    <div class="li-bar"><i></i></div>
+  </div>
+</div>
+<style>
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(../vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+#leonIntro{--li-ink:#2a1f3d;--li-sun:#ffd23a;position:fixed;inset:0;z-index:9999;overflow:hidden;background:#bfe8ff;font-family:'Lilita One','Arial Rounded MT Bold',sans-serif;color:#fff;transition:opacity .5s;-webkit-user-select:none;user-select:none;touch-action:none}
+#leonIntro.out{opacity:0}
+.li-scene{position:absolute;inset:-2%;background:url(../img/splash-wide.webp) 50% 70%/cover no-repeat;animation:li-zoom 4s ease-out both}
+@media (orientation:portrait){.li-scene{background-image:url(../img/splash-tall.webp)}}
+.li-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(42,31,61,.35),rgba(42,31,61,0) 40%,rgba(42,31,61,0) 75%,rgba(42,31,61,.35))}
+.li-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + max(4vh,16px));display:flex;flex-direction:column;align-items:center}
+.li-title{display:flex;gap:.02em;font-size:min(22vw,17vh,150px);line-height:.95;color:var(--li-sun);-webkit-text-stroke:.05em var(--li-ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--li-ink),0 .16em .1em rgba(0,0,0,.25)}
+.li-title span{display:inline-block;opacity:0;transform:translateY(-120%) scale(.6);animation:li-drop .6s cubic-bezier(.3,1.6,.5,1) forwards}
+.li-title span:nth-child(1){animation-delay:.2s}
+.li-title span:nth-child(2){animation-delay:.33s}
+.li-title span:nth-child(3){animation-delay:.46s}
+.li-title span:nth-child(4){animation-delay:.59s}
+.li-sub{margin-top:-.1em;font-size:min(9vw,7vh,62px);letter-spacing:.3em;padding-left:.3em;-webkit-text-stroke:.07em var(--li-ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--li-ink);opacity:0;transform:scale(.4);animation:li-pop .5s cubic-bezier(.3,1.8,.5,1) .9s forwards}
+.li-load{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + max(4vh,16px));transform:translateX(-50%);width:min(62vw,420px)}
+.li-bar{height:min(5vw,26px);box-sizing:border-box;padding:4px;border-radius:99px;background:rgba(42,31,61,.75);box-shadow:0 0 0 4px #fff,0 6px 0 4px rgba(42,31,61,.3)}
+.li-bar i{display:block;height:100%;width:6%;border-radius:99px;background:linear-gradient(#ffe680,#ffc21a);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);transition:width .25s}
+@keyframes li-zoom{from{transform:scale(1.08)}to{transform:none}}
+@keyframes li-drop{to{opacity:1;transform:none}}
+@keyframes li-pop{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#leonIntro *{animation-duration:.01s!important;animation-delay:0s!important}}
+</style>
+<script>
+// Pantalla de carga de LEÓN GAMES: dura al menos ~2.6 s; en los juegos 3D espera a que terminen de cargar los modelos
+// (la barra muestra el avance real). Tocar la pantalla la salta solo cuando ya no hay nada cargando.
+(() => {
+  const el = document.getElementById('leonIntro'), bar = el.querySelector('.li-bar i'), t0 = performance.now();
+  const MIN = matchMedia('(prefers-reduced-motion: reduce)').matches ? 800 : 2600;
+  let gone = false;
+  const ready = () => !window.LEON_WAIT || window.LEON_READY;
+  const done = () => { if (gone) return; gone = true; bar.style.width = '100%'; setTimeout(() => el.classList.add('out'), 150); setTimeout(() => el.remove(), 700); };
+  (function tick() {
+    if (gone) return;
+    const t = performance.now() - t0, timeP = Math.min(1, t / MIN);
+    const p = window.LEON_WAIT ? Math.min(timeP, .1 + .9 * (window.LEON_READY ? 1 : (window.LEON_PROGRESS || 0) * .95)) : timeP;
+    bar.style.width = Math.max(6, p * 100) + '%';
+    if ((t >= MIN && ready()) || t > 25000) done(); else setTimeout(tick, 100);
+  })();
+  // El toque que salta la intro no debe llegar a los botones de atrás
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (ready()) done(); });
+  ['click', 'pointerup', 'touchend'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+})();
+</script>
+<script>window.LEON_HUB='../';</script>
+
+<div class="bg" aria-hidden="true"></div>
+<canvas id="game"></canvas>
+
+<div class="bar">
+  <div class="side"><button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button></div>
+  <div id="hud" hidden><div id="score"><img alt="" src="../img/bugs/splat.webp"><span id="scoreN">0</span></div><div id="hearts"></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<div class="over" id="startScr">
+  <img class="pic" alt="" src="../img/bugs/swatter.webp">
+  <h2>¡APLASTA BICHOS!</h2>
+  <button class="px go" id="playBtn" aria-label="Jugar"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M4 2l10 6-10 6z"/></svg></button>
+</div>
+<div class="over" id="endScr" hidden>
+  <h2>¡MUY BIEN!</h2>
+  <div class="final"><img alt="" src="../img/bugs/splat.webp"><span id="finalN">0</span></div>
+  <div class="best" id="bestTxt"></div>
+  <button class="px go" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+let save = { best: 0, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('bichos')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('bichos', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0); }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+function noise(dur, freq, vol, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const n = actx.createBufferSource(), b = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime + delay; f.type = 'lowpass'; f.frequency.value = freq; g.gain.value = vol;
+    n.buffer = b; n.connect(f).connect(g).connect(actx.destination); n.start(t);
+  } catch (e) {}
+}
+let combo = 0, comboT = 0;
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  swish: () => noise(.08, 2400, .05),
+  splat: () => { noise(.12, 700, .12); const k = Math.min(combo, 8); beep(440 * Math.pow(2, k / 12), .08, 'square', .045, 300, .02); },
+  big: () => { noise(.2, 500, .16); [0, 4, 7, 12].forEach((s, i) => beep(523 * Math.pow(2, s / 12), .1, 'square', .05, 0, i * .07)); },
+  hit: () => { noise(.06, 900, .08); beep(200, .08, 'triangle', .06, 80); },
+  miss: () => beep(330, .25, 'triangle', .06, -180),
+  heart: () => [784, 1047, 1319].forEach((f, i) => beep(f, .1, 'square', .045, 0, i * .07)),
+  over: () => [523, 440, 392, 330, 392, 523].forEach((f, i) => beep(f, .16, 'square', .05, 0, i * .14)),
+  start: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, .1, 'square', .05, 0, i * .08)),
+};
+// Musiquita de picnic, alegre y saltarina; se acelera cuando el juego se pone difícil
+const SONG = [0, 4, 7, 4, 9, 7, 4, 2, 0, 4, 7, 12, 9, 7, 5, 4], BASS = [0, 0, 5, 5, 7, 7, 0, 0];
+let songStep = 0, songNext = 0;
+function musicTick(now, speed) {
+  if (save.muted || !actx || document.hidden || now < songNext) return;
+  songNext = now + 200 / speed;
+  beep(523 * Math.pow(2, SONG[songStep % SONG.length] / 12), .14, 'square', .018);
+  if (songStep % 2 === 0) beep(131 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .22, 'triangle', .045);
+  songStep++;
+}
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', e => { e.stopPropagation(); save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Dibujos ---------- */
+const UP = '../img/bugs/';
+const NAMES = ['spider-0', 'spider-1', 'fly-0', 'fly-1', 'roach-0', 'roach-1', 'lady-0', 'lady-1', 'giant-0', 'giant-1', 'mosq-0', 'mosq-1', 'swatter', 'splat', 'star', 'heart'];
+const IMG = {};
+const ready = Promise.all(NAMES.map(n => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => { IMG[n] = im; res(); }; im.src = UP + n + '.webp'; })));
+
+// Cada bicho: tamaño (veces la unidad), velocidad, cuántos golpes necesita, puntos y cómo camina
+const KINDS = {
+  spider: { size: 1, speed: 70, hp: 1, pts: 1, wiggle: .5, from: 0 },
+  lady: { size: .85, speed: 55, hp: 1, pts: 1, wiggle: .25, from: 0 },
+  roach: { size: 1, speed: 130, hp: 1, pts: 2, wiggle: .15, from: 12 },
+  fly: { size: .9, speed: 110, hp: 1, pts: 2, wiggle: 2.2, from: 20, flies: 1 },
+  mosq: { size: .8, speed: 150, hp: 1, pts: 3, wiggle: 2.8, from: 40, flies: 1 },
+  giant: { size: 2.1, speed: 45, hp: 3, pts: 10, wiggle: .3, from: 35 },
+};
+
+const cv = $('#game'), cx = cv.getContext('2d');
+let W = 0, H = 0, U = 60;
+function resize() { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); U = clamp(Math.min(W, H) * .155, 64, 140); /* bichos grandes, para dedos chiquitos */ }
+addEventListener('resize', resize); resize();
+
+let game = null;
+const MAXH = 5;
+function paintHearts() { $('#hearts').innerHTML = Array.from({ length: MAXH }, (_, i) => `<img alt="" class="${i < game.hearts ? '' : 'off'}" src="${UP}heart.webp">`).join(''); }
+function paintScore(bump) { $('#scoreN').textContent = game.score; if (bump) { const s = $('#score'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); } }
+
+function start() {
+  game = { t: 0, score: 0, hearts: MAXH, bugs: [], fx: [], spawnT: 1, swat: null, over: false, shake: 0, nextHeart: 40 };
+  combo = 0; $('#startScr').hidden = true; $('#endScr').hidden = true; $('#hud').hidden = false; paintHearts(); paintScore(); sfx.start();
+}
+// Qué tan difícil va: sube con los segundos (0 al empezar, ~1 al minuto y medio, sigue subiendo poco a poco)
+const diff = () => game.t < 90 ? game.t / 90 : 1 + (game.t - 90) / 180;
+
+function spawn() {
+  const d = diff(), opts = Object.entries(KINDS).filter(([, k]) => game.t >= k.from);
+  let kind = pick(opts)[0];
+  if (kind === 'giant' && game.bugs.some(b => b.kind === 'giant')) kind = 'spider';
+  const k = KINDS[kind], side = Math.random() * 4 | 0, m = U * k.size;
+  // Entra por una orilla y va hacia la contraria, a un punto al azar
+  const pts = [[rand(m, W - m), -m], [W + m, rand(H * .2, H - m)], [rand(m, W - m), H + m], [-m, rand(H * .2, H - m)]];
+  const [x, y] = pts[side], [tx, ty] = pts[(side + 2) % 4];
+  const sp = k.speed * (.8 + d * 1.1) * rand(.85, 1.15) * U / 90;
+  game.bugs.push({ kind, k, x, y, tx, ty, sp, hp: k.hp, t: rand(0, 10), size: m, ang: Math.atan2(ty - y, tx - x), hitT: 0, wob: rand(0, 6) });
+}
+
+function update(dt) {
+  const g = game; if (!g || g.over) return;
+  g.t += dt; g.shake = Math.max(0, g.shake - dt * 20);
+  const d = diff();
+  // Cada vez salen más seguido y caben más en la pantalla
+  g.spawnT -= dt;
+  const maxBugs = Math.round(2 + d * 6);
+  if (g.spawnT <= 0 && g.bugs.length < maxBugs) { spawn(); if (d > .6 && Math.random() < d * .3) spawn(); g.spawnT = Math.max(.35, 2.3 - d * 1.6) * rand(.8, 1.2); }
+  for (const b of g.bugs) {
+    b.t += dt; if (b.hitT > 0) { b.hitT -= dt; continue; }
+    const want = Math.atan2(b.ty - b.y, b.tx - b.x) + Math.sin(b.t * (b.k.flies ? 3 : 1.6) + b.wob) * b.k.wiggle * (b.k.flies ? .9 : .6);
+    let da = want - b.ang; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+    b.ang += da * Math.min(1, dt * (b.k.flies ? 6 : 3));
+    // Las arañas se detienen un momentito de vez en cuando (y luego corren)
+    const pause = b.kind === 'spider' && Math.sin(b.t * .9 + b.wob) > .93 ? .15 : 1;
+    b.x += Math.cos(b.ang) * b.sp * dt * pause; b.y += Math.sin(b.ang) * b.sp * dt * pause;
+    const m = b.size * 1.2;
+    if (b.t > 1.5 && (b.x < -m || b.x > W + m || b.y < -m || b.y > H + m)) b.gone = true;
+    if (Math.hypot(b.tx - b.x, b.ty - b.y) < 8) b.gone = true;
+  }
+  for (const b of g.bugs) if (b.gone && !b.dead) { g.hearts--; paintHearts(); sfx.miss(); g.fx.push({ type: 'escape', x: clamp(b.x, 40, W - 40), y: clamp(b.y, 90, H - 40), t: 0 }); if (g.hearts <= 0) return end(); }
+  g.bugs = g.bugs.filter(b => !b.gone && !b.dead);
+  // Corazón de premio de vez en cuando: tócalo para recuperar una vida
+  if (g.t > g.nextHeart && g.hearts < MAXH && !g.fx.some(f => f.type === 'heartItem')) { g.nextHeart = g.t + rand(30, 45); g.fx.push({ type: 'heartItem', x: rand(W * .2, W * .8), y: rand(H * .3, H * .8), t: 0 }); }
+  for (const f of g.fx) f.t += dt;
+  g.fx = g.fx.filter(f => f.t < (f.type === 'splat' ? 3 : f.type === 'heartItem' ? 6 : 1));
+  if (g.swat) { g.swat.t += dt; if (g.swat.t > .28) g.swat = null; }
+  comboT -= dt; if (comboT <= 0) combo = 0;
+  musicTick(performance.now(), 1 + Math.min(1, d) * .6);
+}
+
+function tapAt(x, y) {
+  const g = game; if (!g || g.over) return;
+  g.swat = { x, y, t: 0 }; sfx.swish();
+  // Corazón de premio
+  const hi = g.fx.find(f => f.type === 'heartItem' && Math.hypot(f.x - x, f.y - y) < U * .9);
+  if (hi) { hi.t = 99; g.hearts = Math.min(MAXH, g.hearts + 1); paintHearts(); sfx.heart(); for (let i = 0; i < 8; i++) g.fx.push({ type: 'star', x, y, vx: rand(-1, 1), vy: rand(-1.4, -.4), t: 0 }); return; }
+  // Golpe generoso: el matamoscas es grande (para dedos chiquitos)
+  const R = U * .75; let hitAny = false;
+  for (const b of g.bugs.slice().sort((a, c) => Math.hypot(a.x - x, a.y - y) - Math.hypot(c.x - x, c.y - y))) {
+    if (Math.hypot(b.x - x, b.y - y) > R + b.size * .45) continue;
+    hitAny = true; b.hp--; b.hitT = .12;
+    if (b.hp > 0) { sfx.hit(); g.shake = 4; g.fx.push({ type: 'pow', x: b.x, y: b.y, t: 0 }); break; }
+    b.dead = true; combo++; comboT = 1.2;
+    const pts = b.k.pts * (combo >= 3 ? 2 : 1); g.score += pts; paintScore(true);
+    if (b.kind === 'giant') { sfx.big(); g.shake = 10; } else sfx.splat();
+    g.fx.push({ type: 'splat', x: b.x, y: b.y, t: 0, s: b.size, rot: rand(0, 6) });
+    g.fx.push({ type: 'pts', x: b.x, y: b.y - b.size * .4, t: 0, txt: '+' + pts + (combo >= 3 ? ' ¡COMBO!' : '') });
+    for (let i = 0; i < (b.kind === 'giant' ? 14 : 6); i++) g.fx.push({ type: 'star', x: b.x, y: b.y, vx: rand(-1, 1), vy: rand(-1.4, -.4), t: 0 });
+  }
+  if (!hitAny) g.fx.push({ type: 'puff', x, y, t: 0 });
+}
+cv.addEventListener('pointerdown', e => { e.preventDefault(); tapAt(e.clientX, e.clientY); });
+
+function end() {
+  const g = game; g.over = true; sfx.over();
+  const best = g.score > save.best; if (best) { save.best = g.score; persist(); }
+  setTimeout(() => {
+    $('#finalN').textContent = g.score; $('#bestTxt').textContent = best ? '¡NUEVO RÉCORD!' : 'Récord: ' + save.best;
+    $('#endScr').hidden = false; $('#hud').hidden = true;
+  }, 700);
+}
+
+function drawImg(n, x, y, w, ang = 0, alpha = 1) {
+  const im = IMG[n]; if (!im || !im.width) return false;
+  const h = w * im.height / im.width; cx.save(); cx.globalAlpha = alpha; cx.translate(x, y); cx.rotate(ang); cx.drawImage(im, -w / 2, -h / 2, w, h); cx.restore(); return true;
+}
+function render() {
+  cx.clearRect(0, 0, W, H);
+  const g = game; if (!g) return;
+  cx.save(); if (g.shake) cx.translate(rand(-g.shake, g.shake), rand(-g.shake, g.shake));
+  for (const f of g.fx) if (f.type === 'splat') drawImg('splat', f.x, f.y, f.s * 1.5, f.rot, Math.min(1, (3 - f.t) * 1.5));
+  for (const f of g.fx) if (f.type === 'heartItem') { const s = U * (.9 + Math.sin(f.t * 6) * .08); drawImg('heart', f.x, f.y, s, 0, Math.min(1, (6 - f.t) * 2)); }
+  for (const b of g.bugs) {
+    const frame = (b.t * (b.k.flies ? 18 : 8) | 0) % 2, n = b.kind + '-' + frame, sq = b.hitT > 0 ? .8 : 1;
+    // Sombrita: los que vuelan la tienen más lejos (se ven arriba de la mesa)
+    cx.fillStyle = 'rgba(40,20,40,.22)'; cx.beginPath(); cx.ellipse(b.x + (b.k.flies ? b.size * .25 : 4), b.y + (b.k.flies ? b.size * .35 : 6), b.size * .38, b.size * .26, 0, 0, 7); cx.fill();
+    if (!drawImg(n, b.x, b.y, b.size * sq, b.ang + Math.PI / 2)) { cx.fillStyle = '#7a4ad8'; cx.beginPath(); cx.arc(b.x, b.y, b.size * .4, 0, 7); cx.fill(); }
+    if (b.kind === 'giant' && b.hp < b.k.hp) { for (let i = 0; i < b.k.hp; i++) { cx.fillStyle = i < b.hp ? '#ff4d6d' : 'rgba(255,255,255,.6)'; cx.beginPath(); cx.arc(b.x - 18 + i * 18, b.y - b.size * .62, 7, 0, 7); cx.fill(); } }
+  }
+  for (const f of g.fx) {
+    if (f.type === 'star') drawImg('star', f.x + f.vx * f.t * 140, f.y + f.vy * f.t * 140 + f.t * f.t * 200, U * .35 * (1 - f.t), f.t * 6, 1 - f.t);
+    else if (f.type === 'pts' || f.type === 'escape' || f.type === 'pow') {
+      const txt = f.type === 'pts' ? f.txt : f.type === 'pow' ? '¡PAF!' : '¡Se fue!', a = 1 - f.t, fs = Math.round(U * (f.type === 'escape' ? .42 : .5));
+      cx.save(); cx.globalAlpha = a; cx.font = `${fs}px 'Lilita One', sans-serif`; cx.textAlign = 'center'; cx.lineWidth = 6; cx.strokeStyle = '#2a1f3d'; cx.fillStyle = f.type === 'escape' ? '#ff8fa8' : '#ffd23a';
+      const y = f.y - f.t * 60; cx.strokeText(txt, f.x, y); cx.fillText(txt, f.x, y); cx.restore();
+    } else if (f.type === 'puff') { cx.strokeStyle = `rgba(255,255,255,${1 - f.t * 2})`; cx.lineWidth = 4; cx.beginPath(); cx.arc(f.x, f.y, U * .3 + f.t * U, 0, 7); cx.stroke(); }
+  }
+  // El matamoscas: baja de golpe donde tocaste y se levanta
+  if (g.swat) { const p = g.swat.t / .28, lift = p < .3 ? 1 - p / .3 : (p - .3) / .7, im = IMG.swatter;
+    // Gira desde la punta del mango: la red cae justo sobre donde tocaste y luego se levanta
+    if (im && im.width) { const w = U * 1.5, h = w * im.height / im.width, head = h * .2, px = g.swat.x + h * .35, py = g.swat.y + h * .7, ang = Math.atan2(g.swat.x - px, py - g.swat.y);
+      cx.save(); cx.globalAlpha = p > .8 ? (1 - p) * 5 : 1; cx.translate(px, py); cx.rotate(ang + lift * .7); cx.drawImage(im, -w / 2, -Math.hypot(px - g.swat.x, py - g.swat.y) - head, w, h); cx.restore(); } }
+  cx.restore();
+}
+
+let last = performance.now();
+(function loop(t) { const dt = Math.min(.05, (t - last) / 1000); last = t; update(dt); render(); requestAnimationFrame(loop); })(last);
+$('#playBtn').addEventListener('click', () => { unlockAudio(); start(); });
+$('#againBtn').addEventListener('click', () => { unlockAudio(); start(); });
+ready.then(() => { window.LEON_READY = true; });
+// Pruebas: #diag juega solito y manda fotos a un servidor local
+window.__bichos = { start, update, render, tapAt, get game() { return game; } };
+if (location.hash === '#diag') ready.then(async () => {
+  const errs = []; addEventListener('error', e => errs.push(e.message));
+  const shot = (tag, info) => fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag, img: cv.toDataURL('image/png'), info: Object.assign({ ua: navigator.userAgent, errs, t: game && game.t, score: game && game.score, hearts: game && game.hearts, bugs: game && game.bugs.length }, info || {}) }) });
+  start(); for (let i = 0; i < 60 * 25; i++) update(1 / 60); render(); await shot('bugs-25s', { kinds: [...new Set(game.bugs.map(b => b.kind))] });
+  // Aplasta todo lo que ve (como un niño muy rápido) durante 60 s más
+  let squashed = 0; for (let i = 0; i < 60 * 60; i++) { update(1 / 60); if (i % 20 === 0 && game.bugs.length) { const b = game.bugs[0], s0 = game.score; tapAt(b.x, b.y); if (game.score > s0) squashed++; } } render(); await shot('bugs-play', { squashed });
+  // Sin tocar nada: se escapan y termina
+  for (let i = 0; i < 60 * 120 && !game.over; i++) update(1 / 60); await new Promise(r => setTimeout(r, 900)); render(); await shot('bugs-end', { over: game.over, endShown: !$('#endScr').hidden, best: save.best });
+});
+})();
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../sw.js',{scope:'../'});</script>
+</body>
+</html>

@@ -16,3 +16,7 @@
   Cache-Control: no-cache
 /zombito/
   Cache-Control: no-cache
+/bichos/
+  Cache-Control: no-cache
+/pinguinos/
+  Cache-Control: no-cache

@@ -1,0 +1,346 @@
+<title>Pingüinos en el Hielo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: mar del polo a pantalla completa con un témpano de hielo en medio. El dino sigue al dedo; los pingüinos se deslizan y los hielos caen. Sin niveles: cada vez más difícil. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{--ink:#2a1f3d;--sun:#ffd23a;--grass:#6cc63a;--pix:'Lilita One','Arial Rounded MT Bold',sans-serif;color-scheme:light}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#2a8fd8;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+.bg{position:fixed;inset:0;background:url(__UP__img/penguin/penbg-wide.webp) 50% 50%/cover no-repeat #2a8fd8}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/penguin/penbg-tall.webp)}}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:14px;align-items:center}
+.side.end{justify-content:flex-end}
+#hud{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#score{display:flex;align-items:center;gap:6px;font-size:clamp(24px,4.4vw,38px);color:#fff;background:var(--ink);padding:2px 18px 4px 8px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#score img{width:40px;height:40px;object-fit:contain}
+#score.bump{animation:bump .2s ease-out}
+@keyframes bump{50%{transform:scale(1.2)}}
+#hearts{display:flex;gap:4px}
+#hearts img{width:clamp(30px,5vw,44px);height:clamp(30px,5vw,44px);object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink));transition:transform .2s,opacity .2s}
+#hearts img.off{opacity:.25;transform:scale(.7);filter:grayscale(1)}
+#hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);z-index:30;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center}
+#hint svg{width:66px;height:66px;animation:drag 1.4s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(42,31,61,.4))}
+@keyframes drag{0%,100%{transform:translateX(-40px)}50%{transform:translateX(40px)}}
+.over{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;background:rgba(20,40,90,.35)}
+.over h2{margin:0;font-weight:400;font-size:clamp(40px,9vw,92px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.over .pic{max-width:clamp(150px,30vmin,260px);max-height:30vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 8px 0 rgba(42,31,61,.3));animation:bob 1.6s ease-in-out infinite}
+.over .final{display:flex;align-items:center;gap:10px;font-size:clamp(28px,5.6vw,52px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.over .final img{width:58px;height:58px}
+.over .best{font-size:clamp(18px,3vw,26px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.go{min-width:clamp(150px,30vw,230px);height:clamp(76px,12vw,100px);background:var(--grass);display:flex;align-items:center;justify-content:center}
+.go svg{width:44px;height:44px}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-4deg)}}
+@media (max-width:620px){.bar{gap:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}.ibtn{width:44px;height:44px}.side{gap:8px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" aria-hidden="true"></div>
+<canvas id="game"></canvas>
+
+<div class="bar">
+  <div class="side"><button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button></div>
+  <div id="hud" hidden><div id="score"><img alt="" src="__UP__img/penguin/fish.webp"><span id="scoreN">0</span></div><div id="hearts"></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+<div id="hint" hidden><svg viewBox="0 0 32 32"><path d="M12 30c-3 0-5-2-6-4l-3-7c-.6-1.4 1.4-2.4 2.3-1.2L8 21V6a2 2 0 0 1 4 0v9-3a2 2 0 0 1 4 0v3-2a2 2 0 0 1 4 0v3-1a2 2 0 0 1 4 0v7c0 5-3 9-8 9z" fill="#fff" stroke="#2a1f3d" stroke-width="2.4" stroke-linejoin="round"/></svg></div>
+
+<div class="over" id="startScr">
+  <img class="pic" alt="" src="__UP__img/penguin/peng-r.webp">
+  <h2>¡PINGÜINOS!</h2>
+  <button class="px go" id="playBtn" aria-label="Jugar"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M4 2l10 6-10 6z"/></svg></button>
+</div>
+<div class="over" id="endScr" hidden>
+  <h2>¡MUY BIEN!</h2>
+  <div class="final"><img alt="" src="__UP__img/penguin/fish.webp"><span id="finalN">0</span></div>
+  <div class="best" id="bestTxt"></div>
+  <button class="px go" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+let save = { best: 0, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('pinguinos')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('pinguinos', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0); }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+function noise(dur, freq, vol, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const n = actx.createBufferSource(), b = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime + delay; f.type = 'lowpass'; f.frequency.value = freq; g.gain.value = vol;
+    n.buffer = b; n.connect(f).connect(g).connect(actx.destination); n.start(t);
+  } catch (e) {}
+}
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  warn: () => beep(880, .06, 'square', .035),
+  slide: () => noise(.35, 1800, .05),
+  bonk: () => { beep(260, .12, 'square', .06, -120); noise(.08, 900, .08); },
+  crash: () => { noise(.25, 600, .16); beep(140, .2, 'triangle', .08, -60); },
+  fish: () => { beep(988, .07, 'square', .045); beep(1319, .12, 'square', .045, 0, .06); },
+  splash: () => { noise(.5, 1200, .18); beep(400, .4, 'sine', .05, -300); },
+  over: () => [523, 440, 392, 330, 392, 523].forEach((f, i) => beep(f, .16, 'square', .05, 0, i * .14)),
+  start: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, .1, 'square', .05, 0, i * .08)),
+};
+// Musiquita de hielo (campanitas), se acelera con la dificultad
+const SONG = [7, 11, 14, 11, 12, 9, 7, 4, 5, 9, 12, 9, 7, 4, 2, 4], BASS = [0, 0, -3, -3, -7, -7, -5, -5];
+let songStep = 0, songNext = 0;
+function musicTick(now, speed) {
+  if (save.muted || !actx || document.hidden || now < songNext) return;
+  songNext = now + 210 / speed;
+  beep(523 * Math.pow(2, SONG[songStep % SONG.length] / 12), .16, 'triangle', .035);
+  if (songStep % 2 === 0) beep(131 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .24, 'triangle', .045);
+  songStep++;
+}
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', e => { e.stopPropagation(); save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------- Dibujos ---------- */
+const UP = '__UP__img/penguin/';
+const NAMES = ['dino', 'peng-r', 'peng-d', 'peng-u', 'bigpeng', 'iceblock', 'icicle', 'fish', 'splash', 'heart'];
+const IMG = {};
+const ready = Promise.all(NAMES.map(n => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => { IMG[n] = im; res(); }; im.src = UP + n + '.webp'; })));
+
+const cv = $('#game'), cx = cv.getContext('2d');
+let W = 0, H = 0, U = 60;
+// El témpano: rectángulo redondeado al centro, se va encogiendo poco a poco
+const floe = { cx: 0, cy: 0, w: 0, h: 0, w0: 0, h0: 0 };
+function resize() {
+  const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0);
+  U = clamp(Math.min(W, H) * .1, 44, 96);
+  const top = 110, bot = 30; floe.cx = W / 2; floe.cy = top + (H - top - bot) / 2;
+  floe.w0 = Math.min(W * .88, (H - top - bot) * 1.5); floe.h0 = Math.min(H - top - bot, floe.w0 * (H > W ? 1.45 : .8));   // en vertical el témpano es más alto
+  if (!game) { floe.w = floe.w0; floe.h = floe.h0; }
+}
+let game = null;
+addEventListener('resize', resize); resize();
+
+const MAXH = 4;
+function paintHearts() { $('#hearts').innerHTML = Array.from({ length: MAXH }, (_, i) => `<img alt="" class="${i < game.hearts ? '' : 'off'}" src="${UP}heart.webp">`).join(''); }
+function paintScore(bump) { $('#scoreN').textContent = game.score; if (bump) { const s = $('#score'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); } }
+
+function start() {
+  floe.w = floe.w0; floe.h = floe.h0;
+  game = { t: 0, score: 0, hearts: MAXH, pengs: [], ice: [], fish: [], fx: [], penT: 2.2, iceT: 9, fishT: 1.5, over: false, shake: 0, secT: 0,
+    hero: { x: floe.cx, y: floe.cy, vx: 0, vy: 0, dir: 0, anim: 0, stun: 0, inv: 1.5, falling: 0, moving: false }, target: null };
+  $('#startScr').hidden = true; $('#endScr').hidden = true; $('#hud').hidden = false; $('#hint').hidden = false; paintHearts(); paintScore(); sfx.start();
+}
+const diff = () => game.t < 90 ? game.t / 90 : 1 + (game.t - 90) / 200;
+const onFloe = (x, y, pad = 0) => Math.abs(x - floe.cx) < floe.w / 2 - pad && Math.abs(y - floe.cy) < floe.h / 2 - pad;
+
+// Un pingüino aparece en la orilla del agua (con aviso "!") y luego cruza deslizándose
+function spawnPenguin(big) {
+  const d = diff(), side = Math.random() * 4 | 0, L = floe.cx - floe.w / 2, R = floe.cx + floe.w / 2, T = floe.cy - floe.h / 2, B = floe.cy + floe.h / 2, m = U * 1.4;
+  const h = game.hero, aim = Math.random() < .55 + d * .2;   // muchos van hacia el dino
+  let x, y, vx = 0, vy = 0;
+  const along = (a, b, v) => clamp(aim ? v + rand(-U, U) : rand(a, b), a + U * .4, b - U * .4);
+  if (side === 0) { x = L - m; y = along(T, B, h.y); vx = 1; }
+  else if (side === 1) { x = R + m; y = along(T, B, h.y); vx = -1; }
+  else if (side === 2) { y = T - m; x = along(L, R, h.x); vy = 1; }
+  else { y = B + m; x = along(L, R, h.x); vy = -1; }
+  const sp = (big ? 170 : 210) * (1 + d * 1.1) * U / 70;   // al principio despacito; luego cada vez más rápido
+  game.pengs.push({ x, y, vx, vy, sp, warn: Math.max(.55, 1.1 - d * .35), big, r: U * (big ? 1.1 : .55) });
+  sfx.warn();
+}
+function spawnIce() {
+  const d = diff(), h = game.hero, near = Math.random() < .6;
+  const x = clamp(near ? h.x + rand(-U * 1.5, U * 1.5) : floe.cx + rand(-floe.w / 2, floe.w / 2), floe.cx - floe.w / 2 + U * .5, floe.cx + floe.w / 2 - U * .5);
+  const y = clamp(near ? h.y + rand(-U * 1.5, U * 1.5) : floe.cy + rand(-floe.h / 2, floe.h / 2), floe.cy - floe.h / 2 + U * .5, floe.cy + floe.h / 2 - U * .5);
+  game.ice.push({ x, y, t: 0, fall: Math.max(.8, 1.5 - d * .45), r: U * .8, landed: false, kind: Math.random() < .5 ? 'iceblock' : 'icicle' });
+}
+function spawnFish() {
+  for (let k = 0; k < 20; k++) { const x = floe.cx + rand(-floe.w / 2 + U, floe.w / 2 - U), y = floe.cy + rand(-floe.h / 2 + U, floe.h / 2 - U); if (Math.hypot(x - game.hero.x, y - game.hero.y) > U * 2) { game.fish.push({ x, y, t: 0 }); return; } }
+}
+
+function knock(h, dx, dy, power) { const l = Math.hypot(dx, dy) || 1; h.vx += dx / l * power; h.vy += dy / l * power; h.stun = .45; }
+
+function update(dt) {
+  const g = game; if (!g || g.over) return;
+  if (g.overSoon && !g.hero.falling) return finishFx(dt, 1);
+  g.t += dt; g.shake = Math.max(0, g.shake - dt * 20);
+  const d = diff(), h = g.hero;
+  // El témpano se encoge despacito (hasta 60 % de su tamaño)
+  const k = Math.max(.6, 1 - g.t / 240); floe.w = floe.w0 * k; floe.h = floe.h0 * k;
+  // Puntos por aguantar: 1 cada segundo
+  g.secT += dt; if (g.secT >= 1) { g.secT -= 1; g.score++; paintScore(); }
+  // El dino camina hacia el dedo (en el hielo resbala un poquito)
+  h.inv = Math.max(0, h.inv - dt); h.stun = Math.max(0, h.stun - dt);
+  if (h.falling) { h.falling += dt; if (h.falling > 1.2) respawn(); return finishFx(dt, d); }
+  let mvx = 0, mvy = 0;
+  if (g.target && !h.stun) { const dx = g.target.x - h.x, dy = g.target.y - h.y, dist = Math.hypot(dx, dy); if (dist > 6) { const sp = U * 4.2; mvx = dx / dist * Math.min(sp, dist * 8); mvy = dy / dist * Math.min(sp, dist * 8); } }
+  if (keys.size && !h.stun) { const sp = U * 4.2; mvx = ((keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0)) * sp; mvy = ((keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0)) * sp; }
+  const fr = Math.exp(-3.2 * dt); h.vx *= fr; h.vy *= fr;
+  h.x += (mvx + h.vx) * dt; h.y += (mvy + h.vy) * dt;
+  h.moving = Math.hypot(mvx + h.vx, mvy + h.vy) > 20; if (h.moving) { h.anim += dt * 8; const ax = mvx + h.vx, ay = mvy + h.vy; h.dir = Math.abs(ax) > Math.abs(ay) ? (ax < 0 ? 1 : 2) : (ay < 0 ? 3 : 0); }
+  // ¡Al agua!
+  if (!onFloe(h.x, h.y, -U * .15)) { h.falling = .001; g.hearts--; paintHearts(); sfx.splash(); g.fx.push({ type: 'splash', x: h.x, y: h.y, t: 0 }); g.shake = 6; if (g.hearts <= 0) { setTimeout(end, 900); g.overSoon = true; } }
+  // Pingüinos: aviso, luego cruzan; si chocan con el dino lo empujan
+  g.penT -= dt;
+  if (g.penT <= 0) { spawnPenguin(d > .7 && Math.random() < .2); if (d > .5 && Math.random() < d * .35) spawnPenguin(false); g.penT = Math.max(.55, 2.3 - d * 1.5) * rand(.8, 1.2); }
+  for (const p of g.pengs) {
+    if (p.warn > 0) { p.warn -= dt; if (p.warn <= 0) sfx.slide(); continue; }
+    p.x += p.vx * p.sp * dt; p.y += p.vy * p.sp * dt; p.t = (p.t || 0) + dt;
+    if (!h.falling && !h.inv && Math.hypot(p.x - h.x, p.y - h.y) < p.r + U * .35) { knock(h, p.vx + (h.x - p.x) / U * .3, p.vy + (h.y - p.y) / U * .3, U * (p.big ? 7.5 : 5)); h.inv = .8; sfx.bonk(); g.shake = 5; g.fx.push({ type: 'bonk', x: h.x, y: h.y - U * .6, t: 0 }); }
+    if (p.t > 8) p.gone = true;
+  }
+  g.pengs = g.pengs.filter(p => !p.gone);
+  // Hielos que caen: sombra que crece y luego ¡pum!
+  if (g.t > 8) { g.iceT -= dt; if (g.iceT <= 0) { spawnIce(); if (d > .8 && Math.random() < .4) spawnIce(); g.iceT = Math.max(.7, 3 - d * 2) * rand(.8, 1.2); } }
+  for (const c of g.ice) {
+    c.t += dt;
+    if (!c.landed && c.t >= c.fall) { c.landed = true; sfx.crash(); g.shake = 7; for (let i = 0; i < 8; i++) g.fx.push({ type: 'shard', x: c.x, y: c.y, vx: rand(-1, 1), vy: rand(-1, .3), t: 0 });
+      if (!h.falling && !h.inv && Math.hypot(c.x - h.x, c.y - h.y) < c.r) { knock(h, h.x - c.x + rand(-1, 1), h.y - c.y + rand(-1, 1), U * 5.5); h.inv = .8; sfx.bonk(); g.fx.push({ type: 'bonk', x: h.x, y: h.y - U * .6, t: 0 }); } }
+  }
+  g.ice = g.ice.filter(c => c.t < c.fall + 1.4);
+  // Pescaditos para juntar
+  g.fishT -= dt; if (g.fishT <= 0 && g.fish.length < 3) { spawnFish(); g.fishT = rand(2, 4); }
+  for (const f of g.fish) { f.t += dt; if (Math.hypot(f.x - h.x, f.y - h.y) < U * .7) { f.got = true; g.score += 5; paintScore(true); sfx.fish(); g.fx.push({ type: 'pts', x: f.x, y: f.y, t: 0, txt: '+5' }); } if (!onFloe(f.x, f.y, U * .3)) f.got = true; }
+  g.fish = g.fish.filter(f => !f.got);
+  finishFx(dt, d);
+}
+function finishFx(dt, d) { const g = game; for (const f of g.fx) f.t += dt; g.fx = g.fx.filter(f => f.t < 1.2); musicTick(performance.now(), 1 + Math.min(1, d) * .6); }
+function respawn() {
+  const g = game, h = g.hero; if (g.overSoon) { h.falling = 0; h.hidden = true; return; }
+  Object.assign(h, { x: floe.cx, y: floe.cy, vx: 0, vy: 0, falling: 0, inv: 2, stun: 0 }); g.target = null;
+  g.pengs = g.pengs.filter(p => Math.hypot(p.x - h.x, p.y - h.y) > U * 3);
+}
+function end() { const g = game; g.over = true; sfx.over(); const best = g.score > save.best; if (best) { save.best = g.score; persist(); } $('#finalN').textContent = g.score; $('#bestTxt').textContent = best ? '¡NUEVO RÉCORD!' : 'Récord: ' + save.best; $('#endScr').hidden = false; $('#hud').hidden = true; $('#hint').hidden = true; }
+
+// Control: el dino va hacia donde está el dedo (tocar o arrastrar); flechas en computadora
+const keys = new Set();
+addEventListener('keydown', e => { if (e.key.startsWith('Arrow')) { keys.add(e.key); e.preventDefault(); } });
+addEventListener('keyup', e => keys.delete(e.key));
+let dragging = false;
+cv.addEventListener('pointerdown', e => { e.preventDefault(); if (!game || game.over) return; dragging = true; game.target = { x: e.clientX, y: e.clientY }; $('#hint').hidden = true; try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
+cv.addEventListener('pointermove', e => { if (dragging && game) game.target = { x: e.clientX, y: e.clientY }; });
+['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { dragging = false; if (game) game.target = null; }));
+
+function drawImg(n, x, y, w, opts = {}) {
+  const im = IMG[n]; if (!im || !im.width) return false;
+  const h = w * im.height / im.width; cx.save(); cx.globalAlpha = opts.a == null ? 1 : opts.a; cx.translate(x, y); if (opts.rot) cx.rotate(opts.rot); if (opts.flip) cx.scale(-1, 1); cx.drawImage(im, -w / 2, -h / 2, w, h); cx.restore(); return true;
+}
+function rrect(x, y, w, h, r) { cx.beginPath(); cx.moveTo(x + r, y); cx.arcTo(x + w, y, x + w, y + h, r); cx.arcTo(x + w, y + h, x, y + h, r); cx.arcTo(x, y + h, x, y, r); cx.arcTo(x, y, x + w, y, r); cx.closePath(); }
+function drawFloe() {
+  const x = floe.cx - floe.w / 2, y = floe.cy - floe.h / 2, r = Math.min(floe.w, floe.h) * .12, dep = U * .35;
+  // Orilla del hielo (grosor bajo el agua) y brillo
+  cx.fillStyle = 'rgba(10,60,120,.35)'; rrect(x - 8, y + dep * .6, floe.w + 16, floe.h + dep, r + 8); cx.fill();
+  cx.fillStyle = '#8ccdf0'; rrect(x, y + dep * .4, floe.w, floe.h + dep * .4, r); cx.fill();
+  const gr = cx.createLinearGradient(0, y, 0, y + floe.h); gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, '#d8f0ff');
+  cx.fillStyle = gr; rrect(x, y, floe.w, floe.h, r); cx.fill();
+  cx.strokeStyle = '#2a1f3d'; cx.lineWidth = 4; rrect(x, y, floe.w, floe.h + dep * .4, r); cx.stroke();
+  // Grietas y huellitas para que se vea como hielo
+  cx.save(); rrect(x, y, floe.w, floe.h, r); cx.clip(); cx.strokeStyle = 'rgba(120,180,220,.55)'; cx.lineWidth = 2.5;
+  const cr = [[.2, .3, .32, .42, .28, .55], [.7, .2, .62, .34, .74, .46], [.55, .7, .45, .8, .5, .9], [.85, .65, .78, .75, .9, .82]];
+  for (const c of cr) { cx.beginPath(); cx.moveTo(x + c[0] * floe.w, y + c[1] * floe.h); cx.lineTo(x + c[2] * floe.w, y + c[3] * floe.h); cx.lineTo(x + c[4] * floe.w, y + c[5] * floe.h); cx.stroke(); }
+  cx.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < 6; i++) { cx.beginPath(); cx.ellipse(x + floe.w * (.15 + i * .14), y + floe.h * .12, floe.w * .04, floe.h * .015, -.3, 0, 7); cx.fill(); }
+  cx.restore();
+}
+function drawHero() {
+  const g = game, h = g.hero; if (h.hidden) return;
+  if (h.falling) { const k = Math.min(1, h.falling / .6); drawImg('splash', h.x, h.y, U * 1.6 * (.6 + k * .6), { a: 1 - Math.max(0, h.falling - .6) / .6 }); return; }
+  if (h.inv && (g.t * 12 | 0) % 2 && !h.stun) return;
+  const im = IMG.dino; cx.fillStyle = 'rgba(20,40,80,.22)'; cx.beginPath(); cx.ellipse(h.x, h.y + U * .45, U * .45, U * .16, 0, 0, 7); cx.fill();
+  if (!im || !im.width) { cx.fillStyle = '#6cc63a'; cx.beginPath(); cx.arc(h.x, h.y, U * .45, 0, 7); cx.fill(); return; }
+  const cw = im.width / 3, ch = im.height / 4, fr = h.moving ? [0, 1, 2, 1][(h.anim | 0) % 4] : 1, hh = U * 1.45, ww = hh * cw / ch;
+  const wob = h.stun ? Math.sin(g.t * 40) * .15 : 0;
+  cx.save(); cx.translate(h.x, h.y + U * .5); cx.rotate(wob); cx.drawImage(im, fr * cw, h.dir * ch, cw, ch, -ww / 2, -hh, ww, hh); cx.restore();
+  if (h.stun) { for (let i = 0; i < 3; i++) { const a = g.t * 6 + i * 2.1; drawStar(h.x + Math.cos(a) * U * .4, h.y - U * .95 + Math.sin(a) * U * .12, U * .12); } }
+}
+function drawStar(x, y, r) { cx.fillStyle = '#ffd23a'; cx.strokeStyle = '#2a1f3d'; cx.lineWidth = 2; cx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; cx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } cx.closePath(); cx.fill(); cx.stroke(); }
+function render() {
+  cx.clearRect(0, 0, W, H);
+  const g = game;
+  cx.save(); if (g && g.shake) cx.translate(rand(-g.shake, g.shake), rand(-g.shake, g.shake));
+  drawFloe();
+  if (!g) { cx.restore(); return; }
+  for (const f of g.fish) drawImg('fish', f.x, f.y + Math.sin(f.t * 4) * 4, U * .8, { rot: Math.sin(f.t * 3) * .2 });
+  // Sombras de los hielos que vienen
+  for (const c of g.ice) if (!c.landed) { const k = c.t / c.fall; cx.fillStyle = `rgba(20,40,90,${.15 + k * .3})`; cx.beginPath(); cx.ellipse(c.x, c.y, c.r * (.4 + k * .6), c.r * .45 * (.4 + k * .6), 0, 0, 7); cx.fill();
+    if ((g.t * 6 | 0) % 2) { cx.strokeStyle = 'rgba(255,80,100,.8)'; cx.lineWidth = 3; cx.beginPath(); cx.ellipse(c.x, c.y, c.r, c.r * .45, 0, 0, 7); cx.stroke(); } }
+  // Todo lo que está sobre el hielo, ordenado por altura
+  const list = [{ y: g.hero.y, draw: drawHero }];
+  for (const p of g.pengs) list.push({ y: p.y, draw: () => drawPeng(p) });
+  for (const c of g.ice) if (c.landed) list.push({ y: c.y, draw: () => { const a = Math.min(1, (c.fall + 1.4 - c.t) * 2); drawImg(c.kind, c.x, c.y - U * .2, c.r * 1.3, { a }); } });
+  list.sort((a, b) => a.y - b.y); for (const it of list) it.draw();
+  // Hielos cayendo (encima de todo)
+  for (const c of g.ice) if (!c.landed) { const k = c.t / c.fall; drawImg(c.kind, c.x, c.y - (1 - k) * H * .8, c.r * 1.3, { rot: (1 - k) * 2 }); }
+  for (const f of g.fx) {
+    if (f.type === 'shard') { cx.fillStyle = `rgba(200,235,255,${1 - f.t})`; cx.fillRect(f.x + f.vx * f.t * 120, f.y + f.vy * f.t * 120 + f.t * f.t * 160, 7, 7); }
+    else if (f.type === 'splash') drawImg('splash', f.x, f.y, U * 1.8 * (.5 + f.t), { a: 1 - f.t / 1.2 });
+    else if (f.type === 'bonk' || f.type === 'pts') { const txt = f.type === 'pts' ? f.txt : '¡PUM!', fs = Math.round(U * .5); cx.save(); cx.globalAlpha = 1 - f.t / 1.2; cx.font = `${fs}px 'Lilita One', sans-serif`; cx.textAlign = 'center'; cx.lineWidth = 6; cx.strokeStyle = '#2a1f3d'; cx.fillStyle = '#ffd23a'; const y = f.y - f.t * 50; cx.strokeText(txt, f.x, y); cx.fillText(txt, f.x, y); cx.restore(); }
+  }
+  cx.restore();
+}
+function drawPeng(p) {
+  const g = game, n = p.big ? 'bigpeng' : p.vx ? 'peng-r' : p.vy > 0 ? 'peng-d' : 'peng-u', w = p.r * 2.1;
+  // Aviso: el pingüino se asoma en el agua con un "!" brincando
+  const ex = clamp(p.x, floe.cx - floe.w / 2 - U * .2, floe.cx + floe.w / 2 + U * .2), ey = clamp(p.y, floe.cy - floe.h / 2 - U * .2, floe.cy + floe.h / 2 + U * .2);
+  if (p.warn > 0) { const b = Math.abs(Math.sin(g.t * 10)) * 8; cx.font = `${Math.round(U * .9)}px 'Lilita One', sans-serif`; cx.textAlign = 'center'; cx.lineWidth = 7; cx.strokeStyle = '#2a1f3d'; cx.fillStyle = '#ff4d6d'; cx.strokeText('!', ex, ey - b); cx.fillText('!', ex, ey - b);
+    cx.strokeStyle = 'rgba(255,77,109,.5)'; cx.lineWidth = p.r * 1.2; cx.setLineDash([12, 14]); cx.beginPath(); cx.moveTo(ex, ey); cx.lineTo(ex + p.vx * floe.w, ey + p.vy * floe.h); cx.stroke(); cx.setLineDash([]); return; }
+  cx.fillStyle = 'rgba(20,40,80,.2)'; cx.beginPath(); cx.ellipse(p.x, p.y + p.r * .5, p.r, p.r * .35, 0, 0, 7); cx.fill();
+  if (!drawImg(n, p.x, p.y, w, { flip: p.vx < 0 })) { cx.fillStyle = '#2a5ad8'; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill(); }
+}
+
+let last = performance.now();
+(function loop(t) { const dt = Math.min(.05, (t - last) / 1000); last = t; update(dt); render(); requestAnimationFrame(loop); })(last);
+$('#playBtn').addEventListener('click', () => { unlockAudio(); start(); });
+$('#againBtn').addEventListener('click', () => { unlockAudio(); start(); });
+ready.then(() => { window.LEON_READY = true; });
+// Pruebas: #diag juega solito y manda fotos a un servidor local
+window.__pinguinos = { start, update, render, get game() { return game; } };
+if (location.hash === '#diag') ready.then(async () => {
+  const errs = []; addEventListener('error', e => errs.push(e.message));
+  const shot = (tag, info) => fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag, img: cv.toDataURL('image/png'), info: Object.assign({ ua: navigator.userAgent, errs, t: game && game.t, score: game && game.score, hearts: game && game.hearts, pengs: game && game.pengs.length, ice: game && game.ice.length }, info || {}) }) });
+  start();
+  // Esquiva: se aleja de los pingüinos y de las sombras, y busca pescaditos
+  const ai = () => { const h = game.hero; let ax = (floe.cx - h.x) * 1.2, ay = (floe.cy - h.y) * 1.2;
+    for (const p of game.pengs) { const lane = p.vx ? h.y - p.y : h.x - p.x, ahead = p.vx ? (h.x - p.x) * p.vx : (h.y - p.y) * p.vy; if (ahead > -U && Math.abs(lane) < p.r + U * 1.3) { const s2 = lane >= 0 ? 1 : -1; if (p.vx) ay += s2 * 1400; else ax += s2 * 1400; } }
+    for (const c of game.ice) if (!c.landed) { const dx = h.x - c.x, dy = h.y - c.y, dd = Math.hypot(dx, dy) || 1; if (dd < c.r * 1.8) { ax += dx / dd * 1200; ay += dy / dd * 1200; } }
+    if (game.fish[0] && !game.pengs.some(p => p.warn <= 0)) { ax += (game.fish[0].x - h.x) * .8; ay += (game.fish[0].y - h.y) * .8; }
+    game.target = { x: h.x + ax * .15, y: h.y + ay * .15 }; };
+  for (let i = 0; i < 60 * 20; i++) { ai(); update(1 / 60); } render(); await shot('peng-20s');
+  for (let i = 0; i < 60 * 40 && !game.over; i++) { ai(); update(1 / 60); } render(); await shot('peng-60s');
+  // Sin moverse: lo tiran al agua y termina
+  game.target = null; for (let i = 0; i < 60 * 180 && !game.over; i++) update(1 / 60); await new Promise(r => setTimeout(r, 1200)); render(); await shot('peng-end', { over: game.over, endShown: !$('#endScr').hidden, best: save.best });
+});
+})();
+</script>
