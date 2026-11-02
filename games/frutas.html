@@ -161,15 +161,22 @@ addEventListener('resize', resize); resize();
 const groundY = () => H - Math.max(20, H * .04);
 
 function start() {
-  game = { t: 0, score: 0, hearts: MAXH, items: [], fx: [], spawnT: .8, over: false, shake: 0, x: W / 2, tx: W / 2, face: 'dino', faceT: 0 };
+  game = { t: 0, score: 0, hearts: MAXH, items: [], fx: [], spawnT: .8, over: false, shake: 0, x: W / 2, tx: W / 2, face: 'dino', faceT: 0, lastArr: 0, lastX: W / 2, inBasket: [] };
   $('#startScr').hidden = true; $('#endScr').hidden = true; $('#hud').hidden = false; paintHearts(); paintScore(); sfx.start();
 }
-const diff = () => game.t < 90 ? game.t / 90 : 1 + (game.t - 90) / 200;
+const diff = () => game.t < 120 ? game.t / 120 : 1 + (game.t - 120) / 300;   // sube despacio
 function spawn() {
   const d = diff(), r = Math.random(), m = U * .6;
-  const kind = r < Math.min(.32, .1 + d * .16) && game.t > 6 ? 'rock' : r > .94 ? 'star' : pick(KINDS);
-  // Con el tiempo caen más rápido y algunas bailan de lado a lado
-  game.items.push({ kind, x: rand(m, W - m), y: -U, vy: U * (2.2 + d * 2.6) * rand(.85, 1.15), sway: d > .4 && Math.random() < .35 ? rand(.6, 1.2) : 0, ph: rand(0, 6), rot: rand(-1, 1) });
+  const kind = r < Math.min(.22, .06 + d * .1) && game.t > 8 ? 'rock' : r > .93 ? 'star' : pick(KINDS);
+  // Nunca llegan dos al mismo tiempo: cada una llega con tiempo suficiente para que el dino camine de una a otra
+  const g = game, x = rand(m, W - m), by = groundY() - U * .95, y0 = -U;
+  let vy = U * (1.7 + d * 1.6) * rand(.9, 1.1);
+  const gap = .55 + Math.abs(x - g.lastX) / (U * 5.5), want = g.lastArr + gap, arr = g.t + (by - y0) / vy;
+  if (arr < want) vy = (by - y0) / Math.max(.6, want - g.t);
+  if (vy < U * 1.2) { g.spawnT = .25; return; }   // todavía no: espera un poquito
+  g.lastArr = g.t + (by - y0) / vy; g.lastX = x;
+  // Más adelante algunas bailan un poquito de lado a lado
+  g.items.push({ kind, x, y: y0, vy, sway: d > .7 && Math.random() < .25 ? rand(.3, .6) : 0, ph: rand(0, 6), rot: rand(-1, 1) });
 }
 function update(dt) {
   const g = game; if (!g || g.over) return;
@@ -178,7 +185,7 @@ function update(dt) {
   // El dino sigue al dedo
   if (keys.size) g.tx = Math.max(U, Math.min(W - U, g.tx + ((keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0)) * U * 9 * dt));
   g.x += (g.tx - g.x) * Math.min(1, dt * 14);
-  g.spawnT -= dt; if (g.spawnT <= 0) { spawn(); if (d > .7 && Math.random() < .3) spawn(); g.spawnT = Math.max(.32, 1.1 - d * .65) * rand(.8, 1.2); }
+  g.spawnT -= dt; if (g.spawnT <= 0) { g.spawnT = Math.max(.55, 1.5 - d * .8) * rand(.85, 1.15); spawn(); }
   const by = groundY() - U * .95, bw = U * 1.15;
   let rockNear = false;
   for (const it of g.items) {
@@ -187,13 +194,14 @@ function update(dt) {
     if (!it.done && it.y > by - U * .25 && it.y < by + U * .35 && Math.abs(it.x - g.x) < bw * .62) {
       it.done = true;
       if (it.kind === 'rock') { g.hearts--; paintHearts(); sfx.bonk(); g.shake = 9; g.face = 'dino-oh'; g.faceT = 1; g.fx.push({ t: 0, txt: '¡Auch!', x: g.x, y: by - U, bad: 1 }); if (g.hearts <= 0) return finishGame(); }
-      else { const p = it.kind === 'star' ? 5 : 1; g.score += p; paintScore(true); it.kind === 'star' ? sfx.star() : sfx.catch(); g.face = 'dino-yay'; g.faceT = .5; g.fx.push({ t: 0, txt: '+' + p, x: g.x, y: by - U * .6 }); for (let i = 0; i < (p > 1 ? 12 : 4); i++) g.fx.push({ t: 0, star: 1, x: g.x, y: by, vx: rand(-1, 1), vy: rand(-1.5, -.5) }); }
+      else { g.inBasket.push({ kind: it.kind, dx: it.x - g.x, t: 0 }); const p = it.kind === 'star' ? 5 : 1; g.score += p; paintScore(true); it.kind === 'star' ? sfx.star() : sfx.catch(); g.face = 'dino-yay'; g.faceT = .5; g.fx.push({ t: 0, txt: '+' + p, x: g.x, y: by - U * .6 }); for (let i = 0; i < (p > 1 ? 12 : 4); i++) g.fx.push({ t: 0, star: 1, x: g.x, y: by, vx: rand(-1, 1), vy: rand(-1.5, -.5) }); }
     }
     if (!it.done && it.y > groundY() - U * .2) { it.done = true; if (it.kind !== 'rock') g.fx.push({ t: 0, splat: it.kind, x: it.x, y: groundY() - U * .15 }); }
   }
   if (rockNear && !g.faceT) g.face = 'dino-oh'; else if (!g.faceT) g.face = 'dino';
   g.items = g.items.filter(i => !i.done);
   for (const f of g.fx) f.t += dt; g.fx = g.fx.filter(f => f.t < (f.splat ? 1.5 : 1));
+  for (const b of g.inBasket) b.t += dt; g.inBasket = g.inBasket.filter(b => b.t < .45);
   musicTick(performance.now(), 1 + Math.min(1, d) * .6);
 }
 function render() {
@@ -201,14 +209,17 @@ function render() {
   const g = game; if (!g) return;
   cx.save(); if (g.shake) cx.translate(rand(-g.shake, g.shake), rand(-g.shake, g.shake));
   for (const f of g.fx) if (f.splat) drawImg(f.splat, f.x, f.y, U * .9, { a: 1 - f.t / 1.5, rot: 1.4 });
+  const by = groundY();
+  // Primero el dino; las frutas van ENFRENTE (caen dentro de la canasta)
+  cx.fillStyle = 'rgba(30,60,20,.25)'; cx.beginPath(); cx.ellipse(g.x, by - 2, U * .8, U * .16, 0, 0, 7); cx.fill();
+  for (const it of g.items) { const s = it.kind === 'rock' ? U * 1.05 : U * .9; cx.fillStyle = 'rgba(30,60,20,.18)'; cx.beginPath(); cx.ellipse(it.x, by - 4, s * .3 * Math.min(1, it.y / H + .3), s * .1, 0, 0, 7); cx.fill(); }
+  drawImg(g.face, g.x, by + U * .05, U * 2.2, { bottom: 1 }) || drawImg('dino', g.x, by + U * .05, U * 2.2, { bottom: 1 });
+  // Fruta que acaba de entrar: se hunde en la canasta con un brinquito
+  for (const b of g.inBasket) { const k = b.t / .45, bx = g.x + b.dx * (1 - k), byy = by - U * 1.05 - Math.sin(k * Math.PI) * U * .25 + k * U * .2; cx.save(); cx.beginPath(); cx.rect(0, 0, W, by - U * .78); cx.clip(); drawImg(b.kind, bx, byy, U * .75 * (1 - k * .35)); cx.restore(); }
   for (const it of g.items) {
     const s = it.kind === 'rock' ? U * 1.05 : it.kind === 'star' ? U * .95 : U * .9;
-    cx.fillStyle = 'rgba(30,60,20,.18)'; cx.beginPath(); cx.ellipse(it.x, groundY() - 4, s * .3 * Math.min(1, it.y / H + .3), s * .1, 0, 0, 7); cx.fill();
     drawImg(it.kind, it.x, it.y, s, { rot: Math.sin(it.ph) * .25 * (it.kind === 'star' ? 2 : 1) });
   }
-  const by = groundY();
-  cx.fillStyle = 'rgba(30,60,20,.25)'; cx.beginPath(); cx.ellipse(g.x, by - 2, U * .8, U * .16, 0, 0, 7); cx.fill();
-  drawImg(g.face, g.x, by + U * .05, U * 2.2, { bottom: 1 }) || drawImg('dino', g.x, by + U * .05, U * 2.2, { bottom: 1 });
   for (const f of g.fx) { if (f.star) star(f.x + f.vx * f.t * 150, f.y + f.vy * f.t * 150 + f.t * f.t * 200, U * .15 * (1 - f.t)); else if (f.txt) text(f.txt, f.x, f.y - f.t * 60, U * .55, f.bad ? '#ff8fa8' : '#ffd23a', 1 - f.t); }
   if (g.t < 3) text('¡Mueve el dedo para atrapar!', W / 2, H * .3, U * .45, '#fff', Math.min(1, 3 - g.t));
   cx.restore();
