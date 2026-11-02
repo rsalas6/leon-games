@@ -1,0 +1,245 @@
+<title>Atrapa Frutas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: huerto a pantalla completa; el T-rex con su canasta sigue al dedo para atrapar frutas y esquivar piedras. Sin niveles: cada vez caen más y más rápido. */
+@font-face{font-family:'Lilita One';font-style:normal;font-weight:400;font-display:block;src:url(__UP__vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2) format('woff2')}
+:root{--ink:#2a1f3d;--sun:#ffd23a;--grass:#6cc63a;--red:#ff4d6d;--pix:'Lilita One','Arial Rounded MT Bold',sans-serif;color-scheme:light}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:#6cc63a;color:var(--ink);font-family:var(--pix);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;color:var(--ink)}
+.bg{position:fixed;inset:0;background:url(__UP__img/fruit/fruitbg-wide.webp) 50% 50%/cover no-repeat #6cc63a}
+@media (orientation:portrait){.bg{background-image:url(__UP__img/fruit/fruitbg-tall.webp)}}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.px{border:0;border-radius:18px;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 8px 0 4px rgba(42,31,61,.3)}
+.px:active{transform:translateY(4px);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3)}
+.ibtn{width:52px;height:52px;padding:0;display:grid;place-items:center;background:#fff}
+.ibtn svg{width:26px;height:26px;shape-rendering:crispEdges}
+.bar{position:fixed;left:0;right:0;top:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));pointer-events:none}
+.bar>*{pointer-events:auto}
+.side{display:flex;gap:14px;align-items:center}
+.side.end{justify-content:flex-end}
+#hud{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#score{display:flex;align-items:center;gap:6px;font-size:clamp(24px,4.4vw,38px);color:#fff;background:var(--ink);padding:2px 18px 4px 8px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+#score img{width:38px;height:38px;object-fit:contain}
+#score.bump{animation:bump .2s ease-out}
+@keyframes bump{50%{transform:scale(1.2)}}
+#hearts{display:flex;gap:4px}
+#hearts img{width:clamp(30px,5vw,44px);height:clamp(30px,5vw,44px);object-fit:contain;filter:drop-shadow(0 2px 0 var(--ink));transition:transform .2s,opacity .2s}
+#hearts img.off{opacity:.25;transform:scale(.7);filter:grayscale(1)}
+.over{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;background:rgba(42,31,61,.35)}
+.over h2{margin:0;font-weight:400;font-size:clamp(40px,9vw,92px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.over .pic{max-width:clamp(150px,30vmin,260px);max-height:30vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 8px 0 rgba(42,31,61,.3));animation:bob 1.6s ease-in-out infinite}
+.over .final{display:flex;align-items:center;gap:10px;font-size:clamp(28px,5.6vw,52px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.over .final img{width:58px;height:58px}
+.over .best{font-size:clamp(18px,3vw,26px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
+.go{min-width:clamp(150px,30vw,230px);height:clamp(76px,12vw,100px);background:var(--grass);display:flex;align-items:center;justify-content:center}
+.go svg{width:44px;height:44px}
+@keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-4deg)}}
+@media (max-width:620px){.bar{gap:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}.ibtn{width:44px;height:44px}.side{gap:8px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+
+<div class="bg" aria-hidden="true"></div>
+<canvas id="game"></canvas>
+
+<div class="bar">
+  <div class="side"><button class="px ibtn" id="homeBtn" aria-label="Volver a los juegos" hidden><svg viewBox="0 0 16 16"><path fill="#2a1f3d" d="M8 1h0l7 6v1h-2v7H9v-4H7v4H3V8H1V7z"/><path fill="#ff5d8f" d="M4 8h8v6h-2v-4H6v4H4z"/></svg></button></div>
+  <div id="hud" hidden><div id="score"><img alt="" src="__UP__img/fruit/apple.webp"><span id="scoreN">0</span></div><div id="hearts"></div></div>
+  <div class="side end"><button class="px ibtn" id="muteBtn" aria-label="Sonido"></button></div>
+</div>
+
+<div class="over" id="startScr">
+  <img class="pic" alt="" src="__UP__img/fruit/dino.webp">
+  <h2>¡ATRAPA FRUTAS!</h2>
+  <button class="px go" id="playBtn" aria-label="Jugar"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M4 2l10 6-10 6z"/></svg></button>
+</div>
+<div class="over" id="endScr" hidden>
+  <h2>¡MUY BIEN!</h2>
+  <div class="final"><img alt="" src="__UP__img/fruit/apple.webp"><span id="finalN">0</span></div>
+  <div class="best" id="bestTxt"></div>
+  <button class="px go" id="againBtn" aria-label="Jugar otra vez"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M8 2a6 6 0 1 1-5.6 8.2l2-.8A4 4 0 1 0 5.2 5.2L7 7H2V2l1.8 1.8A6 6 0 0 1 8 2z"/></svg></button>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+let save = { best: 0, muted: false };
+try { Object.assign(save, JSON.parse(localStorage.getItem('frutas')) || {}); } catch (e) {}
+const persist = () => { try { localStorage.setItem('frutas', JSON.stringify(save)); } catch (e) {} };
+
+/* ---------- Sonido (sintetizado, sin voz) ---------- */
+let actx = null;
+function unlockAudio() {
+  try {
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); const b = actx.createBufferSource(); b.buffer = actx.createBuffer(1, 1, 22050); b.connect(actx.destination); b.start(0); }
+    if (actx.state !== 'running') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { passive: true }));
+function beep(f, dur = .1, type = 'square', vol = .06, slide = 0, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + delay;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .02);
+  } catch (e) {}
+}
+function noise(dur, freq, vol, delay = 0) {
+  if (save.muted || !actx) return;
+  try {
+    const n = actx.createBufferSource(), b = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime + delay; f.type = 'lowpass'; f.frequency.value = freq; g.gain.value = vol;
+    n.buffer = b; n.connect(f).connect(g).connect(actx.destination); n.start(t);
+  } catch (e) {}
+}
+let combo = 0, comboT = 0;
+const sfx = {
+  tap: () => beep(520, .07, 'square', .05, 200),
+  swish: () => noise(.08, 2400, .05),
+  splat: () => { noise(.12, 700, .12); const k = Math.min(combo, 8); beep(440 * Math.pow(2, k / 12), .08, 'square', .045, 300, .02); },
+  big: () => { noise(.2, 500, .16); [0, 4, 7, 12].forEach((s, i) => beep(523 * Math.pow(2, s / 12), .1, 'square', .05, 0, i * .07)); },
+  hit: () => { noise(.06, 900, .08); beep(200, .08, 'triangle', .06, 80); },
+  miss: () => beep(330, .25, 'triangle', .06, -180),
+  heart: () => [784, 1047, 1319].forEach((f, i) => beep(f, .1, 'square', .045, 0, i * .07)),
+  over: () => [523, 440, 392, 330, 392, 523].forEach((f, i) => beep(f, .16, 'square', .05, 0, i * .14)),
+  start: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, .1, 'square', .05, 0, i * .08)),
+};
+// Musiquita de picnic, alegre y saltarina; se acelera cuando el juego se pone difícil
+const SONG = [0, 4, 7, 4, 9, 7, 4, 2, 0, 4, 7, 12, 9, 7, 5, 4], BASS = [0, 0, 5, 5, 7, 7, 0, 0];
+let songStep = 0, songNext = 0;
+function musicTick(now, speed) {
+  if (save.muted || !actx || document.hidden || now < songNext) return;
+  songNext = now + 200 / speed;
+  beep(523 * Math.pow(2, SONG[songStep % SONG.length] / 12), .14, 'square', .018);
+  if (songStep % 2 === 0) beep(131 * Math.pow(2, BASS[(songStep >> 1) % BASS.length] / 12), .22, 'triangle', .045);
+  songStep++;
+}
+const ICON_ON = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path d="M11 5h1v1h1v4h-1v1h-1zM13 3h1v1h1v8h-1v1h-1v-2h1V5h-1z"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M1 6h3l4-4h1v12H8l-4-4H1z"/><path fill="#ff5d8f" d="M10 5h2v1h1V5h2v2h-1v1h1v2h-2v-1h-1v1h-2V8h1V7h-1z"/></svg>';
+function paintMute() { $('#muteBtn').innerHTML = save.muted ? ICON_OFF : ICON_ON; $('#muteBtn').setAttribute('aria-label', save.muted ? 'Activar sonido' : 'Silenciar sonido'); }
+$('#muteBtn').addEventListener('click', e => { e.stopPropagation(); save.muted = !save.muted; persist(); paintMute(); sfx.tap(); });
+paintMute();
+if (window.LEON_HUB) { const b = $('#homeBtn'); b.hidden = false; b.addEventListener('click', () => { sfx.tap(); location.href = window.LEON_HUB; }); }
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+
+/* ---------- Dibujos ---------- */
+const HEART = '__UP__img/bugs/heart.webp', UPF = '__UP__img/fruit/';
+const KINDS = ['apple', 'banana', 'berry', 'orange', 'grapes', 'melon'];
+const NAMES = [...KINDS, 'star', 'rock', 'dino', 'dino-oh', 'dino-yay'];
+const IMG = {};
+const ready = Promise.all(NAMES.map(n => new Promise(res => { const im = new Image(); im.onload = im.onerror = () => { IMG[n] = im; res(); }; im.src = UPF + n + '.webp'; })));
+
+const cv = $('#game'), cx = cv.getContext('2d');
+let W = 0, H = 0, U = 60, game = null;
+function drawImg(n, x, y, w, opts = {}) {
+  const im = IMG[n]; if (!im || !im.width) return false;
+  const h = w * im.height / im.width; cx.save(); cx.globalAlpha = opts.a == null ? 1 : opts.a; cx.translate(x, y); if (opts.rot) cx.rotate(opts.rot); if (opts.flip) cx.scale(-1, 1); cx.drawImage(im, -w / 2, opts.bottom ? -h : -h / 2, w, h); cx.restore(); return true;
+}
+function paintHearts() { $('#hearts').innerHTML = Array.from({ length: MAXH }, (_, i) => `<img alt="" class="${i < game.hearts ? '' : 'off'}" src="${HEART}">`).join(''); }
+function paintScore(bump) { $('#scoreN').textContent = game.score; if (bump) { const s = $('#score'); s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); } }
+function text(txt, x, y, size, color, a = 1) { cx.save(); cx.globalAlpha = a; cx.font = `${Math.round(size)}px 'Lilita One', sans-serif`; cx.textAlign = 'center'; cx.lineWidth = Math.max(4, size * .14); cx.strokeStyle = '#2a1f3d'; cx.fillStyle = color; cx.strokeText(txt, x, y); cx.fillText(txt, x, y); cx.restore(); }
+function star(x, y, r, c = '#ffd23a') { cx.fillStyle = c; cx.strokeStyle = '#2a1f3d'; cx.lineWidth = 2; cx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; cx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } cx.closePath(); cx.fill(); cx.stroke(); }
+function finishGame() {
+  const g = game; g.over = true; sfx.over();
+  const best = g.score > save.best; if (best) { save.best = g.score; persist(); }
+  setTimeout(() => { $('#finalN').textContent = g.score; $('#bestTxt').textContent = best ? '¡NUEVO RÉCORD!' : 'Récord: ' + save.best; $('#endScr').hidden = false; $('#hud').hidden = true; }, 900);
+}
+
+const MAXH = 3;
+function resize() { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); U = Math.max(50, Math.min(W * .11, H * .13, 120)); }
+addEventListener('resize', resize); resize();
+const groundY = () => H - Math.max(20, H * .04);
+
+function start() {
+  game = { t: 0, score: 0, hearts: MAXH, items: [], fx: [], spawnT: .8, over: false, shake: 0, x: W / 2, tx: W / 2, face: 'dino', faceT: 0 };
+  $('#startScr').hidden = true; $('#endScr').hidden = true; $('#hud').hidden = false; paintHearts(); paintScore(); sfx.start();
+}
+const diff = () => game.t < 90 ? game.t / 90 : 1 + (game.t - 90) / 200;
+function spawn() {
+  const d = diff(), r = Math.random(), m = U * .6;
+  const kind = r < Math.min(.32, .1 + d * .16) && game.t > 6 ? 'rock' : r > .94 ? 'star' : pick(KINDS);
+  // Con el tiempo caen más rápido y algunas bailan de lado a lado
+  game.items.push({ kind, x: rand(m, W - m), y: -U, vy: U * (2.2 + d * 2.6) * rand(.85, 1.15), sway: d > .4 && Math.random() < .35 ? rand(.6, 1.2) : 0, ph: rand(0, 6), rot: rand(-1, 1) });
+}
+function update(dt) {
+  const g = game; if (!g || g.over) return;
+  g.t += dt; g.shake = Math.max(0, g.shake - dt * 20); g.faceT = Math.max(0, g.faceT - dt);
+  const d = diff();
+  // El dino sigue al dedo
+  if (keys.size) g.tx = Math.max(U, Math.min(W - U, g.tx + ((keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0)) * U * 9 * dt));
+  g.x += (g.tx - g.x) * Math.min(1, dt * 14);
+  g.spawnT -= dt; if (g.spawnT <= 0) { spawn(); if (d > .7 && Math.random() < .3) spawn(); g.spawnT = Math.max(.32, 1.1 - d * .65) * rand(.8, 1.2); }
+  const by = groundY() - U * .95, bw = U * 1.15;
+  let rockNear = false;
+  for (const it of g.items) {
+    it.y += it.vy * dt; it.ph += dt * 3; if (it.sway) it.x += Math.cos(it.ph) * U * it.sway * dt * 2;
+    if (it.kind === 'rock' && it.y > by - U * 2.5 && it.y < by && Math.abs(it.x - g.x) < bw * 1.2) rockNear = true;
+    if (!it.done && it.y > by - U * .25 && it.y < by + U * .35 && Math.abs(it.x - g.x) < bw * .62) {
+      it.done = true;
+      if (it.kind === 'rock') { g.hearts--; paintHearts(); sfx.bonk(); g.shake = 9; g.face = 'dino-oh'; g.faceT = 1; g.fx.push({ t: 0, txt: '¡Auch!', x: g.x, y: by - U, bad: 1 }); if (g.hearts <= 0) return finishGame(); }
+      else { const p = it.kind === 'star' ? 5 : 1; g.score += p; paintScore(true); it.kind === 'star' ? sfx.star() : sfx.catch(); g.face = 'dino-yay'; g.faceT = .5; g.fx.push({ t: 0, txt: '+' + p, x: g.x, y: by - U * .6 }); for (let i = 0; i < (p > 1 ? 12 : 4); i++) g.fx.push({ t: 0, star: 1, x: g.x, y: by, vx: rand(-1, 1), vy: rand(-1.5, -.5) }); }
+    }
+    if (!it.done && it.y > groundY() - U * .2) { it.done = true; if (it.kind !== 'rock') g.fx.push({ t: 0, splat: it.kind, x: it.x, y: groundY() - U * .15 }); }
+  }
+  if (rockNear && !g.faceT) g.face = 'dino-oh'; else if (!g.faceT) g.face = 'dino';
+  g.items = g.items.filter(i => !i.done);
+  for (const f of g.fx) f.t += dt; g.fx = g.fx.filter(f => f.t < (f.splat ? 1.5 : 1));
+  musicTick(performance.now(), 1 + Math.min(1, d) * .6);
+}
+function render() {
+  cx.clearRect(0, 0, W, H);
+  const g = game; if (!g) return;
+  cx.save(); if (g.shake) cx.translate(rand(-g.shake, g.shake), rand(-g.shake, g.shake));
+  for (const f of g.fx) if (f.splat) drawImg(f.splat, f.x, f.y, U * .9, { a: 1 - f.t / 1.5, rot: 1.4 });
+  for (const it of g.items) {
+    const s = it.kind === 'rock' ? U * 1.05 : it.kind === 'star' ? U * .95 : U * .9;
+    cx.fillStyle = 'rgba(30,60,20,.18)'; cx.beginPath(); cx.ellipse(it.x, groundY() - 4, s * .3 * Math.min(1, it.y / H + .3), s * .1, 0, 0, 7); cx.fill();
+    drawImg(it.kind, it.x, it.y, s, { rot: Math.sin(it.ph) * .25 * (it.kind === 'star' ? 2 : 1) });
+  }
+  const by = groundY();
+  cx.fillStyle = 'rgba(30,60,20,.25)'; cx.beginPath(); cx.ellipse(g.x, by - 2, U * .8, U * .16, 0, 0, 7); cx.fill();
+  drawImg(g.face, g.x, by + U * .05, U * 2.2, { bottom: 1 }) || drawImg('dino', g.x, by + U * .05, U * 2.2, { bottom: 1 });
+  for (const f of g.fx) { if (f.star) star(f.x + f.vx * f.t * 150, f.y + f.vy * f.t * 150 + f.t * f.t * 200, U * .15 * (1 - f.t)); else if (f.txt) text(f.txt, f.x, f.y - f.t * 60, U * .55, f.bad ? '#ff8fa8' : '#ffd23a', 1 - f.t); }
+  if (g.t < 3) text('¡Mueve el dedo para atrapar!', W / 2, H * .3, U * .45, '#fff', Math.min(1, 3 - g.t));
+  cx.restore();
+}
+const keys = new Set();
+addEventListener('keydown', e => { if (e.key.startsWith('Arrow')) { keys.add(e.key); e.preventDefault(); } });
+addEventListener('keyup', e => keys.delete(e.key));
+let dragging = false;
+cv.addEventListener('pointerdown', e => { e.preventDefault(); dragging = true; if (game) game.tx = Math.max(U, Math.min(W - U, e.clientX)); try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
+cv.addEventListener('pointermove', e => { if (dragging && game) game.tx = Math.max(U, Math.min(W - U, e.clientX)); });
+['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { dragging = false; }));
+sfx.catch = () => { beep(784, .06, 'square', .045); beep(1047, .1, 'square', .045, 0, .05); };
+sfx.star = () => [0, 4, 7, 12, 16].forEach((s2, i) => beep(523 * Math.pow(2, s2 / 12), .08, 'square', .05, 0, i * .05));
+sfx.bonk = () => { noise(.18, 500, .16); beep(180, .2, 'triangle', .07, -60); };
+
+let last = performance.now();
+(function loop(t) { const dt = Math.min(.05, (t - last) / 1000); last = t; update(dt); render(); requestAnimationFrame(loop); })(last);
+$('#playBtn').addEventListener('click', () => { unlockAudio(); start(); });
+$('#againBtn').addEventListener('click', () => { unlockAudio(); start(); });
+ready.then(() => { window.LEON_READY = true; });
+window.__frutas = { start, update, render, get game() { return game; } };
+if (location.hash === '#diag') ready.then(async () => {
+  const errs = []; addEventListener('error', e => errs.push(e.message));
+  const shot = (tag, info) => fetch('http://127.0.0.1:8799/', { method: 'POST', body: JSON.stringify({ tag, img: cv.toDataURL('image/png'), info: Object.assign({ ua: navigator.userAgent, errs, t: game && game.t, score: game && game.score, hearts: game && game.hearts, items: game && game.items.length }, info || {}) }) });
+  start();
+  // Va por la fruta más baja y se aleja de las piedras
+  const ai = () => { const by = groundY() - U * .95, fr = game.items.filter(i => i.kind !== 'rock' && i.y < by).sort((a, b) => b.y - a.y)[0], rk = game.items.filter(i => i.kind === 'rock' && i.y > by - U * 3 && i.y < by + U * .3); let tx = fr ? fr.x : game.tx; for (const r of rk) if (Math.abs(r.x - tx) < U * 1.4) tx = r.x + (tx > r.x ? 1 : -1) * U * 1.6; game.tx = Math.max(U, Math.min(W - U, tx)); };
+  for (let i = 0; i < 60 * 60; i++) { ai(); update(1 / 60); if (i === 60 * 20) { render(); await shot('fruit-20s'); } } render(); await shot('fruit-60s');
+  // Quieto debajo de las piedras: pierde y termina
+  for (let i = 0; i < 60 * 120 && !game.over; i++) { const r = game.items.find(x => x.kind === 'rock'); if (r) game.tx = r.x; update(1 / 60); } await new Promise(r => setTimeout(r, 1100)); render(); await shot('fruit-end', { over: game.over, endShown: !$('#endScr').hidden });
+});
+
+})();
+</script>

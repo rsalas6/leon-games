@@ -31,15 +31,17 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .t2{font-size:clamp(52px,min(12vw,13vh),130px);color:var(--sun);letter-spacing:.02em;-webkit-text-stroke:.06em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink),0 .14em .1em rgba(0,0,0,.25);animation:wob 3s ease-in-out infinite}
 @keyframes wob{50%{transform:rotate(-2deg) scale(1.03)}}
 
-.apps{display:grid;grid-template-columns:repeat(4,auto);justify-content:center;column-gap:clamp(22px,5vw,60px);row-gap:clamp(14px,3vh,32px)}
+.apps{display:grid;grid-template-columns:repeat(5,auto);justify-content:center;column-gap:clamp(22px,5vw,60px);row-gap:clamp(14px,3vh,32px)}
 .app{display:flex;flex-direction:column;align-items:center;gap:12px;text-decoration:none;color:#fff}
-.icon{width:clamp(76px,min(15vw,19vh),170px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
+.icon{width:clamp(72px,min(13vw,18vh),160px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
 .app:nth-child(2) .icon{animation-delay:-1s}
 .app:nth-child(3) .icon{animation-delay:-2s}
 .app:nth-child(4) .icon{animation-delay:-.5s}
 .app:nth-child(5) .icon{animation-delay:-1.5s}
 .app:nth-child(6) .icon{animation-delay:-2.5s}
 .app:nth-child(7) .icon{animation-delay:-.8s}
+.app:nth-child(8) .icon{animation-delay:-1.8s}
+.app:nth-child(9) .icon{animation-delay:-2.8s}
 @media (orientation:portrait){.apps{grid-template-columns:repeat(3,auto)}}
 .icon img{width:100%;height:100%;display:block;object-fit:cover}
 @keyframes float{50%{transform:translateY(-10px)}}
@@ -81,6 +83,8 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     <a class="app" href="zombito/" data-keys="zombito" aria-label="Zombito"><span class="icon"><img src="icons/zombito.webp" alt=""></span><span class="name">Zombito</span></a>
     <a class="app" href="bichos/" data-keys="bichos" aria-label="Aplasta Bichos"><span class="icon"><img src="icons/bichos.webp" alt=""></span><span class="name">Bichos</span></a>
     <a class="app" href="pinguinos/" data-keys="pinguinos" aria-label="Pingüinos"><span class="icon"><img src="icons/pinguinos.webp" alt=""></span><span class="name">Pingüinos</span></a>
+    <a class="app" href="cuerda/" data-keys="cuerda" aria-label="Brinca la Cuerda"><span class="icon"><img src="icons/cuerda.webp" alt=""></span><span class="name">Cuerda</span></a>
+    <a class="app" href="frutas/" data-keys="frutas" aria-label="Atrapa Frutas"><span class="icon"><img src="icons/frutas.webp" alt=""></span><span class="name">Frutas</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
   <button class="parent upd" id="updBtn">Actualizar</button>

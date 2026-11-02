@@ -20,3 +20,7 @@
   Cache-Control: no-cache
 /pinguinos/
   Cache-Control: no-cache
+/cuerda/
+  Cache-Control: no-cache
+/frutas/
+  Cache-Control: no-cache
