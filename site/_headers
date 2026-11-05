@@ -30,3 +30,7 @@
   Cache-Control: no-cache
 /rescate/
   Cache-Control: no-cache
+/bolos/
+  Cache-Control: no-cache
+/pinta/
+  Cache-Control: no-cache

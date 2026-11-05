@@ -29,17 +29,18 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 @keyframes bump{50%{transform:scale(1.18)}}
 #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 96px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));box-sizing:border-box}
 #levels{flex:1;min-height:0;width:100%;max-width:1100px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,18vw,200px),1fr));gap:clamp(16px,3vw,28px);padding:10px 10px 24px;box-sizing:border-box;align-content:start}
-.lv{position:relative;aspect-ratio:1;padding:0;overflow:visible;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.lv .em{font-size:clamp(46px,8vw,78px);line-height:1;filter:drop-shadow(0 4px 0 rgba(42,31,61,.25))}
-.lv .nm{font-size:clamp(15px,2.2vw,20px)}
-.lv b{position:absolute;left:10px;top:8px;font-weight:400;font-size:clamp(18px,2.6vw,24px);color:#fff;text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),0 4px 0 var(--ink)}
-.lv .star{position:absolute;right:-12px;top:-12px;width:36px;height:36px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+.lv{position:relative;aspect-ratio:1;padding:0;overflow:visible;background:#fff}
+.lv img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:13px;object-fit:cover;pointer-events:none}
+.lv>b{position:absolute;left:-12px;top:-12px;width:clamp(38px,5vw,48px);height:clamp(38px,5vw,48px);display:grid;place-items:center;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px var(--ink),0 4px 0 4px rgba(42,31,61,.3);font-weight:400;font-size:clamp(19px,2.8vw,26px);color:var(--ink)}
+.lv .nm{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);max-width:88%;overflow:hidden;text-overflow:ellipsis;background:rgba(255,255,255,.94);padding:3px 12px;border-radius:99px;box-shadow:0 0 0 3px var(--ink);font-size:clamp(13px,1.9vw,18px);white-space:nowrap}
+.lv .goals{position:absolute;right:8px;top:8px;display:flex;gap:1px;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.94);box-shadow:0 0 0 3px var(--ink);font-size:clamp(15px,2.2vw,21px);line-height:1.25}
+.lv .stars{position:absolute;right:-10px;bottom:-12px;display:flex;gap:1px}
+.lv .stars i{width:30px;height:30px;background:var(--sun);clip-path:polygon(50% 0,62% 34%,100% 36%,70% 58%,80% 100%,50% 76%,20% 100%,30% 58%,0 36%,38% 34%);filter:drop-shadow(0 3px 0 var(--ink))}
+.lv:active img{filter:brightness(1.1)}
 
 #colors{display:flex;gap:clamp(12px,2.4vw,20px);margin:0 0 clamp(12px,2.4vh,22px);padding:10px 18px;border-radius:99px;background:rgba(255,255,255,.85);box-shadow:0 0 0 4px var(--ink)}
 .col{width:clamp(40px,6vw,54px);height:clamp(40px,6vw,54px);border-radius:50%;padding:0}
 .col.on{transform:scale(1.18);box-shadow:0 0 0 4px var(--ink),0 0 0 9px #fff,0 0 0 12px var(--ink)}
-.lv .em{font-size:clamp(34px,6vw,58px);letter-spacing:-.1em}
-.lv .nm{color:#fff;-webkit-text-stroke:.1em var(--ink);paint-order:stroke fill}
 #goal{gap:14px}
 .gi{display:flex;align-items:center;gap:4px}
 .gi.ok{color:#2f9e44}
@@ -52,6 +53,8 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 #hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 9vh);z-index:30;transform:translateX(-50%);pointer-events:none}
 #hint svg{width:70px;height:70px;animation:tap 1s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(42,31,61,.4))}
 @keyframes tap{50%{transform:translate(6px,10px) scale(.9)}}
+#joy{position:fixed;left:0;top:0;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:rgba(255,255,255,.22);box-shadow:inset 0 0 0 5px rgba(255,255,255,.75),0 0 0 4px rgba(42,31,61,.35);pointer-events:none;z-index:30}
+#joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px #2a1f3d,0 6px 0 rgba(42,31,61,.35)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:950;width:100%;height:100%}
 #win{position:fixed;inset:0;z-index:960;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:26px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);pointer-events:none}
 #win .big{font-size:clamp(34px,8vw,76px);color:var(--sun);-webkit-text-stroke:.07em var(--ink);paint-order:stroke fill;text-shadow:0 .08em 0 var(--ink);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both;text-align:center}
@@ -79,6 +82,7 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 <main id="menu"><div id="colors"></div><div id="levels"></div></main>
 <div id="lvlLoad" hidden><b>Cargando…</b><span><i></i></span></div>
 <div id="hint" hidden><svg viewBox="0 0 32 32"><path d="M12 30c-3 0-5-2-6-4l-3-7c-.6-1.4 1.4-2.4 2.3-1.2L8 21V6a2 2 0 0 1 4 0v9-3a2 2 0 0 1 4 0v3-2a2 2 0 0 1 4 0v3-1a2 2 0 0 1 4 0v7c0 5-3 9-8 9z" fill="#fff" stroke="#2a1f3d" stroke-width="2.4" stroke-linejoin="round"/></svg></div>
+<div id="joy" hidden aria-hidden="true"><i></i></div>
 <canvas id="confetti" hidden></canvas>
 <div id="win" hidden>
   <div class="big" id="winTxt">¡LO LOGRASTE!</div>
@@ -193,13 +197,33 @@ function confetti() {
   const bits = Array.from({ length: 90 }, () => ({ x: Math.random() * W, y: -Math.random() * H * .6, v: rand(.6, 1.6), d: rand(-.4, .4), r: rand(0, 6), col: pick(['#ffd23a', '#ff5d8f', '#5ac8ff', '#6cc63a', '#fff']) })); const t0 = performance.now();
   (function f(t) { x.clearRect(0, 0, W, H); bits.forEach(b => { b.y += b.v; b.x += b.d; b.r += .1; x.fillStyle = b.col; x.save(); x.translate(b.x, b.y); x.rotate(b.r); x.fillRect(-2, -1, 4, 2); x.restore(); }); if (t - t0 < 3600 && !c.hidden) requestAnimationFrame(f); else c.hidden = true; })(t0);
 }
-// Dedo: punto del piso donde está tocando (el personaje va hacia allá)
+// Dedo: punto del piso que está bajo un punto de la pantalla
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 function groundAt(cx, cy) { ptr.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ptr, camera); const p = new THREE.Vector3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; }
-let finger = null, tapPt = null; // tapPt: un toque rápido (se suelta antes del siguiente cuadro)
-app.addEventListener('pointerdown', e => { e.preventDefault(); finger = { x: e.clientX, y: e.clientY }; tapPt = { ...finger }; $('#hint').hidden = true; try { app.setPointerCapture(e.pointerId); } catch (er) {} });
-app.addEventListener('pointermove', e => { if (finger) finger = { x: e.clientX, y: e.clientY }; });
-['pointerup', 'pointercancel'].forEach(ev => app.addEventListener(ev, () => { finger = null; }));
+/* Control tipo joystick (igual que en la Rana): donde se pone el dedo queda el centro; arrastrar desde ahí mueve en esa dirección */
+let joy = null, joyOn = true; // joyOn = false: el juego maneja el dedo a su manera (deslizar)
+const joyEl = $('#joy'), knob = joyEl.querySelector('i'), JOY_R = 60;
+app.addEventListener('pointerdown', e => {
+  e.preventDefault(); $('#hint').hidden = true; if (joy || !joyOn) return;
+  joy = { id: e.pointerId, ox: e.clientX, oy: e.clientY, dx: 0, dy: 0 };
+  joyEl.hidden = false; joyEl.style.transform = `translate(${e.clientX}px,${e.clientY}px)`; knob.style.transform = '';
+  try { app.setPointerCapture(e.pointerId); } catch (er) {}
+});
+app.addEventListener('pointermove', e => {
+  if (!joy || joy.id !== e.pointerId) return;
+  let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy; const l = Math.hypot(dx, dy);
+  if (l > JOY_R) { dx *= JOY_R / l; dy *= JOY_R / l; }
+  joy.dx = dx; joy.dy = dy; knob.style.transform = `translate(${dx}px,${dy}px)`;
+});
+['pointerup', 'pointercancel'].forEach(ev => app.addEventListener(ev, e => { if (joy && joy.id === e.pointerId) { joy = null; joyEl.hidden = true; } }));
+function joyOff() { joy = null; joyEl.hidden = true; }
+// Dirección pedida (pantalla: derecha = +x, arriba = -z); mag de 0 a 1
+function stick() {
+  let x = 0, z = 0;
+  if (joy) { const l = Math.hypot(joy.dx, joy.dy); if (l > 6) { const f = Math.min(1, l / JOY_R); x = joy.dx / l * f; z = joy.dy / l * f; } }
+  if (keys.has('ArrowLeft')) x = -1; if (keys.has('ArrowRight')) x = 1; if (keys.has('ArrowUp')) z = -1; if (keys.has('ArrowDown')) z = 1;
+  const mag = Math.min(1, Math.hypot(x, z)); return { x, z, mag };
+}
 const keys = new Set(); addEventListener('keydown', e => { if (e.key.startsWith('Arrow')) { keys.add(e.key); e.preventDefault(); } }); addEventListener('keyup', e => keys.delete(e.key));
 
 /* ---------- Dino Camión: un monster truck manejado por un T-rex ---------- */
@@ -378,7 +402,7 @@ function makeRamp(L, W, H) {
   const m = new THREE.Mesh(geo, [side, topM]); m.castShadow = true; m.receiveShadow = true;
   // UVs de la cara inclinada: a lo largo de la rampa
   const uv = geo.attributes.uv, pos = geo.attributes.position;
-  for (let i = 0; i < uv.count; i++) { if (geo.groups.length > 1 && i >= geo.groups[1].start) uv.setXY(i, (pos.getX(i) + W / 2) / W, 1 - (pos.getZ(i) + L / 2) / L); else uv.setXY(i, (pos.getZ(i) + L / 2) / 3, pos.getY(i) / H); }
+  for (let i = 0; i < uv.count; i++) { if (geo.groups.length > 1 && i >= geo.groups[1].start) uv.setXY(i, (pos.getX(i) + W / 2) / W, (pos.getZ(i) + L / 2) / L); else uv.setXY(i, (pos.getZ(i) + L / 2) / 3, pos.getY(i) / H); }
   const g = new THREE.Group(); g.add(m);
   // Tablón de atrás oscuro (la caída)
   return g;
@@ -575,7 +599,7 @@ function startNow(n) {
   $('#lvl').textContent = 'NIVEL ' + (n + 1);
   $('#menu').hidden = true; $('#menuBg').hidden = true; $('#title').hidden = true; $('#win').hidden = true;
   app.hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false; $('#hint').hidden = false;
-  resize(); music(true, SONG, BASS, 200); engineOn(true); finger = null;
+  resize(); music(true, SONG, BASS, 200); engineOn(true); joyOff();
   updateCamera(1);
   banner(Object.keys(L.goals).map(k => GOAL_ICON[k]).join(' ') + ' ¡VAMOS!'); sfx.go();
 }
@@ -646,10 +670,9 @@ const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
 const VMAX = 12.5, GRAV = 18;
 function update(dt) {
   const g = game, t = g.truck, L = g.L, A = g.A; g.t += dt;
-  // Hacia dónde quiere ir: el dedo (o las flechas del teclado)
-  let tx = null, tz = null;
-  if (finger && g.phase === 'play') { const p = groundAt(finger.x, finger.y); if (p) { tx = p.x; tz = p.z; } }
-  if (keys.size && g.phase === 'play') { const kx = (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0), kz = (keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0); if (kx || kz) { tx = t.x + kx * 8; tz = t.z + kz * 8; } }
+  // Hacia dónde quiere ir: el joystick (o las flechas); más lejos el dedo = más rápido
+  let tx = null, tz = null; const st = stick();
+  if (st.mag > .08 && g.phase === 'play') { tx = t.x + st.x * 8; tz = t.z + st.z * 8; }
   if (g.auto) { tx = g.auto.x; tz = g.auto.z; }
   let want = 0;
   if (tx != null) {
@@ -773,9 +796,8 @@ function buildMenu() {
   const box = $('#levels'); box.innerHTML = '';
   LEVELS.forEach((L, n) => {
     const T = THEMES[L.theme], b = document.createElement('button'); b.className = 'px lv';
-    b.style.background = L.night ? 'linear-gradient(#2a3a78,#0b1640)' : `linear-gradient(${T.sky[0]} 0 45%, ${hex(T.ground)} 45%)`;
     b.setAttribute('aria-label', 'Nivel ' + (n + 1) + ' ' + T.name);
-    b.innerHTML = `<span class="em">${Object.keys(L.goals).map(k => GOAL_ICON[k]).join('')}</span><span class="nm">${T.name}</span><b>${n + 1}</b>` + (save.done[n] ? '<span class="star"></span>' : '');
+    b.innerHTML = `<img alt="" src="__UP__img/cards/truck-${L.night ? 'noche' : L.theme}.webp"><b>${n + 1}</b><span class="goals">${Object.keys(L.goals).map(k => GOAL_ICON[k]).join('')}</span>` + (save.done[n] ? '<span class="stars"><i></i></span>' : '');
     b.addEventListener('click', () => { sfx.tap(); start(n); });
     box.appendChild(b);
   });

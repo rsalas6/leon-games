@@ -32,8 +32,10 @@ button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:no
 .over .final{display:flex;align-items:center;gap:10px;font-size:clamp(28px,5.6vw,52px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
 .over .final img{width:58px;height:58px}
 .over .best{font-size:clamp(18px,3vw,26px);color:#fff;-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
-.go{min-width:clamp(150px,30vw,230px);height:clamp(76px,12vw,100px);background:var(--grass);display:flex;align-items:center;justify-content:center}
-.go svg{width:44px;height:44px}
+.go{min-width:clamp(190px,36vw,280px);height:clamp(92px,14vw,124px);background:var(--grass);display:flex;align-items:center;justify-content:center;animation:pulse 1.3s ease-in-out infinite}
+.go svg{width:56px;height:56px}
+@keyframes pulse{50%{transform:scale(1.07)}}
+#startScr{cursor:pointer}
 @keyframes pop{from{transform:scale(.2)}70%{transform:scale(1.15)}to{transform:none}}
 @keyframes bob{50%{transform:translateY(-10px) rotate(-4deg)}}
 @media (max-width:620px){.bar{gap:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}.ibtn{width:44px;height:44px}.side{gap:8px}}
@@ -52,6 +54,7 @@ button{font-family:var(--pix);touch-action:manipulation;-webkit-touch-callout:no
 <div class="over" id="startScr">
   <img class="pic" alt="" src="__UP__img/fruit/dino.webp">
   <h2>¡ATRAPA FRUTAS!</h2>
+  <div class="best" id="bestStart"></div>
   <button class="px go" id="playBtn" aria-label="Jugar"><svg viewBox="0 0 16 16" fill="#2a1f3d"><path d="M4 2l10 6-10 6z"/></svg></button>
 </div>
 <div class="over" id="endScr" hidden>
@@ -237,8 +240,11 @@ sfx.bonk = () => { noise(.18, 500, .16); beep(180, .2, 'triangle', .07, -60); };
 
 let last = performance.now();
 (function loop(t) { const dt = Math.min(.05, (t - last) / 1000); last = t; update(dt); render(); requestAnimationFrame(loop); })(last);
-$('#playBtn').addEventListener('click', () => { unlockAudio(); start(); });
-$('#againBtn').addEventListener('click', () => { unlockAudio(); start(); });
+// Tocar en cualquier parte de la portada empieza; al terminar, el botón espera un momento (para que un toque del juego no lo salte)
+$('#startScr').addEventListener('click', () => { if ($('#startScr').hidden) return; unlockAudio(); start(); });
+let endAt = 0; new MutationObserver(() => { if (!$('#endScr').hidden) endAt = performance.now(); }).observe($('#endScr'), { attributes: true, attributeFilter: ['hidden'] });
+$('#againBtn').addEventListener('click', () => { if (performance.now() - endAt < 900) return; unlockAudio(); start(); });
+if (save.best) $('#bestStart').textContent = '🏆 Récord: ' + save.best;
 ready.then(() => { window.LEON_READY = true; });
 window.__frutas = { start, update, render, get game() { return game; } };
 if (location.hash === '#diag') ready.then(async () => {
