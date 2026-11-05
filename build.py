@@ -24,6 +24,8 @@ PAGES = [
     ('games/frutas.html', 'frutas/index.html', '../'),
     ('games/topos.html', 'topos/index.html', '../'),
     ('games/colorear.html', 'colorear/index.html', '../'),
+    ('games/camion.html', 'camion/index.html', '../'),
+    ('games/rescate.html', 'rescate/index.html', '../'),
 ]
 APP_NAME = 'Juegos de León'
 # iOS home-screen apps (black-translucent status bar) report a viewport shorter than the screen by the status bar height,

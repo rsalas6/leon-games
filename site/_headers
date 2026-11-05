@@ -26,3 +26,7 @@
   Cache-Control: no-cache
 /colorear/
   Cache-Control: no-cache
+/camion/
+  Cache-Control: no-cache
+/rescate/
+  Cache-Control: no-cache
