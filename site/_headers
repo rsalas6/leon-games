@@ -22,3 +22,5 @@
   Cache-Control: no-cache
 /frutas/
   Cache-Control: no-cache
+/topos/
+  Cache-Control: no-cache
