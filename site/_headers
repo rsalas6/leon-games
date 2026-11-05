@@ -24,3 +24,5 @@
   Cache-Control: no-cache
 /topos/
   Cache-Control: no-cache
+/colorear/
+  Cache-Control: no-cache
