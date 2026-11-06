@@ -28,6 +28,9 @@ PAGES = [
     ('games/rescate.html', 'rescate/index.html', '../'),
     ('games/bolos.html', 'bolos/index.html', '../'),
     ('games/pinta.html', 'pinta/index.html', '../'),
+    ('games/moto.html', 'moto/index.html', '../'),
+    ('games/vuela.html', 'vuela/index.html', '../'),
+    ('games/submarino.html', 'submarino/index.html', '../'),
 ]
 APP_NAME = 'Juegos de León'
 # iOS home-screen apps (black-translucent status bar) report a viewport shorter than the screen by the status bar height,
@@ -103,13 +106,15 @@ def main():
         ],
     }, ensure_ascii=False, indent=2))
     dirs = [out.rsplit('/', 1)[0] + '/' for _, out, up in PAGES if up]
-    files = ['./'] + dirs
+    files = ['./']
     for d, _, fs in os.walk(SITE):
         for f in fs:
             rel = os.path.relpath(os.path.join(d, f), SITE).replace(os.sep, '/')
-            # Only the core is stored at install; game files (models, pictures) are stored when a game first needs them
-            on_demand = rel.startswith(('models/', 'img/puzzle/', 'img/hole/', 'img/menus/', 'img/zomb/', 'img/bugs/', 'img/penguin/', 'img/fruit/', 'img/mole/', 'img/color/', 'img/cards/'))
-            if rel not in ('sw.js', '_headers', 'version.json') and not f.startswith('.') and not on_demand:
+            # Only the hub is stored at install (its page, game icons, art and fonts). Each game (its page, three.js,
+            # models, pictures) is downloaded the first time it is opened and then kept for offline play.
+            core = rel in ('index.html', 'manifest.webmanifest', 'icons/icon-192.png') or rel.startswith(('img/hub3d-', 'img/splash-', 'vendor/fonts')) \
+                or (rel.startswith('icons/') and rel.endswith('.webp'))
+            if core and not f.startswith('.'):
                 files.append(rel)
     write(os.path.join(SITE, 'version.json'), json.dumps({'v': version}))  # read by the hub's update button
     sw = read('sw.template.js').replace('__VERSION__', version).replace('__FILES__', ', '.join(f"'{f}'" for f in sorted(files)))

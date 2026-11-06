@@ -34,3 +34,9 @@
   Cache-Control: no-cache
 /pinta/
   Cache-Control: no-cache
+/moto/
+  Cache-Control: no-cache
+/vuela/
+  Cache-Control: no-cache
+/submarino/
+  Cache-Control: no-cache

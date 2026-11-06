@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261105122215';</script>
+<script>window.LEON_VERSION='20261106052648';</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -39,12 +39,12 @@ img{-webkit-user-drag:none}
 .page{position:relative;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,3.4vh,40px);overflow-y:auto;padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 44px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:center;line-height:.95;text-align:center}
 .t1{font-size:clamp(22px,4.6vw,40px);color:#fff;letter-spacing:.06em;-webkit-text-stroke:.09em var(--ink);paint-order:stroke fill;text-shadow:0 .1em 0 var(--ink)}
-.t2{font-size:clamp(44px,min(10vw,10vh),110px);color:var(--sun);letter-spacing:.02em;-webkit-text-stroke:.06em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink),0 .14em .1em rgba(0,0,0,.25);animation:wob 3s ease-in-out infinite}
+.t2{font-size:clamp(40px,min(9vw,8.5vh),100px);color:var(--sun);letter-spacing:.02em;-webkit-text-stroke:.06em var(--ink);paint-order:stroke fill;text-shadow:0 .07em 0 var(--ink),0 .14em .1em rgba(0,0,0,.25);animation:wob 3s ease-in-out infinite}
 @keyframes wob{50%{transform:rotate(-2deg) scale(1.03)}}
 
-.apps{display:grid;grid-template-columns:repeat(5,auto);justify-content:center;column-gap:clamp(18px,4vw,52px);row-gap:clamp(12px,2.6vh,28px)}
+.apps{display:grid;grid-template-columns:repeat(6,auto);justify-content:center;column-gap:clamp(14px,3vw,44px);row-gap:clamp(10px,2.2vh,24px)}
 .app{display:flex;flex-direction:column;align-items:center;gap:12px;text-decoration:none;color:#fff}
-.icon{width:clamp(68px,min(13vw,16vh),150px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
+.icon{width:clamp(58px,min(11vw,15vh),140px);aspect-ratio:1;max-width:100%;border-radius:24%;overflow:hidden;background:#fff;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--ink),0 14px 0 6px rgba(42,31,61,.35),0 24px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;transition:transform .12s}
 .app:nth-child(2) .icon{animation-delay:-1s}
 .app:nth-child(3) .icon{animation-delay:-2s}
 .app:nth-child(4) .icon{animation-delay:-.5s}
@@ -53,13 +53,13 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
 .app:nth-child(7) .icon{animation-delay:-.8s}
 .app:nth-child(8) .icon{animation-delay:-1.8s}
 .app:nth-child(9) .icon{animation-delay:-2.8s}
-@media (orientation:portrait){.apps{grid-template-columns:repeat(4,auto)}.icon{width:clamp(64px,min(19vw,13vh),150px)}}
+@media (orientation:portrait){.apps{grid-template-columns:repeat(4,auto)}.icon{width:clamp(58px,min(18vw,10.5vh),140px)}}
 .icon img{width:100%;height:100%;display:block;object-fit:cover}
 @keyframes float{50%{transform:translateY(-10px)}}
 .app:active .icon{transform:scale(.92);animation:none}
 .app:focus-visible{outline:none}
 .app:focus-visible .icon{box-shadow:0 0 0 6px var(--sun),0 0 0 10px var(--ink)}
-.name{font-size:clamp(16px,min(3vw,3.6vh),28px);letter-spacing:.04em;white-space:nowrap;-webkit-text-stroke:.12em var(--ink);paint-order:stroke fill;text-shadow:0 .12em 0 var(--ink)}
+.name{font-size:clamp(14px,min(2.5vw,3.1vh),24px);letter-spacing:.04em;white-space:nowrap;-webkit-text-stroke:.12em var(--ink);paint-order:stroke fill;text-shadow:0 .12em 0 var(--ink)}
 
 .parent{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);border:0;border-radius:99px;background:rgba(42,31,61,.72);color:#fff;font-family:var(--body);font-weight:800;font-size:13px;padding:9px 16px;cursor:pointer}
 .upd{right:auto;left:max(14px,env(safe-area-inset-left,0px))}
@@ -159,6 +159,9 @@ h1{margin:0;font-weight:400;display:flex;flex-direction:column;align-items:cente
     <a class="app" href="rescate/" data-keys="dinoRescue" aria-label="Mamá Dino"><span class="icon"><img src="icons/rescate.webp" alt=""></span><span class="name">Mamá Dino</span></a>
     <a class="app" href="bolos/" data-keys="dinoBolos" aria-label="Dino Bolos"><span class="icon"><img src="icons/bolos.webp" alt=""></span><span class="name">Bolos</span></a>
     <a class="app" href="pinta/" data-keys="dinoPinta" aria-label="Pinta con Dino"><span class="icon"><img src="icons/pinta.webp" alt=""></span><span class="name">Pinta</span></a>
+    <a class="app" href="moto/" data-keys="dinoMoto" aria-label="Dino Moto"><span class="icon"><img src="icons/moto.webp" alt=""></span><span class="name">Moto</span></a>
+    <a class="app" href="vuela/" data-keys="dinoVuela" aria-label="Dino Vuela"><span class="icon"><img src="icons/vuela.webp" alt=""></span><span class="name">Vuela</span></a>
+    <a class="app" href="submarino/" data-keys="dinoSub" aria-label="Dino Submarino"><span class="icon"><img src="icons/submarino.webp" alt=""></span><span class="name">Submarino</span></a>
   </nav>
   <button class="parent" id="helpBtn">Instalar en el iPad</button>
   <button class="parent upd" id="updBtn">Actualizar</button>

@@ -1,9 +1,9 @@
 // Offline support with on-demand loading:
-// - CORE (pages, fonts, icons, loading screen, hub art) is stored when the app is installed.
-// - Everything else (3D models, game pictures) is stored the first time a game asks for it, so each game only
-//   downloads its own files when it is opened, and then keeps working offline.
-const CACHE = 'leon-games-20261105122215';
-const CORE = ['./', 'bichos/', 'bichos/index.html', 'bolos/', 'bolos/index.html', 'camion/', 'camion/index.html', 'colorear/', 'colorear/index.html', 'dino-hide/', 'dino-hide/index.html', 'dino-hole/', 'dino-hole/index.html', 'dino-puzzle/', 'dino-puzzle/index.html', 'dino-race/', 'dino-race/index.html', 'frutas/', 'frutas/index.html', 'icons/apple-touch-icon.png', 'icons/bichos.webp', 'icons/bolos.webp', 'icons/camion.webp', 'icons/colorear.webp', 'icons/dino-hide.webp', 'icons/dino-hole.webp', 'icons/dino-puzzle.webp', 'icons/dino-race.webp', 'icons/frutas.webp', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/pinguinos.webp', 'icons/pinta.webp', 'icons/rescate.webp', 'icons/topos.webp', 'icons/zombito.webp', 'img/hide/card-ciudad.webp', 'img/hide/card-desierto.webp', 'img/hide/card-jardin.webp', 'img/hide/card-nieve.webp', 'img/hide/card-noche.webp', 'img/hide/card-playa.webp', 'img/hide/card-volcan.webp', 'img/hide/count-dino.webp', 'img/hub3d-tall.webp', 'img/hub3d-wide.webp', 'img/splash-tall.webp', 'img/splash-wide.webp', 'index.html', 'manifest.webmanifest', 'pinguinos/', 'pinguinos/index.html', 'pinta/', 'pinta/index.html', 'rescate/', 'rescate/index.html', 'topos/', 'topos/index.html', 'vendor/GLTFLoader.js', 'vendor/SkeletonUtils.js', 'vendor/fonts.css', 'vendor/fonts/XRXV3I6Li01BKofINeaBTMnFcQ.woff2', 'vendor/fonts/XRXV3I6Li01BKofIO-aBTMnFcQIG.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2', 'vendor/three.min.js', 'zombito/', 'zombito/index.html'];
+// - CORE (the hub: its page, game icons, hub art, fonts) is stored when the app is installed.
+// - Each game (its page, three.js, 3D models, pictures) is stored the first time it is opened, so only what is
+//   played gets downloaded, and then it keeps working offline.
+const CACHE = 'leon-games-20261106052648';
+const CORE = ['./', 'icons/bichos.webp', 'icons/bolos.webp', 'icons/camion.webp', 'icons/colorear.webp', 'icons/dino-hide.webp', 'icons/dino-hole.webp', 'icons/dino-puzzle.webp', 'icons/dino-race.webp', 'icons/frutas.webp', 'icons/icon-192.png', 'icons/moto.webp', 'icons/pinguinos.webp', 'icons/pinta.webp', 'icons/rescate.webp', 'icons/submarino.webp', 'icons/topos.webp', 'icons/vuela.webp', 'icons/zombito.webp', 'img/hub3d-tall.webp', 'img/hub3d-wide.webp', 'img/splash-tall.webp', 'img/splash-wide.webp', 'index.html', 'manifest.webmanifest', 'vendor/fonts.css', 'vendor/fonts/XRXV3I6Li01BKofINeaBTMnFcQ.woff2', 'vendor/fonts/XRXV3I6Li01BKofIO-aBTMnFcQIG.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2', 'vendor/fonts/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2'];
 self.addEventListener('install', e => {
   // cache: 'reload' skips the browser's HTTP cache so a new version never stores old copies
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
@@ -16,7 +16,7 @@ self.addEventListener('activate', e => {
       if (k === CACHE) continue;
       const old = await caches.open(k);
       for (const req of await old.keys()) {
-        if (req.mode === 'navigate' || coreUrls.has(req.url) || /\/(index\.html)?$/.test(new URL(req.url).pathname)) continue;
+        if (coreUrls.has(req.url)) continue; // the hub comes fresh; game pages and files already opened stay (pages refresh online)
         if (!(await keep.match(req))) { const r = await old.match(req); if (r) await keep.put(req, r); }
       }
       await caches.delete(k);

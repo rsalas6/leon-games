@@ -1,7 +1,7 @@
 // Offline support with on-demand loading:
-// - CORE (pages, fonts, icons, loading screen, hub art) is stored when the app is installed.
-// - Everything else (3D models, game pictures) is stored the first time a game asks for it, so each game only
-//   downloads its own files when it is opened, and then keeps working offline.
+// - CORE (the hub: its page, game icons, hub art, fonts) is stored when the app is installed.
+// - Each game (its page, three.js, 3D models, pictures) is stored the first time it is opened, so only what is
+//   played gets downloaded, and then it keeps working offline.
 const CACHE = 'leon-games-__VERSION__';
 const CORE = [__FILES__];
 self.addEventListener('install', e => {
@@ -16,7 +16,7 @@ self.addEventListener('activate', e => {
       if (k === CACHE) continue;
       const old = await caches.open(k);
       for (const req of await old.keys()) {
-        if (req.mode === 'navigate' || coreUrls.has(req.url) || /\/(index\.html)?$/.test(new URL(req.url).pathname)) continue;
+        if (coreUrls.has(req.url)) continue; // the hub comes fresh; game pages and files already opened stay (pages refresh online)
         if (!(await keep.match(req))) { const r = await old.match(req); if (r) await keep.put(req, r); }
       }
       await caches.delete(k);

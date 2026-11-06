@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juegos de León">
 <meta name="theme-color" content="#5ac8ff">
-<script>window.LEON_VERSION='20261105122215';window.LEON_WAIT=true;</script>
+<script>window.LEON_VERSION='20261106052648';window.LEON_WAIT=true;</script>
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -55,6 +55,10 @@ h1{margin:0;font-weight:400;font-size:clamp(28px,5.4vw,50px);color:var(--sun);le
 .prog{width:clamp(110px,22vw,220px);height:20px;border-radius:99px;background:#eee;box-shadow:inset 0 0 0 3px var(--ink);overflow:hidden;display:block}
 .prog i{display:block;height:100%;transition:width .2s}
 .pc{font-size:.8em;min-width:2.6em}
+.world{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:8px 20px;border-radius:99px;background:rgba(255,255,255,.92);box-shadow:0 0 0 4px var(--ink);font-size:clamp(20px,3vw,28px)}
+.world i{font-style:normal;font-size:.8em}
+.lv.next{animation:nextp 1.1s ease-in-out infinite}
+@keyframes nextp{50%{transform:scale(1.06)}}
 
 #lvlLoad{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(42,31,61,.55);color:#fff;font-size:clamp(28px,6vw,44px);-webkit-text-stroke:.08em var(--ink);paint-order:stroke fill}
 #lvlLoad span{width:min(60vw,360px);height:22px;padding:4px;box-sizing:border-box;border-radius:99px;background:var(--ink);box-shadow:0 0 0 4px #fff}
@@ -363,11 +367,13 @@ const keys = new Set(); addEventListener('keydown', e => { if (e.key.startsWith(
 /* ---------- Pinta con Dino: desliza y el dino resbala hasta chocar, pintando el piso. ¡Píntalo todo! ---------- */
 joyOn = false;
 const SONG = [0, 7, 4, 7, 9, 7, 4, 2, 0, 4, 2, -3, 0, 2, 4, 7], BASS = [0, 0, 5, 5, -3, -3, 7, 7];
-// Tableros: tamaño (sin la orilla) y cuántos deslizones tiene la solución
-const LEVELS = [[5, 5, 4], [5, 6, 5], [6, 6, 6], [6, 7, 7], [7, 7, 8], [7, 8, 9], [8, 8, 10], [8, 9, 11], [9, 9, 12], [9, 10, 13], [10, 10, 14], [10, 11, 16]].map(([w, h, n], i) => ({ w, h, n, seed: 101 + i * 37 }));
+// 60 tableros en 5 mundos de 12: cada mundo empieza un poco más grande. Tamaño (sin la orilla) y cuántos deslizones tiene la solución
+const WORLDS = 5, PER = 12;
+const LEVELS = Array.from({ length: WORLDS * PER }, (_, i) => { const w = i / PER | 0, k = i % PER, size = 4 + w + (k / 3 | 0); return { w: size, h: size + (k % 2), n: 3 + w * 2 + (k >> 1), seed: 101 + i * 37, world: w }; });
 const PALS = [
   { wall: 0x4fb83a, wall2: 0x62c84a, paint: 0xff5d8f, floor: 0xfff4e4, dino: 0xff9a2e }, { wall: 0x3f86c8, wall2: 0x5ac8ff, paint: 0xffd23a, floor: 0xf4f8ff, dino: 0x5cc241 },
   { wall: 0x8a5ad8, wall2: 0xa98bff, paint: 0xff9a2e, floor: 0xfaf4ff, dino: 0x5cc241 }, { wall: 0xff6f91, wall2: 0xff9ab0, paint: 0x3fb8e8, floor: 0xfff4f6, dino: 0x5cc241 },
+  { wall: 0xff9a2e, wall2: 0xffb85a, paint: 0x8a5ad8, floor: 0xfffaf0, dino: 0x5cc241 },
 ];
 const psfx = {
   slide: n => beep(300 + n * 40, .14, 'triangle', .05, 300),
@@ -397,7 +403,7 @@ function makeBoard(L) {
     const paint = new Set([sx + ',' + sy]); let px = sx, py = sy;
     for (const di of moves) { const r = slide(g, px, py, DIRS[di]); r.path.forEach(([a, b]) => paint.add(a + ',' + b)); px = r.x; py = r.y; }
     let floor = 0; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (!g[yy][xx]) floor++;
-    if (paint.size === floor && floor >= L.w * L.h * .4) {
+    if (paint.size === floor && floor >= L.w * L.h * (tr < 250 ? .4 : .28)) {
       // Recorta las filas y columnas que son pura pared (deja una orilla de una)
       let x0 = W, x1 = 0, y0 = H, y1 = 0; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (!g[yy][xx]) { x0 = Math.min(x0, xx); x1 = Math.max(x1, xx); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy); }
       const g2 = g.slice(y0 - 1, y1 + 2).map(r => r.slice(x0 - 1, x1 + 2));
@@ -415,7 +421,7 @@ const TILE = new THREE.BoxGeometry(.94, .1, .94);
 function buildWorld(L, n) {
   if (world) scene.remove(world);
   world = new THREE.Group(); scene.add(world);
-  const P = PALS[n % PALS.length], b = game.b;
+  const P = PALS[LEVELS[n].world % PALS.length], b = game.b;
   scene.background = skyTex('#8fd8ff', '#effcff'); scene.fog = null;
   hemi.intensity = .85; hemi.color.setHex(0xffffff); hemi.groundColor.setHex(0xd0c0ff); sun.intensity = .7; sun.position.set(-5, 14, 8); sun.target.position.set(0, 0, 0);
   // Base del tablero
@@ -443,7 +449,7 @@ function startNow(n) {
   const L = LEVELS[n], b = makeBoard(L);
   game = { n, L, b, t: 0, phase: 'play', x: b.sx, y: b.sy, painted: new Set(), anim: null, queue: [], combo: 0, idle: 0 };
   buildWorld(L, n);
-  const d = makeAnimal('trex', PALS[n % PALS.length].dino); fit(d.userData.model, 1.35, 1.25); d.userData.model.scale.x *= 1.6; d.userData.model.scale.y *= 1.35; world.add(d); play(d, 'idle'); game.dino = d;
+  const d = makeAnimal('trex', PALS[LEVELS[n].world % PALS.length].dino); fit(d.userData.model, 1.35, 1.25); d.userData.model.scale.x *= 1.6; d.userData.model.scale.y *= 1.35; world.add(d); play(d, 'idle'); game.dino = d;
   d.position.copy(pos3(b.sx, b.sy)); d.rotation.y = Math.PI;
   paintTile(b.sx, b.sy, true);
   paintHud();
@@ -452,10 +458,10 @@ function startNow(n) {
   app.hidden = false; $('#hud').hidden = false; $('#backBtn').hidden = false; $('#hint').hidden = false; $('#resetBtn').hidden = false;
   resize(); music(true, SONG, BASS, 250); framing();
 }
-function paintHud() { const g = game, p = Math.round(g.painted.size / g.b.floor * 100); $('#goal').innerHTML = `<span class="prog"><i style="width:${p}%;background:${'#' + new THREE.Color(PALS[g.n % PALS.length].paint).getHexString()}"></i></span><span class="pc">${p}%</span>`; }
+function paintHud() { const g = game, p = Math.round(g.painted.size / g.b.floor * 100); $('#goal').innerHTML = `<span class="prog"><i style="width:${p}%;background:${'#' + new THREE.Color(PALS[LEVELS[g.n].world % PALS.length].paint).getHexString()}"></i></span><span class="pc">${p}%</span>`; }
 function paintTile(x, y, quiet) {
   const g = game, k = x + ',' + y; if (g.painted.has(k)) return false;
-  g.painted.add(k); const t = g.tiles[k]; t.material = M(PALS[g.n % PALS.length].paint); t.userData.pop = 0;
+  g.painted.add(k); const t = g.tiles[k]; t.material = M(PALS[LEVELS[g.n].world % PALS.length].paint); t.userData.pop = 0;
   return true;
 }
 function framing() {
@@ -485,7 +491,7 @@ function update(dt) {
   if (a && a.bump != null) { a.bump += dt; const s = Math.sin(Math.min(1, a.bump / .25) * Math.PI) * .15; d.position.copy(pos3(g.x, g.y)).add(new THREE.Vector3(DIRS[a.di][0] * s, 0, DIRS[a.di][1] * s)); if (a.bump >= .25) g.anim = null; }
   else if (a) {
     a.t += dt * 15; // casillas por segundo
-    while (a.t >= 1 && a.i < a.path.length) { a.t -= 1; const [x, y] = a.path[a.i]; if (paintTile(x, y)) { psfx.paint(a.k++); const p = pos3(x, y); burst(p.x, .2, p.z, 3, [PALS[g.n % PALS.length].paint, 0xffffff], 2, .18, 2.5); } a.from = pos3(x, y); a.i++; }
+    while (a.t >= 1 && a.i < a.path.length) { a.t -= 1; const [x, y] = a.path[a.i]; if (paintTile(x, y)) { psfx.paint(a.k++); const p = pos3(x, y); burst(p.x, .2, p.z, 3, [PALS[LEVELS[g.n].world % PALS.length].paint, 0xffffff], 2, .18, 2.5); } a.from = pos3(x, y); a.i++; }
     if (a.i >= a.path.length) { d.position.copy(pos3(g.x, g.y)); g.anim = null; play(d, 'idle', .1); d.userData.squash = 1; paintHud(); checkWin(); }
     else { const [x, y] = a.path[a.i]; d.position.copy(a.from).lerp(pos3(x, y), a.t); }
   }
@@ -504,12 +510,17 @@ function checkWin() {
 }
 
 /* ---------- Menú ---------- */
+const WORLD_NAMES = ['Mundo Verde', 'Mundo Azul', 'Mundo Morado', 'Mundo Rosa', 'Mundo Naranja'];
 function buildMenu() {
   const box = $('#levels'); box.innerHTML = '';
+  // Abre donde va: el primer nivel sin terminar (palpita)
+  let next = LEVELS.findIndex((_, n) => !save.done[n]); if (next < 0) next = 0;
   LEVELS.forEach((L, n) => {
-    const b = document.createElement('button'); b.className = 'px lv'; b.setAttribute('aria-label', 'Nivel ' + (n + 1));
-    b.innerHTML = `<img alt="" src="../img/cards/pinta-${n % 4 + 1}.webp"><b>${n + 1}</b>` + (save.done[n] ? '<span class="stars"><i></i></span>' : '');
+    if (n % PER === 0) { const h = document.createElement('div'); h.className = 'world'; const got = LEVELS.slice(n, n + PER).filter((_, j) => save.done[n + j]).length; h.innerHTML = `<span>${WORLD_NAMES[L.world]}</span><i>${got}/${PER} ⭐</i>`; box.appendChild(h); }
+    const b = document.createElement('button'); b.className = 'px lv' + (n === next ? ' next' : ''); b.setAttribute('aria-label', 'Nivel ' + (n + 1));
+    b.innerHTML = `<img alt="" src="../img/cards/pinta-${L.world % 4 + 1}.webp"><b>${n + 1}</b>` + (save.done[n] ? '<span class="stars"><i></i></span>' : '');
     b.addEventListener('click', () => { sfx.tap(); start(n); }); box.appendChild(b);
+    if (n === next) setTimeout(() => b.scrollIntoView({ block: 'center' }), 0);
   });
 }
 function showMenu() {
