@@ -40,3 +40,9 @@
   Cache-Control: no-cache
 /bomberos/
   Cache-Control: no-cache
+/gallinero/
+  Cache-Control: no-cache
+/golf/
+  Cache-Control: no-cache
+/catapulta/
+  Cache-Control: no-cache
